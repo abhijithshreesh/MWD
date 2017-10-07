@@ -33,6 +33,7 @@ class SvdGenreTag(GenreTag):
         U, s, Vh = numpy.linalg.svd(genre_tag_tfidf_df.values,full_matrices=True)
         a = 1
 
+#what's up
         x = genre_tag_tfidf_df.values
         pca = PCA(n_components = 4)
         pca.fit(x)
