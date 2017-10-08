@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
 from config_parser import ParseConfig
-from data_extractor import ExtractData
+from data_extractor import DataExtractor
 from collections import Counter
 import math
 import argparse
@@ -22,7 +22,7 @@ class ActorTag(object):
         Initialiazing the data extractor object to get data from the csv files
         """
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
-        self.data_extractor = ExtractData(self.data_set_loc)
+        self.data_extractor = DataExtractor(self.data_set_loc)
 
     def assign_idf_weight(self, data_frame, unique_tags):
         """
