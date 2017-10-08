@@ -16,6 +16,8 @@ class SvdGenreTag(GenreTag):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
 
+#working
+
     def genre_tag(self, genre):
         """
         Triggers the compute function and outputs the result tag vector
