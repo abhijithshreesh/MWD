@@ -1,4 +1,4 @@
-import configparser
+import config_parser
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -12,7 +12,7 @@ class ParseConfig(object):
 
     def __init__(self):
         self.Config = configparser.ConfigParser()
-        self.Config.read("config.Ini")
+        self.Config.read("../config.ini")
 
     def config_section_mapper(self, section):
             dict1 = {}
@@ -26,3 +26,7 @@ class ParseConfig(object):
                     log.error("exception on %s!" % option)
                     dict1[option] = None
             return dict1
+
+if __name__ == "__main__":
+    conf = ParseConfig()
+    print conf.config_section_mapper("filePath")
