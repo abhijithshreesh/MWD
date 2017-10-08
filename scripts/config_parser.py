@@ -1,5 +1,6 @@
-import config_parser
 import logging
+
+import configparser
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

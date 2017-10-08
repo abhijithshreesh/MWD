@@ -1,6 +1,8 @@
-import os
 import logging
+import os
+
 import pandas as pd
+
 from config_parser import ParseConfig
 
 logging.basicConfig(level=logging.INFO)
@@ -44,4 +46,4 @@ if __name__ == "__main__":
     conf = ParseConfig()
     data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
     e_d = ExtractData(data_set_loc)
-    e_d.data_extractor("mlmovies.csv")
+    print e_d.data_extractor("mlmovies.csv")
