@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
-from config_parser import ParseConfig
-from data_extractor import DataExtractor
+from scripts.config_parser import ParseConfig
+from scripts.data_extractor import DataExtractor
 from collections import Counter
 import math
 import argparse

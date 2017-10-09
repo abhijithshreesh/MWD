@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-import config_parser
+from scripts.config_parser import ParseConfig
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ class DataExtractor(object):
 
 
 if __name__ == "__main__":
-    conf = config_parser.ParseConfig()
+    conf = ParseConfig()
     data_set_location = conf.config_section_mapper("filePath").get("data_set_loc")
     extract_data = DataExtractor(data_set_location)
     data_frame = extract_data.data_extractor("mlmovies.csv")
