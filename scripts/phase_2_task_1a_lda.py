@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 conf = ParseConfig()
 
-class SvdGenreTag(GenreTag):
+class LdaGenreTag(GenreTag):
     def __init__(self):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
@@ -36,5 +36,5 @@ class SvdGenreTag(GenreTag):
         #print(ldamodel.print_topics(num_topics=3, num_words=3))
 
 if __name__ == "__main__":
-    obj = SvdGenreTag()
+    obj = LdaGenreTag()
     obj.get_lda_data(genre="Action")

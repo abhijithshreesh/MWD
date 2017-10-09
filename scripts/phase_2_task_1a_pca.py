@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 conf = ParseConfig()
 
-class SvdGenreTag(GenreTag):
+class PcaGenreTag(GenreTag):
     def __init__(self):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
@@ -40,5 +40,5 @@ class SvdGenreTag(GenreTag):
         print(pca.components_)
 
 if __name__ == "__main__":
-    obj = SvdGenreTag()
+    obj = PcaGenreTag()
     obj.genre_tag(genre="Action")
