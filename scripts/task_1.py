@@ -136,7 +136,8 @@ class ActorTag(object):
         merged_data_frame["timestamp_weight"] = pd.Series([(index + 1) / data_frame_len * 10 for index in merged_data_frame.index],
                                                    index=merged_data_frame.index)
         tag_dict = self.combine_computed_weights(merged_data_frame[merged_data_frame['actorid'] == actorid], rank_weight_dict, model)
-        print({actorid: tag_dict})
+        #print({actorid: tag_dict})
+        return tag_dict
 
 if __name__ == "__main__":
     obj = ActorTag()
@@ -146,5 +147,5 @@ if __name__ == "__main__":
     input = vars(parser.parse_args())
     actorid = input['actorid']
     model = input['model']
-    obj.merge_movie_actor_and_tag(actorid=actorid, model=model)
-
+    tag_dict = obj.merge_movie_actor_and_tag(actorid=actorid, model=model)
+    print (tag_dict)
