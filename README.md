@@ -1,11 +1,6 @@
 # mwd-vector-space-modelling
 
-Aditya Test
-
-Kevin was here
-
-Jags here
-
-Abhi here
-
-Randam text here
+#Install gensim for LDA
+#Run the below command in anaconda command prompt
+conda install -c anaconda gensim
+#Run anaconda prompt as administrator if you encounter permission issues
