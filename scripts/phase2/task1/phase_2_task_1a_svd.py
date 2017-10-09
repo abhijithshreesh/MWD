@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
-from scripts.config_parser import ParseConfig
-from scripts.task_2 import GenreTag
+from config_parser import ParseConfig
+from task_2 import GenreTag
 import argparse
 import scipy
 import numpy

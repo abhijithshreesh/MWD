@@ -1,9 +1,9 @@
 import pandas as pd
 import logging
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 from collections import Counter
-from scripts.task_2 import GenreTag
+from task_2 import GenreTag
 import math
 import argparse
 import numpy

@@ -1,13 +1,11 @@
 import logging
-from scripts.config_parser import ParseConfig
+from config_parser import ParseConfig
 import numpy
 from sklearn.decomposition import PCA
 import logging
 
 import numpy
 from sklearn.decomposition import PCA
-
-from scripts.config_parser import ParseConfig
 
 logging.basicConfig(level=logging.INFO)
 from scripts.phase2.task1.phase_2_task_1b_svd import SvdGenreActor
