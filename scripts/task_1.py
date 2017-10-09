@@ -124,7 +124,7 @@ class ActorTag(object):
         mov_act = self.data_extractor.get_movie_actor_data()
         ml_tag = self.data_extractor.get_ml_tags_data()
         genome_tag = self.data_extractor.get_genome_tags_data()
-        actor_info = self.data_extractor.get_imdb_actor_info()
+        actor_info = self.data_extractor.get_imdb_actor_info_data()
         actor_movie_info = mov_act.merge(actor_info, how="left", on="actorid")
         tag_data_frame = ml_tag.merge(genome_tag, how="left", left_on="tagid", right_on="tagId")
         merged_data_frame = actor_movie_info.merge(tag_data_frame, how="left", on="movieid")
