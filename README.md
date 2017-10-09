@@ -1,6 +1,7 @@
 # mwd-vector-space-modelling
 
 Install gensim for LDA
+
 Run the below command in anaconda command prompt
 
 conda install -c anaconda gensim
