@@ -1,10 +1,10 @@
 import pandas as pd
 import logging
-from config_parser import ParseConfig
+from scripts.phase2.common.config_parser import ParseConfig
 import argparse
 import scipy
 import numpy
-from task_1 import ActorTag
+from scripts.phase2.common.task_1 import ActorTag
 
 conf = ParseConfig()
 
@@ -13,7 +13,7 @@ class ActorActorMatrix(ActorTag):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
 
-    def getActorActorMatrix(self):
+    def fetchActorActorSimilarityMatrix(self):
         actor_info = self.data_extractor.get_imdb_actor_info_data()
         actor_ids = actor_info.id
         actor_ids = actor_ids.sort_values()
@@ -38,4 +38,4 @@ class ActorActorMatrix(ActorTag):
 
 if __name__ == "__main__":
     obj = ActorActorMatrix()
-    matrix = obj.getActorActorMatrix()
+    matrix = obj.fetchActorActorSimilarityMatrix()

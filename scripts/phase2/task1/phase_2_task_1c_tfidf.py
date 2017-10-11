@@ -1,12 +1,12 @@
 import pandas as pd
 import logging
-from config_parser import ParseConfig
-from data_extractor import DataExtractor
+from scripts.phase2.common.config_parser import ParseConfig
+from scripts.phase2.common.data_extractor import DataExtractor
 from collections import Counter
 import math
 import argparse
 import operator
-from actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -18,11 +18,12 @@ class SimilarActors(ActorActorMatrix):
         """
         Initialiazing the data extractor object to get data from the csv files
         """
+        super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
 
     def get_actor_actor_vector(self, actorid):
-        (matrix, actorids) = self.getActorActorMatrix()
+        (matrix, actorids) = self.fetchActorActorSimilarityMatrix()
         index_actor = None
         for i,j in enumerate(actorids):
             if j == actorid:
