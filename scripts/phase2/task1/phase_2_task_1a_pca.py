@@ -1,11 +1,11 @@
-import pandas as pd
 import logging
-from config_parser import ParseConfig
-from task_2 import GenreTag
-import argparse
-import scipy
+
 import numpy
+from scripts.phase2.common.task_2 import GenreTag
 from sklearn.decomposition import PCA
+
+from scripts.phase2.common.config_parser import ParseConfig
+
 logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(__name__)

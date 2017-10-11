@@ -1,5 +1,5 @@
 import logging
-from config_parser import ParseConfig
+from scripts.phase2.common.config_parser import ParseConfig
 import numpy
 from sklearn.decomposition import PCA
 import logging

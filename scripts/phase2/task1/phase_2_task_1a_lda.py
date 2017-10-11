@@ -1,11 +1,8 @@
 import pandas as pd
 import logging
-from config_parser import ParseConfig
-from task_2 import GenreTag
+from scripts.phase2.common.config_parser import ParseConfig
+from scripts.phase2.common.task_2 import GenreTag
 import argparse
-import scipy
-import numpy
-from gensim import corpora, models
 import gensim
 logging.basicConfig(level=logging.INFO)
 

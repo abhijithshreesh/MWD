@@ -1,7 +1,7 @@
 import pandas as pd
 import logging
-from config_parser import ParseConfig
-from task_2 import GenreTag
+from scripts.phase2.common.config_parser import ParseConfig
+from scripts.phase2.common.task_2 import GenreTag
 import argparse
 import scipy
 import numpy
@@ -30,7 +30,6 @@ class SvdGenreTag(GenreTag):
         genre_tag_tfidf_df = temp_df.pivot(index='moviename', columns='tag', values='total')
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
         U, s, Vh = numpy.linalg.svd(genre_tag_tfidf_df.values,full_matrices=True)
-        a = 1
 
         x = genre_tag_tfidf_df.values
         svd = TruncatedSVD(n_components = 4)

@@ -1,13 +1,14 @@
-import pandas as pd
 import logging
-from config_parser import ParseConfig
-from data_extractor import DataExtractor
-from collections import Counter
-from task_2 import GenreTag
 import math
-import argparse
+from collections import Counter
+
 import numpy
+import pandas as pd
+from scripts.phase2.common.config_parser import ParseConfig
+from scripts.phase2.common.task_2 import GenreTag
 from sklearn.decomposition import TruncatedSVD
+
+from scripts.phase2.common.data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
