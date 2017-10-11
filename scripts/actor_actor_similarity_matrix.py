@@ -33,7 +33,7 @@ class ActorActorMatrix(ActorTag):
         numpy.savetxt("actor_tag_matrix.csv", actor_tag_matrix, delimiter=",")
         numpy.savetxt("tag_actor_matrix.csv", tag_actor_matrix, delimiter=",")
         numpy.savetxt("actor_actor_matrix.csv", actor_actor_matrix, delimiter=",")
-        return actor_actor_matrix
+        return (actor_actor_matrix, actor_ids)
 
 
 if __name__ == "__main__":
