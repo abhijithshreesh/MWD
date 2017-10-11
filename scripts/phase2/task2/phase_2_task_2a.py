@@ -18,13 +18,19 @@ class ActorActorSVD(ActorTag):
 
     def actor_actor_svd(self):
         actor_actor_matrix_object = ActorActorMatrix()
-        actor_actor_similarity_matrix = actor_actor_matrix_object.fetchActorActorSimilarityMatrix()
-        U, s, Vh = numpy.linalg.svd(actor_actor_similarity_matrix.values, full_matrices=True)
+        actor_actor_similarity_matrix, actor_ids = actor_actor_matrix_object.fetchActorActorSimilarityMatrix()
+        # print(actor_actor_similarity_matrix)
+        U, s, Vh = numpy.linalg.svd(actor_actor_similarity_matrix, full_matrices=False)
 
-        x = actor_actor_similarity_matrix.values
+        x = actor_actor_similarity_matrix
         svd = TruncatedSVD(n_components=3)
         svd.fit(x)
         print(svd.components_)
+
+        # print(U)
+        # print(s)
+        # print(Vh)
+
 
 
 if __name__ == "__main__":
