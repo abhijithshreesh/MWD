@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 class ParseConfig(object):
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read("../config.ini")
+        self.config.read("../../../config.ini")
 
     def config_section_mapper(self, section):  # Code to parse a section of the config.ini file
         dict1 = {}
