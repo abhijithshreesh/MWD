@@ -2,8 +2,10 @@ import pandas as pd
 import logging
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.task_2 import GenreTag
+from sklearn.preprocessing import Imputer
+from sklearn.decomposition import LatentDirichletAllocation
 import argparse
-import gensim
+#import gensim
 logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(__name__)
@@ -27,8 +29,13 @@ class LdaGenreTag(GenreTag):
                             in zip(tag_df.index, tag_df.tag, tag_df.movieid)], index=tag_df.index)
         tag_df["total"] = tag_df.groupby(['movieid', 'tag'])['value'].transform('sum')
         tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
-        a=1
-
+        temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates()
+        genre_tag_freq = temp_df.pivot(index='moviename', columns='tag', values='total') #, fill_value=0)
+        genre_tag_freq = genre_tag_freq.fillna(0)
+        lda = LatentDirichletAllocation(n_topics=4)
+        #lda.fit_transform(genre_tag_freq.values)
+        #topics = lda.components_
+        
         #ldamodel = gensim.models.ldamodel.LdaModel(tag_df.values, num_topics=3)
         #print(ldamodel.print_topics(num_topics=3, num_words=3))
 
