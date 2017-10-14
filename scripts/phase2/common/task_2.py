@@ -47,7 +47,7 @@ class GenreTag(ActorTag):
         tag_df = data_frame.reset_index()
         temp_df = data_frame[data_frame["genre"]==genre]
         unique_tags = tag_df.tag.unique()
-        idf_data = tag_df.groupby(['movieid'])['tag'].apply(lambda x: ','.join(x)).reset_index()
+        idf_data = tag_df.groupby(['movieid'])['tag'].apply(set)
         tf_df = temp_df.groupby(['movieid'])['tag'].apply(lambda x: ','.join(x)).reset_index()
         movie_tag_dict = dict(zip(tf_df.movieid, tf_df.tag))
         tf_weight_dict = {movie: self.assign_tf_weight(tags.split(',')) for movie, tags in
