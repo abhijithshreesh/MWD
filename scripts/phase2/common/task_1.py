@@ -1,15 +1,17 @@
-import pandas as pd
 import logging
+import math
+from collections import Counter
+
+import pandas as pd
+
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from collections import Counter
-import math
-import argparse
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 conf = ParseConfig()
+
 
 class ActorTag(object):
 
@@ -19,7 +21,7 @@ class ActorTag(object):
 
     def __init__(self):
         """
-        Initialiazing the data extractor object to get data from the csv files
+        Initializing the data extractor object to get data from the csv files
         """
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
@@ -115,7 +117,7 @@ class ActorTag(object):
         :return: returns a dictionary of Actors to dictionary of tags and weights.
         """
         mov_act = self.data_extractor.get_movie_actor_data()
-        ml_tag = self.data_extractor.get_ml_tags_data()
+        ml_tag = self.data_extractor.get_mltags_data()
         genome_tag = self.data_extractor.get_genome_tags_data()
         actor_info = self.data_extractor.get_imdb_actor_info_data()
         actor_movie_info = mov_act.merge(actor_info, how="left", left_on="actorid", right_on="id")
@@ -133,15 +135,13 @@ class ActorTag(object):
             tag_dict = self.combine_computed_weights(merged_data_frame[merged_data_frame['actorid'] == actorid], rank_weight_dict, idf_weight_dict, model)
         else:
             tag_dict = self.combine_computed_weights(merged_data_frame[merged_data_frame['actorid'] == actorid], rank_weight_dict, {},model)
-        #print({actorid: tag_dict})
+
         return tag_dict
+
+
 if __name__ == "__main__":
     obj = ActorTag()
-    parser = argparse.ArgumentParser(description='task1.py actorid model')
-    parser.add_argument('actorid', action="store", type=int)
-    parser.add_argument('model', action="store", type=str, choices=set(('TF', 'TFIDF')))
-    input = vars(parser.parse_args())
-    actorid = input['actorid']
-    model = input['model']
-    obj.merge_movie_actor_and_tag(actorid=actorid, model=model)
-    #obj.merge_movie_actor_and_tag(actorid=1, model='TFIDF')
+    actor_id = 810424
+    model = "TFIDF"
+    print("TFIDF tag values for actor:\n")
+    print(obj.merge_movie_actor_and_tag(actor_id, model))

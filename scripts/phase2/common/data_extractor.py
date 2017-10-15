@@ -39,12 +39,6 @@ class DataExtractor(object):
     def get_mlusers_data(self):
         return self.data_extractor("mlusers.csv")
 
-    def get_movie_genre_data(self):
-        return self.data_extractor("mlmovies.csv").reset_index()
-
-    def get_ml_tags_data(self):
-        return self.data_extractor("mltags.csv").reset_index()
-
 
 if __name__ == "__main__":
     conf = ParseConfig()

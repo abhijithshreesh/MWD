@@ -1,9 +1,11 @@
-import pandas as pd
 import logging
+
+import pandas as pd
+
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.task_1 import ActorTag
+
 logging.basicConfig(level=logging.INFO)
-import argparse
 log = logging.getLogger(__name__)
 conf = ParseConfig()
 
@@ -82,9 +84,9 @@ class GenreTag(ActorTag):
                 assigns weights to timestamp.
                 :return: data frame
         """
-        data_frame = self.data_extractor.get_movie_genre_data()
+        data_frame = self.data_extractor.get_mlmovies_data()
         tag_data_frame = self.data_extractor.get_genome_tags_data()
-        movie_data_frame = self.data_extractor.get_ml_tags_data()
+        movie_data_frame = self.data_extractor.get_mltags_data()
         data_frame = self.split_genres(data_frame)
         movie_tag_data_frame = movie_data_frame.merge(tag_data_frame, how="left", left_on="tagid", right_on="tagId")
         genre_tag_frame = data_frame.merge(movie_tag_data_frame, how="left", on="movieid")

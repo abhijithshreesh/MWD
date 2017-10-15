@@ -4,11 +4,11 @@ from collections import Counter
 
 import numpy
 import pandas as pd
-from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.task_2 import GenreTag
 from sklearn.decomposition import TruncatedSVD
 
+from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+from scripts.phase2.common.task_2 import GenreTag
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -136,7 +136,7 @@ class SvdGenreActor(GenreTag):
 
     def get_genre_actor_data_frame(self):
         # Getting movie_genre_data
-        movie_genre_data_frame = self.data_extractor.get_movie_genre_data()
+        movie_genre_data_frame = self.data_extractor.get_mlmovies_data()
         movie_genre_data_frame = self.split_genres(movie_genre_data_frame)
 
         # Getting actor_movie_data
