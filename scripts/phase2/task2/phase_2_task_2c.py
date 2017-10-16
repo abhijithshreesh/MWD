@@ -14,35 +14,53 @@ class ActorMovieYearTensor(ActorTag):
         movies_df = self.data_extractor.get_mlmovies_data()
         actor_df = self.data_extractor.get_movie_actor_data()
 
-        #Create Tensor(either list or dictionary)
         movie_actor_df = actor_df.merge(movies_df, how="left", on="movieid")
-        tensor = np.ndarray(order=3)
+        year_list = movie_actor_df["year"]
+        year_count = 0
+        year_dict = {}
+        for element in year_list:
+            if element in year_dict.keys():
+                continue
+            year_dict[element] = year_count
+            year_count += 1
 
+        movieid_list = movie_actor_df["movieid"]
+        movieid_count = 0
+        movieid_dict = {}
+        for element in movieid_list:
+            if element in movieid_dict.keys():
+                continue
+            movieid_dict[element] = movieid_count
+            movieid_count += 1
 
-        # tensor_dict = {}
-        # for index, row in movie_actor_df.iterrows():
-        #     year = row["year"]
-        #     movieid = row["movieid"]
-        #     actorid = row["actorid"]
-        #     if year in tensor_dict:
-        #         if movieid in tensor_dict[year]:
-        #             tensor_dict[year][movieid].append(actorid)
-        #         else:
-        #             tensor_dict[year][movieid] = [actorid]
-        #     else:
-        #         tensor_dict[year] = {movieid:[actorid]}
-        # return tensor_dict
+        actorid_list = movie_actor_df["actorid"]
+        actorid_count = 0
+        actorid_dict = {}
+        for element in actorid_list:
+            if element in actorid_dict.keys():
+                continue
+            actorid_dict[element] = actorid_count
+            actorid_count += 1
+
+        tensor = np.zeros((year_count + 1, movieid_count + 1, actorid_count + 1))
+
+        for index, row in movie_actor_df.iterrows():
+            year = row["year"]
+            movieid = row["movieid"]
+            actorid = row["actorid"]
+            year_id = year_dict[year]
+            movieid_id = movieid_dict[movieid]
+            actorid_id = actorid_dict[actorid]
+            tensor[year_id][movieid_id][actorid_id] = 1
 
         return tensor
 
     def cpDecomposition(self, tensor):
-        #Add Tensorly package and use parafac()
-        # a = np.array(pd.DataFrame.from_dict(tensor_dict))
-
         factors = decomp.parafac(tensor, 5)
         return factors
 
 if __name__ == "__main__":
     obj = ActorMovieYearTensor()
     tensor = obj.fetchActorMovieYearTensor()
-    obj.cpDecomposition(tensor)
+    factors = obj.cpDecomposition(tensor)
+    print(factors)
