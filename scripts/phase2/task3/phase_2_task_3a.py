@@ -23,8 +23,9 @@ class PageRankActor(ActorActorMatrix):
         actor_matrix, actorids = self.fetchActorActorSimilarityMatrix()
         actor_df = pd.DataFrame(actor_matrix)
         for column in actor_df:
-            actor_df[column] = pd.Series([1 if each > 0 else 0 for each in actor_df[column]], index=actor_df.index)
-        temp_df = actor_df[(actor_df.T == 0).any()]
+            actor_df[column] = pd.Series(
+                [1 if (each > 0 and ind != int(column)) else 0 for ind, each in zip(actor_df.index, actor_df[column])],
+                index=actor_df.index)
         actor_df.loc[(actor_df.T == 0).any()] = 1 / (len(temp_df.columns))
         graph = nx.from_numpy_matrix(np.array(actor_df.values))
         pagerank_dict = nx.pagerank(graph)
