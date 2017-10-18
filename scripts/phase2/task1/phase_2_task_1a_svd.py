@@ -31,12 +31,26 @@ class SvdGenreTag(GenreTag):
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
         U, s, Vh = numpy.linalg.svd(genre_tag_tfidf_df.values,full_matrices=True)
 
-        x = genre_tag_tfidf_df.values
-        svd = TruncatedSVD(n_components = 4)
-        svd.fit(x)
-        print(svd.explained_variance_ratio_)
-        print(svd.components_)
+        df1 = genre_tag_tfidf_df.values
+        # svd = TruncatedSVD(n_components = 4)
+        # svd.fit(x)
+        # print(svd.explained_variance_ratio_)
+        # print(svd.components_)
+
+        from sklearn.preprocessing import StandardScaler
+        sc = StandardScaler()
+        df_sc = sc.fit_transform(df1[:, 1:])
+
+        # Applying PCA
+        from sklearn.decomposition import TruncatedSVD
+        svd = TruncatedSVD(n_components=4)
+        df_svd = svd.fit_transform(df_sc)
+        explained_variance = svd.explained_variance_ratio_
+
+        return (df_svd, explained_variance)
 
 if __name__ == "__main__":
     obj = SvdGenreTag()
-    obj.genre_tag(genre="Action")
+    (df_svd, explained_variance) = obj.genre_tag(genre="Action")
+    print (df_svd)
+    print (explained_variance)

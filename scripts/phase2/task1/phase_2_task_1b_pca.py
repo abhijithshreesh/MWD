@@ -36,12 +36,26 @@ class PcaGenreActor(SvdGenreActor):
         U, s, Vh = numpy.linalg.svd(genre_actor_tfidf_df.values,full_matrices=True)
         a = 1
 
-        x = genre_actor_tfidf_df.values
-        pca = PCA(n_components = 4)
-        pca.fit(x)
-        print(pca.explained_variance_ratio_)
-        print(pca.components_)
+        df1 = genre_actor_tfidf_df.values
+        # pca = PCA(n_components = 4)
+        # pca.fit(x)
+        # print(pca.explained_variance_ratio_)
+        # print(pca.components_)
+
+        # Feature Scaling
+        from sklearn.preprocessing import StandardScaler
+        sc = StandardScaler()
+        df_sc = sc.fit_transform(df1[:, 1:])
+
+        # Applying PCA
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=5)
+        df_pca = pca.fit_transform(df_sc)
+        explained_variance = pca.explained_variance_ratio_
+        return (df_pca, explained_variance)
 
 if __name__ == "__main__":
     obj = PcaGenreActor()
-    obj.pca_genre_actor(genre="Action")
+    (df_pca, explained_variance) = obj.pca_genre_actor(genre="Action")
+    print (df_pca)
+    print (explained_variance)

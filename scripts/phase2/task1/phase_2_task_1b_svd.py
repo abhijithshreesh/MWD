@@ -169,13 +169,26 @@ class SvdGenreActor(GenreTag):
         U, s, Vh = numpy.linalg.svd(genre_actor_tfidf_df.values, full_matrices=True)
         a = 1
 
-        x = genre_actor_tfidf_df.values
+        df1 = genre_actor_tfidf_df.values
+        # svd = TruncatedSVD(n_components=4)
+        # svd.fit(x)
+        # print(svd.explained_variance_ratio_)
+        # print(svd.components_)
+
+        from sklearn.preprocessing import StandardScaler
+        sc = StandardScaler()
+        df_sc = sc.fit_transform(df1[:, 1:])
+
+        # Applying PCA
+        from sklearn.decomposition import TruncatedSVD
         svd = TruncatedSVD(n_components=4)
-        svd.fit(x)
-        print(svd.explained_variance_ratio_)
-        print(svd.components_)
-        #return None
+        df_svd = svd.fit_transform(df_sc)
+        explained_variance = svd.explained_variance_ratio_
+
+        return (df_svd, explained_variance)
 
 if __name__ == "__main__":
     obj = SvdGenreActor()
-    obj.svd_genre_actor(genre="Action")
+    (df_svd, explained_variance) = obj.svd_genre_actor(genre="Action")
+    print (df_svd)
+    print (explained_variance)

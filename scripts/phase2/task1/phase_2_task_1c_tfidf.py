@@ -7,10 +7,13 @@ import math
 import argparse
 import operator
 from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.phase2.common.util import Util
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 conf = ParseConfig()
+util = Util()
 
 class SimilarActors(ActorActorMatrix):
 
@@ -24,6 +27,15 @@ class SimilarActors(ActorActorMatrix):
 
     def get_actor_actor_vector(self, actorid):
         (matrix, actorids) = self.fetchActorActorSimilarityMatrix()
+        #In the pre-processing task above command should be run so that actor_actor_similarity matrix will be generated
+        #and saved as csv which can be used multiple number of times. Will comment the above line, when its done.
+
+        # Loading the required actor_actor_similarity matrix from csv
+        df = pd.DataFrame(pd.read_csv('actor_actor_matrix.csv', header=None))
+        matrix = df.values
+
+        actorids = util.get_sorted_actor_ids()
+
         index_actor = None
         for i,j in enumerate(actorids):
             if j == actorid:
