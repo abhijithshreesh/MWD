@@ -117,15 +117,12 @@ class UserMovieRecommendation(object):
             total_movies_count += genre_counter[genre]
 
         if total_movies_count == 0:
-            # pick the highest genre and recommend movies from that genre
             highest_percentage_genre = self.get_highest_percentage_genre(genre_counter_copy)
             genre_counter[highest_percentage_genre] = 5
         elif total_movies_count > 5:
-            # remove movie from the genre that has the least percentage
             least_percentage_genre = self.get_least_percentage_genre(genre_counter_copy)
             genre_counter[least_percentage_genre] -= (total_movies_count - 5)
         elif total_movies_count < 5:
-            # add movie to the genre that has the best percentage
             highest_percentage_genre = self.get_highest_percentage_genre(genre_counter_copy)
             genre_counter[highest_percentage_genre] += (5 - total_movies_count)
 
@@ -134,20 +131,13 @@ class UserMovieRecommendation(object):
             if genre_counter[genre] != 0:
                 movie_recommendation_counter[genre] = genre_counter[genre]
 
-        loop_counter = 0
         while len(recommended_movies) != 5:
-            loop_counter += 1
-            if loop_counter == 100:
-                print("UNABLE TO FIND MORE MOVIES FOR RECOMMENDATION")
-                break
-
             genre = self.get_highest_percentage_genre(movie_recommendation_counter)
             movie = self.get_movie_recommendation(genre, user_id, recommended_movies)
             if movie != "~~NOT-FOUND~~":
                 movie_recommendation_counter[genre] -= 1
                 recommended_movies.append(movie)
             else:
-                print("Reshuffling needed")
                 movie_recommendation_counter = self.reshuffle_movie_recommendation(genre_counter,
                                                                                    movie_recommendation_counter, genre)
                 if movie_recommendation_counter is None:
@@ -159,7 +149,7 @@ class UserMovieRecommendation(object):
 
 if __name__ == "__main__":
     obj = UserMovieRecommendation()
-    user_id = 146
+    user_id = 48717
     print("Movie recommendation for user id " + str(user_id))
     movies = obj.recommendedMovies(user_id)
     for movie in movies:
