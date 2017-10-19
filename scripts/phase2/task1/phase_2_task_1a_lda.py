@@ -51,12 +51,12 @@ class LdaGenreTag(GenreTag):
 
         # Encoding the String Variables
 
-         """  from sklearn.preprocessing import LabelEncoder
-                  labelencoder_df = LabelEncoder()
-                  df.iloc[:, 1] = labelencoder_df.fit_transform(df.iloc[:, 1])
-                  df.iloc[:, 2] = labelencoder_df.fit_transform(df.iloc[:, 2])
-
-                  df1 = df.values """
+        # from sklearn.preprocessing import LabelEncoder
+        # labelencoder_df = LabelEncoder()
+        # df.iloc[:, 1] = labelencoder_df.fit_transform(df.iloc[:, 1])
+        # df.iloc[:, 2] = labelencoder_df.fit_transform(df.iloc[:, 2])
+        #
+        # df1 = df.values
 
         # Calling the LDA algorithm
 
