@@ -79,6 +79,30 @@ class Util(object):
 
         return groups
 
+    def get_latent_semantics(self, r, matrix):
+        latent_semantics = []
+        for latent_semantic in matrix:
+            if len(latent_semantics) == r:
+                break
+            latent_semantics.append(latent_semantic)
+
+        return latent_semantics
+
+    def print_partitioned_entities(self, groupings):
+        for key in groupings.keys():
+            print(key)
+            for entity in groupings[key]:
+                print(entity, end="|")
+            print("\n")
+
+    def print_latent_semantics(self, latent_semantics, entity_names_list):
+        for latent_semantic in latent_semantics:
+            print("Latent Semantic:")
+            for i in range(0, len(entity_names_list)):
+                print(str(latent_semantic[i]) + "*(" + str(entity_names_list[i]) + ")", end="")
+                if i != len(entity_names_list) - 1:
+                    print(" + ", end="")
+            print("\n")
 
 if __name__ == "__main__":
     obj = Util()

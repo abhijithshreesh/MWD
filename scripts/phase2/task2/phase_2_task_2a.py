@@ -12,44 +12,27 @@ class ActorActorSVD(object):
         self.vt = self.v.transpose()
         self.util = Util()
 
-    def get_latent_semantics(self, r):
-        latent_semantics = []
-        for latent_semantic in self.vt:
-            if len(latent_semantics) == r:
-                break
-            latent_semantics.append(latent_semantic)
-
-        return latent_semantics
-
-    def get_partitions(self, no_of_partitions):
+    def get_actor_names_list(self):
         actor_names_list = []
         for actor in self.actor_ids:
             actor_names_list.append(self.util.get_actor_name_for_id(actor))
+
+        return actor_names_list
+
+    def get_partitions(self, no_of_partitions):
+        actor_names_list = self.get_actor_names_list()
         groupings = self.util.partition_factor_matrix(self.u, no_of_partitions, actor_names_list)
 
         return groupings
 
     def print_partitioned_actors(self, no_of_partitions):
         groupings = self.get_partitions(no_of_partitions)
-        for key in groupings.keys():
-            print(str(key) + " Actors")
-            for actor in groupings[key]:
-                print(actor, end="|")
-            print("\n")
+        self.util.print_partitioned_entities(groupings)
 
     def print_latent_semantics(self, r):
-        latent_semantics = self.get_latent_semantics(r)
-        actor_names_list = []
-        for actor in self.actor_ids:
-            actor_names_list.append(self.util.get_actor_name_for_id(actor))
-
-        for latent_semantic in latent_semantics:
-            print("Latent Semantic in terms of Actors:")
-            for i in range(0, len(actor_names_list)):
-                print(str(latent_semantic[i]) + "*(" + str(actor_names_list[i]) + ")", end="")
-                if i != len(actor_names_list) - 1:
-                    print(" + ", end="")
-            print("\n")
+        latent_semantics = self.util.get_latent_semantics(r, self.vt)
+        actor_names_list = self.get_actor_names_list()
+        self.util.print_latent_semantics(latent_semantics, actor_names_list)
 
 
 if __name__ == "__main__":
