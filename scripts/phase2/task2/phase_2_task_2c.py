@@ -73,7 +73,6 @@ class ActorMovieYearTensor(object):
     def print_latent_semantics(self, r):
         i = 0
         for factor in self.factors:
-
             latent_semantics = self.util.get_latent_semantics(r, factor.transpose())
             self.util.print_latent_semantics(latent_semantics, self.get_factor_names(i))
             i+=1
