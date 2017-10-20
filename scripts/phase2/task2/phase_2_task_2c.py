@@ -1,12 +1,18 @@
-from scripts.phase2.common.task_1 import ActorTag
 import numpy as np
 
+from scripts.phase2.common.config_parser import ParseConfig
+from scripts.phase2.common.data_extractor import DataExtractor
 from scripts.phase2.common.util import Util
 
 
-class ActorMovieYearTensor(ActorTag):
+class ActorMovieYearTensor(object):
     def __init__(self):
-        super().__init__()
+        self.conf = ParseConfig()
+        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
+        self.data_extractor = DataExtractor(self.data_set_loc)
+        self.tensor = self.fetchActorMovieYearTensor()
+        self.util = Util()
+        self.factors = self.util.CPDecomposition(self.tensor, 5)
 
     def fetchActorMovieYearTensor(self):
         movies_df = self.data_extractor.get_mlmovies_data()
@@ -53,9 +59,13 @@ class ActorMovieYearTensor(ActorTag):
 
         return tensor
 
+    def print_latent_semantics(self, r):
+        for factor in self.factors:
+            latent_semantics = self.util.get_latent_semantics(r, factor.transpose())
+            self.util.print_latent_semantics(latent_semantics, )
+
+
 if __name__ == "__main__":
     obj = ActorMovieYearTensor()
-    tensor = obj.fetchActorMovieYearTensor()
-    util = Util()
-    factors = util.CPDecomposition(tensor, 5)
-    print(factors)
+    obj.print_latent_semantics(5)
+    # obj.print_partitioned_entites(5)
