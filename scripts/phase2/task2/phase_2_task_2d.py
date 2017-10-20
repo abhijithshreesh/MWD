@@ -12,11 +12,8 @@ class TagMovieRatingTensor(ActorTag):
 
     def fetchTagMovieRatingTensor(self):
         mltags_df = self.data_extractor.get_mltags_data()
-        mlratings_df = self.data_extractor.get_mlratings_data()
 
-        movie_ratings_tags_df = mltags_df.merge(mlratings_df, how="left", on="movieid")
-
-        tag_id_list = movie_ratings_tags_df["tagid"]
+        tag_id_list = mltags_df["tagid"]
         tag_id_count = 0
         tag_id_dict = {}
         for element in tag_id_list:
@@ -25,7 +22,7 @@ class TagMovieRatingTensor(ActorTag):
             tag_id_dict[element] = tag_id_count
             tag_id_count += 1
 
-        movieid_list = movie_ratings_tags_df["movieid"]
+        movieid_list = mltags_df["movieid"]
         movieid_count = 0
         movieid_dict = {}
         for element in movieid_list:
@@ -38,14 +35,14 @@ class TagMovieRatingTensor(ActorTag):
 
         util = Util()
 
-        for index, row in movie_ratings_tags_df.iterrows():
+        for index, row in mltags_df.iterrows():
             tagid = row["tagid"]
             movieid = row["movieid"]
-            rating = row["rating"]
-            if util.get_average_ratings_for_movie(movieid) <= rating:
-                tagid_id = tag_id_dict[tagid]
-                movieid_id = movieid_dict[movieid]
-                tensor[tagid_id][movieid_id][rating] = 1
+            for rating in range(0,6):
+                if util.get_average_ratings_for_movie(movieid) <= rating:
+                    tagid_id = tag_id_dict[tagid]
+                    movieid_id = movieid_dict[movieid]
+                    tensor[tagid_id][movieid_id][rating] = 1
 
         return tensor
 
