@@ -8,11 +8,13 @@ import numpy
 from sklearn.decomposition import TruncatedSVD
 from scipy import linalg
 from sklearn.preprocessing import StandardScaler
+from scripts.phase2.common.util import Util
 
 logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(__name__)
 conf = ParseConfig()
+util = Util()
 
 class SvdGenreTag(GenreTag):
     def __init__(self):
@@ -41,12 +43,12 @@ class SvdGenreTag(GenreTag):
         column_headers = list(df)
         del column_headers[0]
 
-        # Feature Scaling
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(df1[:, :])
+        (U, s, Vh) = util.SVD(df1)
 
-        # Calculating SVD
-        U, s, Vh = linalg.svd(df_sc)
+        # To print latent semantics
+        latents = util.get_latent_semantics(5, Vh)
+        util.print_latent_semantics(latents, column_headers)
+
         u_frame = pd.DataFrame(U[:,:5], index=row_headers)
         v_frame = pd.DataFrame(Vh[:5,:], columns=column_headers)
         u_frame.to_csv('u_1a_svd.csv', index=True, encoding='utf-8')
@@ -56,6 +58,3 @@ class SvdGenreTag(GenreTag):
 if __name__ == "__main__":
     obj = SvdGenreTag()
     (u_frame, v_frame, s) = obj.genre_tag(genre="Action")
-    print (u_frame)
-    print (v_frame)
-    print (s)

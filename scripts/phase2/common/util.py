@@ -1,9 +1,11 @@
 import math
-
 import tensorly.tensorly.decomposition as decomp
+import numpy
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+from scipy import linalg
+from sklearn.preprocessing import StandardScaler
 
 
 class Util(object):
@@ -116,6 +118,26 @@ class Util(object):
         factors = decomp.parafac(tensor, rank)
         return factors
 
+    def SVD(self, matrix):
+        # Feature Scaling
+        sc = StandardScaler()
+        df_sc = sc.fit_transform(matrix[:, :])
+
+        # Calculating SVD
+        U, s, Vh = linalg.svd(df_sc)
+        return (U, s, Vh)
+
+    def PCA(self, matrix):
+        # Feature Scaling
+        sc = StandardScaler()
+        df_sc = sc.fit_transform(matrix[:, :])
+
+        # Computng covariance matrix
+        cov_df = numpy.cov(df_sc, rowvar=False)
+
+        # Calculating PCA
+        U, s, Vh = linalg.svd(cov_df)
+        return (U, s, Vh)
 
 if __name__ == "__main__":
     obj = Util()
