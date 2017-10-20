@@ -22,6 +22,7 @@ class Util(object):
         self.mlratings = self.data_extractor.get_mlratings_data()
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.imdb_actor_info = self.data_extractor.get_imdb_actor_info_data()
+        self.genome_tags = self.data_extractor.get_genome_tags_data()
 
     def get_sorted_actor_ids(self):
         actor_info = self.data_extractor.get_imdb_actor_info_data()
@@ -51,6 +52,12 @@ class Util(object):
     def get_actor_name_for_id(self, actor_id):
         actor_data = self.imdb_actor_info[self.imdb_actor_info['id'] == actor_id]
         name = actor_data['name'].unique()
+
+        return name[0]
+
+    def get_tag_name_for_id(self, tag_id):
+        tag_data = self.genome_tags[self.genome_tags['tagId'] == tag_id]
+        name = tag_data['tag'].unique()
 
         return name[0]
 
