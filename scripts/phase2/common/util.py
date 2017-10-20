@@ -57,6 +57,13 @@ class Util(object):
 
         return name[0]
 
+    def get_movie_name_for_id(self, movieid):
+        all_movie_data = self.mlmovies
+        movie_data = all_movie_data[all_movie_data['movieid'] == movieid]
+        movie_name = movie_data['moviename'].unique()
+
+        return movie_name[0]
+
     def get_tag_name_for_id(self, tag_id):
         tag_data = self.genome_tags[self.genome_tags['tagId'] == tag_id]
         name = tag_data['tag'].unique()
