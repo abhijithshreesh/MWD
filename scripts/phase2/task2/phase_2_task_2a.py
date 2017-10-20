@@ -8,8 +8,7 @@ class ActorActorSVD(object):
     def __init__(self):
         self.actor_actor_matrix_object = ActorActorMatrix()
         self.actor_actor_similarity_matrix, self.actor_ids = self.actor_actor_matrix_object.fetchActorActorSimilarityMatrix()
-        self.u, self.s, self.v = numpy.linalg.svd(self.actor_actor_similarity_matrix, full_matrices=False)
-        self.vt = self.v.transpose()
+        self.u, self.s, self.vt = numpy.linalg.svd(self.actor_actor_similarity_matrix, full_matrices=False)
         self.util = Util()
 
     def get_actor_names_list(self):

@@ -8,8 +8,7 @@ class CoactorCoactorSVD(object):
     def __init__(self):
         self.coactor_coactor_matrix_object = CoactorCoactorMatrix()
         self.coactor_coactor_similarity_matrix, self.actor_ids = self.coactor_coactor_matrix_object.fetchCoactorCoactorSimilarityMatrix()
-        self.u, self.s, self.v = numpy.linalg.svd(self.coactor_coactor_similarity_matrix, full_matrices=False)
-        self.vt = self.v.transpose()
+        self.u, self.s, self.vt = numpy.linalg.svd(self.coactor_coactor_similarity_matrix, full_matrices=False)
         self.util = Util()
 
     def get_actor_names_list(self):
