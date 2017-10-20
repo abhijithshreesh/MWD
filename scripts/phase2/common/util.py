@@ -3,8 +3,6 @@ import math
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
 
-conf = ParseConfig()
-
 
 class Util(object):
 
@@ -16,7 +14,8 @@ class Util(object):
         """
         Initializing the data extractor object to get data from the csv files
         """
-        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
+        self.conf = ParseConfig()
+        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
         self.mlratings = self.data_extractor.get_mlratings_data()
         self.mlmovies = self.data_extractor.get_mlmovies_data()
@@ -103,6 +102,7 @@ class Util(object):
                 if i != len(entity_names_list) - 1:
                     print(" + ", end="")
             print("\n")
+
 
 if __name__ == "__main__":
     obj = Util()
