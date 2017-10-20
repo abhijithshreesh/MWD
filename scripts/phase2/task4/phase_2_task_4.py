@@ -42,10 +42,11 @@ class UserMovieRecommendation(object):
         return result_genre
 
     def get_combined_data(self):
-        result = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
-        del result['timestamp']
-        del result['tagid']
+        result = self.mlratings.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
         del result['year']
+        del result['timestamp']
+        del result['rating']
+        del result['imdbid']
 
         return result
 
@@ -167,7 +168,7 @@ class UserMovieRecommendation(object):
 
 if __name__ == "__main__":
     obj = UserMovieRecommendation()
-    user_id = 48717
+    user_id = 3
     print("Movie recommendation for user id " + str(user_id))
     movies = obj.recommendedMovies(user_id)
     for movie in movies:
