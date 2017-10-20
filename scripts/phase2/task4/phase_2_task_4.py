@@ -86,7 +86,6 @@ class UserMovieRecommendation(object):
 
         max_movie = ""
         max_rating = -1
-
         for movie in ratings.keys():
             if ratings[movie] >= max_rating or max_rating == -1:
                 max_movie = movie
