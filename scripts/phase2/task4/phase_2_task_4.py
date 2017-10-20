@@ -9,6 +9,11 @@ class UserMovieRecommendation(object):
         self.conf = ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
+        self.mlmovies = self.data_extractor.get_mlmovies_data()
+        self.mltags = self.data_extractor.get_mltags_data()
+        self.mlmovies = self.data_extractor.get_mlmovies_data()
+        self.mlratings = self.data_extractor.get_mlratings_data()
+        self.combined_data = self.get_combined_data()
         self.reshuffle = False
 
     def get_highest_percentage_genre(self, genre_counter):
@@ -35,9 +40,7 @@ class UserMovieRecommendation(object):
         return result_genre
 
     def get_combined_data(self):
-        mltags = self.data_extractor.get_mltags_data()
-        mlmovies = self.data_extractor.get_mlmovies_data()
-        result = mltags.merge(mlmovies, left_on="movieid", right_on="movieid", how="left")
+        result = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
         del result['timestamp']
         del result['tagid']
         del result['year']
@@ -45,18 +48,51 @@ class UserMovieRecommendation(object):
         return result
 
     def get_all_movies_for_genre(self, genre):
-        mlmovies = self.data_extractor.get_mlmovies_data()
-        genre_data = mlmovies[mlmovies['genres'].str.contains(genre)]
+        genre_data = self.mlmovies[self.mlmovies['genres'].str.contains(genre)]
         movies = genre_data['moviename'].unique()
 
         return movies
 
     def get_all_movies_for_user(self, user_id):
-        combined_data = self.get_combined_data()
-        user_data = combined_data[combined_data['userid'] == user_id]
+        user_data = self.combined_data[self.combined_data['userid'] == user_id]
         movies = user_data['moviename'].unique()
 
         return movies
+
+    def get_movie_id(self, movie):
+        all_movie_data = self.mlmovies
+        movie_data = all_movie_data[all_movie_data['moviename'] == movie]
+        movie_id = movie_data['movieid'].unique()
+
+        return movie_id[0]
+
+    def get_average_ratings_for_movie(self, movie):
+        movie_id = self.get_movie_id(movie)
+        all_ratings = self.mlratings
+        movie_ratings = all_ratings[all_ratings['movieid'] == movie_id]
+
+        ratings_sum = 0
+        ratings_count = 0
+        for index, row in movie_ratings.iterrows():
+            ratings_count += 1
+            ratings_sum += row['rating']
+
+        return ratings_sum / float(ratings_count)
+
+    def get_highest_ranked_movie_from_list(self, movie_list):
+        ratings = {}
+        for movie in movie_list:
+            ratings[movie] = self.get_average_ratings_for_movie(movie)
+
+        max_movie = ""
+        max_rating = -1
+
+        for movie in ratings.keys():
+            if ratings[movie] >= max_rating or max_rating == -1:
+                max_movie = movie
+                max_rating = ratings[movie]
+
+        return max_movie
 
     def get_movie_recommendation(self, genre, user_id, recommended_movies):
         genre_movies = self.get_all_movies_for_genre(genre)
@@ -64,7 +100,7 @@ class UserMovieRecommendation(object):
         result = (set(genre_movies) - set(user_watched_movies) - set(recommended_movies))
 
         if len(result) != 0:
-            return result.pop()
+            return self.get_highest_ranked_movie_from_list(result)
         else:
             return "~~NOT-FOUND~~"
 
