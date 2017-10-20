@@ -14,8 +14,8 @@ class CoactorCoactorMatrix(ActorTag):
     def fetchCoactorCoactorSimilarityMatrix(self):
         movie_actor_df = self.data_extractor.get_movie_actor_data()
         movie_actor_set_df = movie_actor_df.groupby(['actorid'])["movieid"].apply(set).reset_index()
-        num_of_actors = movie_actor_df.actorid.unique()
-        coactor_matrix = [[0] * len(num_of_actors) for i in range(num_of_actors)]
+        num_of_actors = len(movie_actor_df.actorid.unique())
+        coactor_matrix = [[0] * num_of_actors for i in range(num_of_actors)]
         for index, movie_set in zip(movie_actor_set_df.index, movie_actor_set_df.movieid):
             for index_2, movie_set_2 in zip(movie_actor_set_df.index, movie_actor_set_df.movieid):
                 if index != index_2:
