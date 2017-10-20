@@ -2,6 +2,7 @@ from collections import Counter
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+from scripts.phase2.common.util import Util
 
 
 class UserMovieRecommendation(object):
@@ -14,6 +15,7 @@ class UserMovieRecommendation(object):
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.mlratings = self.data_extractor.get_mlratings_data()
         self.combined_data = self.get_combined_data()
+        self.util = Util()
         self.reshuffle = False
 
     def get_highest_percentage_genre(self, genre_counter):
@@ -59,30 +61,11 @@ class UserMovieRecommendation(object):
 
         return movies
 
-    def get_movie_id(self, movie):
-        all_movie_data = self.mlmovies
-        movie_data = all_movie_data[all_movie_data['moviename'] == movie]
-        movie_id = movie_data['movieid'].unique()
-
-        return movie_id[0]
-
-    def get_average_ratings_for_movie(self, movie):
-        movie_id = self.get_movie_id(movie)
-        all_ratings = self.mlratings
-        movie_ratings = all_ratings[all_ratings['movieid'] == movie_id]
-
-        ratings_sum = 0
-        ratings_count = 0
-        for index, row in movie_ratings.iterrows():
-            ratings_count += 1
-            ratings_sum += row['rating']
-
-        return ratings_sum / float(ratings_count)
-
     def get_highest_ranked_movie_from_list(self, movie_list):
         ratings = {}
         for movie in movie_list:
-            ratings[movie] = self.get_average_ratings_for_movie(movie)
+            movie_id = self.util.get_movie_id(movie)
+            ratings[movie] = self.util.get_average_ratings_for_movie(movie_id)
 
         max_movie = ""
         max_rating = -1
