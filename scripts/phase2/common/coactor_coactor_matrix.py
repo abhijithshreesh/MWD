@@ -1,15 +1,14 @@
-import logging
+import numpy
+
 from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.task_1 import ActorTag
+from scripts.phase2.common.data_extractor import DataExtractor
 
-conf = ParseConfig()
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
 
-class CoactorCoactorMatrix(ActorTag):
+class CoactorCoactorMatrix(object):
     def __init__(self):
-        super().__init__()
-        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
+        self.conf = ParseConfig()
+        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
+        self.data_extractor = DataExtractor(self.data_set_loc)
 
     def fetchCoactorCoactorSimilarityMatrix(self):
         movie_actor_df = self.data_extractor.get_movie_actor_data()
@@ -20,7 +19,10 @@ class CoactorCoactorMatrix(ActorTag):
             for index_2, movie_set_2 in zip(movie_actor_set_df.index, movie_actor_set_df.movieid):
                 if index != index_2:
                     coactor_matrix[index][index_2] = len(movie_set.intersection(movie_set_2))
-        return coactor_matrix
+
+        numpy.savetxt("coactor_coactor_matrix.csv", coactor_matrix, delimiter=",")
+        return coactor_matrix, movie_actor_set_df.actorid.unique()
+
 
 if __name__ == "__main__":
     obj = CoactorCoactorMatrix()

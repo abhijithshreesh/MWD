@@ -1,18 +1,10 @@
-import pandas as pd
-import logging
-from scripts.phase2.common.config_parser import ParseConfig
-import argparse
-import scipy
 import numpy
+import pandas as pd
+
 from scripts.phase2.common.task_1 import ActorTag
 
-conf = ParseConfig()
 
 class ActorActorMatrix(ActorTag):
-    def __init__(self):
-        super().__init__()
-        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
-
     def fetchActorActorSimilarityMatrix(self):
         actor_info = self.data_extractor.get_imdb_actor_info_data()
         actor_ids = actor_info.id
@@ -33,7 +25,7 @@ class ActorActorMatrix(ActorTag):
         numpy.savetxt("actor_tag_matrix.csv", actor_tag_matrix, delimiter=",")
         numpy.savetxt("tag_actor_matrix.csv", tag_actor_matrix, delimiter=",")
         numpy.savetxt("actor_actor_matrix.csv", actor_actor_matrix, delimiter=",")
-        return (actor_actor_matrix, actor_ids)
+        return actor_actor_matrix, actor_ids
 
 
 if __name__ == "__main__":
