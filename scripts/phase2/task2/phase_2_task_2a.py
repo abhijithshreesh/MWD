@@ -9,11 +9,12 @@ class ActorActorSVD(object):
         self.actor_actor_matrix_object = ActorActorMatrix()
         self.actor_actor_similarity_matrix, self.actor_ids = self.actor_actor_matrix_object.fetchActorActorSimilarityMatrix()
         self.u, self.s, self.v = numpy.linalg.svd(self.actor_actor_similarity_matrix, full_matrices=False)
+        self.vt = self.v.transpose()
         self.util = Util()
 
     def get_latent_semantics(self, r):
         latent_semantics = []
-        for latent_semantic in self.v:
+        for latent_semantic in self.vt:
             if len(latent_semantics) == r:
                 break
             latent_semantics.append(latent_semantic)
@@ -34,7 +35,7 @@ class ActorActorSVD(object):
             print(str(key) + " Actors")
             for actor in groupings[key]:
                 print(actor, end="|")
-            print("\n\n")
+            print("\n")
 
     def print_latent_semantics(self, r):
         latent_semantics = self.get_latent_semantics(r)
@@ -48,7 +49,7 @@ class ActorActorSVD(object):
                 print(str(latent_semantic[i]) + "*(" + str(actor_names_list[i]) + ")", end="")
                 if i != len(actor_names_list) - 1:
                     print(" + ", end="")
-            print("\n\n")
+            print("\n")
 
 
 if __name__ == "__main__":
