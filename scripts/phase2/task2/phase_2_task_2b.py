@@ -1,36 +1,42 @@
-import logging
-
 import numpy
-from sklearn.decomposition import TruncatedSVD
 
 from scripts.phase2.common.coactor_coactor_matrix import CoactorCoactorMatrix
-from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.task_1 import ActorTag
+from scripts.phase2.common.util import Util
 
-log = logging.getLogger(__name__)
-conf = ParseConfig()
 
-class CoactorCoactorSVD(ActorTag):
+class CoactorCoactorSVD(object):
     def __init__(self):
-        super().__init__()
-        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
+        self.coactor_coactor_matrix_object = CoactorCoactorMatrix()
+        self.coactor_coactor_similarity_matrix, self.actor_ids = self.coactor_coactor_matrix_object.fetchCoactorCoactorSimilarityMatrix()
+        self.u, self.s, self.v = numpy.linalg.svd(self.coactor_coactor_similarity_matrix, full_matrices=False)
+        self.vt = self.v.transpose()
+        self.util = Util()
 
-    def coactor_coactor_svd(self):
-        coactor_coactor_matrix_object = CoactorCoactorMatrix()
-        coactor_coactor_similarity_matrix, actor_ids = coactor_coactor_matrix_object.fetchCoactorCoactorSimilarityMatrix()
-        # print(coactor_coactor_similarity_matrix)
-        U, s, Vh = numpy.linalg.svd(coactor_coactor_similarity_matrix, full_matrices=False)
+    def get_actor_names_list(self):
+        actor_names_list = []
+        for actor in self.actor_ids:
+            actor_names_list.append(self.util.get_actor_name_for_id(actor))
 
-        x = coactor_coactor_similarity_matrix
-        svd = TruncatedSVD(n_components=3)
-        svd.fit(x)
-        print(svd.components_)
+        return actor_names_list
 
-        # print(U)
-        # print(s)
-        # print(Vh)
+    def get_partitions(self, no_of_partitions):
+        actor_names_list = self.get_actor_names_list()
+        groupings = self.util.partition_factor_matrix(self.u, no_of_partitions, actor_names_list)
+
+        return groupings
+
+    def print_partitioned_actors(self, no_of_partitions):
+        groupings = self.get_partitions(no_of_partitions)
+        self.util.print_partitioned_entities(groupings)
+
+    def print_latent_semantics(self, r):
+        latent_semantics = self.util.get_latent_semantics(r, self.vt)
+        actor_names_list = self.get_actor_names_list()
+        self.util.print_latent_semantics(latent_semantics, actor_names_list)
 
 
 if __name__ == "__main__":
     obj = CoactorCoactorSVD()
-    obj.coactor_coactor_svd()
+    obj.print_latent_semantics(3)
+    print("\n\n\n")
+    obj.print_partitioned_actors(3)
