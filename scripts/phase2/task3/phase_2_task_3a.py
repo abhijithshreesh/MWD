@@ -23,17 +23,12 @@ class PageRankActor(ActorActorMatrix):
     def get_similarity_matrix(self, seed_actors):
         actor_matrix, actorids = self.fetchActorActorSimilarityMatrix()
         actor_df = pd.DataFrame(actor_matrix)
-        actor_df = (actor_df - actor_df.mean()) / (actor_df.max() - actor_df.min())
+        actor_df["row_sum"] = actor_df.sum(axis=1)
         for column in actor_df:
             actor_df[column] = pd.Series(
-                [each if (each > 0 and ind != int(column)) else 0 for ind, each in zip(actor_df.index, actor_df[column])],
+                [each/sum if (column!="row_sum" and each > 0 and ind != int(column)) else 0 for ind, each, sum in zip(actor_df.index, actor_df[column], actor_df.row_sum)],
                 index=actor_df.index)
-        actor_df['edge_count'] = (actor_df != 0).astype(int).sum(axis=1)
-        for column in actor_df:
-            actor_df[column] = pd.Series(
-                [each/count if (count > 0 and each > 0) else each for count, each in zip(actor_df.edge_count, actor_df[column])],
-                index=actor_df.index)
-        actor_df = actor_df.drop("edge_count", axis=1)
+        actor_df = actor_df.drop(["row_sum"], axis=1)
         seed_frame = pd.DataFrame(0.0, index=np.arange(len(actor_df.columns)), columns=actor_df.columns)
         seed_value = float(1/len(actor_df.columns))
         for each in seed_actors:
@@ -46,13 +41,6 @@ class PageRankActor(ActorActorMatrix):
         sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(sorted_rank)
 
-        # personalization = {each: 0 for each in actorids.index}
-        # personalization[list(actorids).index(581911)] = 1
-        # graph = nx.from_numpy_matrix(np.array(actor_df.values))
-        # pagerank_dict = nx.pagerank(graph, personalization=personalization)
-        a =1
-
-
 if __name__ == "__main__":
     PRA = PageRankActor()
-    PRA.get_similarity_matrix([3619702, 3426176])
+    PRA.get_similarity_matrix([3619702, 3426176])#2055016])
