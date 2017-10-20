@@ -1,5 +1,7 @@
 import math
 
+import tensorly.tensorly.decomposition as decomp
+
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
 
@@ -102,6 +104,10 @@ class Util(object):
                 if i != len(entity_names_list) - 1:
                     print(" + ", end="")
             print("\n")
+
+    def CPDecomposition(self, tensor, rank):
+        factors = decomp.parafac(tensor, rank)
+        return factors
 
 
 if __name__ == "__main__":

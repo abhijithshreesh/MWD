@@ -1,14 +1,12 @@
-import tensorly.tensorly.decomposition as decomp
-from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.task_1 import ActorTag
-import pandas as pd
 import numpy as np
-conf = ParseConfig()
+
+from scripts.phase2.common.util import Util
+
 
 class ActorMovieYearTensor(ActorTag):
     def __init__(self):
         super().__init__()
-        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
 
     def fetchActorMovieYearTensor(self):
         movies_df = self.data_extractor.get_mlmovies_data()
@@ -55,12 +53,9 @@ class ActorMovieYearTensor(ActorTag):
 
         return tensor
 
-    def cpDecomposition(self, tensor):
-        factors = decomp.parafac(tensor, 5)
-        return factors
-
 if __name__ == "__main__":
     obj = ActorMovieYearTensor()
     tensor = obj.fetchActorMovieYearTensor()
-    factors = obj.cpDecomposition(tensor)
+    util = Util()
+    factors = util.CPDecomposition(tensor, 5)
     print(factors)
