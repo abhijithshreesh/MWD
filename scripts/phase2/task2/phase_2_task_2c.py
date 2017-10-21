@@ -14,7 +14,7 @@ class ActorMovieYearTensor(object):
         self.ordered_years = []
         self.ordered_movie_names = []
         self.ordered_actor_names = []
-        self.print_list = ["\n\nFor Years:\n", "\n\nFor Movies:\n", "\n\nFor Actors:\n"]
+        self.print_list = ["\n\nFor Years:", "\n\nFor Movies:", "\n\nFor Actors:"]
         self.util = Util()
         self.tensor = self.fetchActorMovieYearTensor()
         self.factors = self.util.CPDecomposition(self.tensor, 5)
@@ -56,7 +56,7 @@ class ActorMovieYearTensor(object):
             name = self.util.get_actor_name_for_id(element)
             self.ordered_actor_names.append(name)
 
-        tensor = np.zeros((year_count + 1, movieid_count + 1, actorid_count + 1))
+        tensor = np.zeros((year_count, movieid_count, actorid_count))
 
         for index, row in movie_actor_df.iterrows():
             year = row["year"]
@@ -75,7 +75,7 @@ class ActorMovieYearTensor(object):
             print(self.print_list[i])
             latent_semantics = self.util.get_latent_semantics(r, factor.transpose())
             self.util.print_latent_semantics(latent_semantics, self.get_factor_names(i))
-            i+=1
+            i += 1
 
     def get_factor_names(self, i):
         if i == 0:
@@ -89,13 +89,13 @@ class ActorMovieYearTensor(object):
         i = 0
         groupings_list = []
         for factor in self.factors:
-            groupings = self.util.partition_factor_matrix(factor.transpose(), no_of_partitions, self.get_factor_names(i))
+            groupings = self.util.partition_factor_matrix(factor, no_of_partitions, self.get_factor_names(i))
             groupings_list.append(groupings)
             i += 1
 
         return groupings_list
 
-    def print_partitioned_entites(self, no_of_partitions):
+    def print_partitioned_entities(self, no_of_partitions):
         groupings_list = self.get_partitions(no_of_partitions)
         i = 0
         for groupings in groupings_list:
@@ -103,7 +103,8 @@ class ActorMovieYearTensor(object):
             self.util.print_partitioned_entities(groupings)
             i += 1
 
+
 if __name__ == "__main__":
     obj = ActorMovieYearTensor()
     obj.print_latent_semantics(5)
-    obj.print_partitioned_entites(5)
+    obj.print_partitioned_entities(5)
