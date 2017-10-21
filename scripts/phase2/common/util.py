@@ -1,11 +1,12 @@
 import math
-import tensorly.tensorly.decomposition as decomp
+
 import numpy
+import tensorly.tensorly.decomposition as decomp
+from scipy import linalg
+from sklearn.preprocessing import StandardScaler
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from scipy import linalg
-from sklearn.preprocessing import StandardScaler
 
 
 class Util(object):
@@ -83,16 +84,15 @@ class Util(object):
         length_of_group = (float(max_length) - float(min_length)) / float(no_of_partitions)
 
         groups = {}
+        for i in range(0, no_of_partitions):
+            groups["Group " + str(i + 1)] = []
+
         for key in entity_dict.keys():
             entity_length = entity_dict[key]
             group_no = math.ceil(float(entity_length - min_length) / float(length_of_group))
             if group_no == 0:
                 group_no = 1
-            if "Group " + str(group_no) in groups.keys():
-                groups["Group " + str(group_no)].append(key)
-            else:
-                groups["Group " + str(group_no)] = []
-                groups["Group " + str(group_no)].append(key)
+            groups["Group " + str(group_no)].append(key)
 
         return groups
 
@@ -108,6 +108,9 @@ class Util(object):
     def print_partitioned_entities(self, groupings):
         for key in groupings.keys():
             print(key)
+            if len(groupings[key]) == 0:
+                print("NO ELEMENTS IN THIS GROUP\n")
+                continue
             for entity in groupings[key]:
                 print(entity, end="|")
             print("\n")
