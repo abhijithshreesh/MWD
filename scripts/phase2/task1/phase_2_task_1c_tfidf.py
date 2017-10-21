@@ -49,8 +49,14 @@ class SimilarActors(ActorActorMatrix):
         actor_row = matrix[index_actor].tolist()
         actor_actor_dict = dict(zip(actorids, actor_row))
         del actor_actor_dict[actorid]
-        actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
-        return actor_actor_dict
+        #actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
+
+        actor_actor_name_dict = {}
+        for key in actor_actor_dict.keys():
+            actor_actor_name_dict[util.get_actor_name_for_id(int(key))] = actor_actor_dict[key]
+
+        actor_actor_name_dict = sorted(actor_actor_name_dict.items(), key=operator.itemgetter(1), reverse=True)
+        return actor_actor_name_dict
 
 
 if __name__ == "__main__":

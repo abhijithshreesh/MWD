@@ -48,11 +48,14 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         idf_weight_dict = {}
         idf_weight_dict = genre_tag.assign_idf_weight(idf_data, unique_tags)
         tag_df = genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
-        tag_df["total"] = tag_df.groupby(['tag'])['value'].transform('sum')
-        tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
+        tag_df["total"] = tag_df.groupby(['movieid','tag'])['value'].transform('sum')
+        #tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
         # actor_tag_dict = dict(zip(tag_df.tag, tag_df.total))
-        temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates()
-        genre_tag_tfidf_df = temp_df.pivot(index='moviename', columns='tag', values='total')
+        temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates().reset_index()
+
+
+
+        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag')
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
         genre_tag_tfidf_df.to_csv('movie_tag_matrix1d.csv', index=True, encoding='utf-8')
         return genre_tag_tfidf_df
@@ -101,6 +104,8 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
             return None
         actors = []
         for (movie,val) in movie_movie_dict:
+            if val <= 0:
+                break
             movieid = util.get_movie_id(movie)
             actors = actors + self.get_actors_of_movie(movie)
             if len(actors) >= 10:
@@ -124,5 +129,5 @@ if __name__ == "__main__":
     #obj.get_movie_tag_matrix()
     #obj.get_actors_of_movie(moviename="Hannibal")
     #movie_movie_dict = obj.get_movie_movie_vector(movieid="Hannibal")
-    actors = obj.most_similar_actors(moviename="Hannibal")
+    actors = obj.most_similar_actors(moviename="Swordfish")
     print (actors)

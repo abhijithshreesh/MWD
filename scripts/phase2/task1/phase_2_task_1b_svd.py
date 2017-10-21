@@ -10,11 +10,13 @@ from sklearn.preprocessing import StandardScaler
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
 from scripts.phase2.common.task_2 import GenreTag
+from scripts.phase2.common.util import Util
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 conf = ParseConfig()
+util = Util()
 
 class SvdGenreActor(GenreTag):
     """
@@ -176,12 +178,18 @@ class SvdGenreActor(GenreTag):
         column_headers = list(df)
         del column_headers[0]
 
-        # Feature Scaling
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(df1[:, :])
+        column_headers_names = []
 
-        # Calculating SVD
-        U, s, Vh = linalg.svd(df_sc)
+        for col_head in column_headers:
+            col_head_name = util.get_actor_name_for_id(int(col_head))
+            column_headers_names = column_headers_names + [col_head_name]
+
+        (U, s, Vh) = util.SVD(df1)
+
+        # To print latent semantics
+        latents = util.get_latent_semantics(5, Vh)
+        util.print_latent_semantics(latents, column_headers_names)
+
         u_frame = pd.DataFrame(U[:, :5], index=row_headers)
         v_frame = pd.DataFrame(Vh[:5, :], columns=column_headers)
         u_frame.to_csv('u_1b_svd.csv', index=True, encoding='utf-8')
@@ -191,6 +199,6 @@ class SvdGenreActor(GenreTag):
 if __name__ == "__main__":
     obj = SvdGenreActor()
     (u_frame, v_frame, s) = obj.svd_genre_actor(genre="Action")
-    print (u_frame)
-    print (v_frame)
-    print (s)
+    # print (u_frame)
+    # print (v_frame)
+    # print (s)
