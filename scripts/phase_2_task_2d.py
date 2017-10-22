@@ -1,40 +1,39 @@
 import numpy as np
-
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from scripts.phase2.common.util import Util
+
+from scripts.util import Util
 
 
-class ActorMovieYearTensor(object):
-
+class TagMovieRatingTensor(object):
     def __init__(self):
         self.conf = ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
-        self.ordered_years = []
+        self.max_ratings = 5
+        self.ordered_ratings = [0, 1, 2, 3, 4, 5]
         self.ordered_movie_names = []
-        self.ordered_actor_names = []
-        self.print_list = ["\n\nFor Years:", "\n\nFor Movies:", "\n\nFor Actors:"]
+        self.ordered_tag_names = []
+        self.print_list = ["\n\nFor Tags:", "\n\nFor Movies:", "\n\nFor Ratings:"]
         self.util = Util()
-        self.tensor = self.fetchActorMovieYearTensor()
+        self.tensor = self.fetchTagMovieRatingTensor()
         self.factors = self.util.CPDecomposition(self.tensor, 5)
 
-    def fetchActorMovieYearTensor(self):
-        movies_df = self.data_extractor.get_mlmovies_data()
-        actor_df = self.data_extractor.get_movie_actor_data()
+    def fetchTagMovieRatingTensor(self):
+        mltags_df = self.data_extractor.get_mltags_data()
 
-        movie_actor_df = actor_df.merge(movies_df, how="left", on="movieid")
-        year_list = movie_actor_df["year"]
-        year_count = 0
-        year_dict = {}
-        for element in year_list:
-            if element in year_dict.keys():
+        tag_id_list = mltags_df["tagid"]
+        tag_id_count = 0
+        tag_id_dict = {}
+        for element in tag_id_list:
+            if element in tag_id_dict.keys():
                 continue
-            year_dict[element] = year_count
-            year_count += 1
-            self.ordered_years.append(element)
+            tag_id_dict[element] = tag_id_count
+            tag_id_count += 1
+            name = self.util.get_tag_name_for_id(element)
+            self.ordered_tag_names.append(name)
 
-        movieid_list = movie_actor_df["movieid"]
+        movieid_list = mltags_df["movieid"]
         movieid_count = 0
         movieid_dict = {}
         for element in movieid_list:
@@ -45,27 +44,16 @@ class ActorMovieYearTensor(object):
             name = self.util.get_movie_name_for_id(element)
             self.ordered_movie_names.append(name)
 
-        actorid_list = movie_actor_df["actorid"]
-        actorid_count = 0
-        actorid_dict = {}
-        for element in actorid_list:
-            if element in actorid_dict.keys():
-                continue
-            actorid_dict[element] = actorid_count
-            actorid_count += 1
-            name = self.util.get_actor_name_for_id(element)
-            self.ordered_actor_names.append(name)
+        tensor = np.zeros((tag_id_count, movieid_count, self.max_ratings + 1))
 
-        tensor = np.zeros((year_count, movieid_count, actorid_count))
-
-        for index, row in movie_actor_df.iterrows():
-            year = row["year"]
+        for index, row in mltags_df.iterrows():
+            tagid = row["tagid"]
             movieid = row["movieid"]
-            actorid = row["actorid"]
-            year_id = year_dict[year]
-            movieid_id = movieid_dict[movieid]
-            actorid_id = actorid_dict[actorid]
-            tensor[year_id][movieid_id][actorid_id] = 1
+            avg_movie_rating = self.util.get_average_ratings_for_movie(movieid)
+            for rating in range(0, int(avg_movie_rating) + 1):
+                tagid_id = tag_id_dict[tagid]
+                movieid_id = movieid_dict[movieid]
+                tensor[tagid_id][movieid_id][rating] = 1
 
         return tensor
 
@@ -79,11 +67,11 @@ class ActorMovieYearTensor(object):
 
     def get_factor_names(self, i):
         if i == 0:
-            return self.ordered_years
+            return self.ordered_tag_names
         elif i == 1:
             return self.ordered_movie_names
         elif i == 2:
-            return self.ordered_actor_names
+            return self.ordered_ratings
 
     def get_partitions(self, no_of_partitions):
         i = 0
@@ -105,6 +93,6 @@ class ActorMovieYearTensor(object):
 
 
 if __name__ == "__main__":
-    obj = ActorMovieYearTensor()
+    obj = TagMovieRatingTensor()
     obj.print_latent_semantics(5)
     obj.print_partitioned_entities(5)

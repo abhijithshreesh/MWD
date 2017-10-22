@@ -6,10 +6,10 @@ import numpy
 import tensorly.tensorly.decomposition as decomp
 from gensim import corpora
 from scipy import linalg
+from scripts.phase2.common.data_extractor import DataExtractor
 from sklearn.preprocessing import StandardScaler
 
-from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.data_extractor import DataExtractor
+from scripts.config_parser import ParseConfig
 
 
 class Util(object):

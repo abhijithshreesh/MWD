@@ -1,7 +1,9 @@
-import numpy
 import os
-from scripts.phase2.common.config_parser import ParseConfig
+
+import numpy
 from scripts.phase2.common.data_extractor import DataExtractor
+
+from scripts.config_parser import ParseConfig
 
 
 class CoactorCoactorMatrix(object):

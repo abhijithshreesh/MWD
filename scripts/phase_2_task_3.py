@@ -1,12 +1,13 @@
 import logging
 import operator
+
 import numpy
 import pandas as pd
-
-from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
-from scripts.phase2.common.coactor_coactor_matrix import CoactorCoactorMatrix
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+
+from scripts.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.coactor_coactor_matrix import CoactorCoactorMatrix
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

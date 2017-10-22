@@ -1,7 +1,7 @@
 import numpy
 
-from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
-from scripts.phase2.common.util import Util
+from scripts.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.util import Util
 
 
 class ActorActorSVD(object):

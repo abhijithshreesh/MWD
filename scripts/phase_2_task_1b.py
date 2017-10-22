@@ -1,11 +1,13 @@
-import pandas as pd
 import logging
+import math
+from collections import Counter
+
+import pandas as pd
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from scripts.phase2.common.task_2 import GenreTag
-from scripts.phase2.common.util import Util
-from collections import Counter
-import math
+from scripts.phase2.common.phase1_task_2 import GenreTag
+
+from scripts.util import Util
 
 logging.basicConfig(level=logging.INFO)
 

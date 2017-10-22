@@ -1,15 +1,14 @@
-import pandas as pd
 import logging
+import operator
+
+import numpy
+import pandas as pd
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from collections import Counter
-import math
-import argparse
-import operator
-from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
-from scripts.phase2.common.util import Util
-from scripts.phase2.common.task_2 import GenreTag
-import numpy
+from scripts.phase2.common.phase1_task_2 import GenreTag
+
+from scripts.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.util import Util
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

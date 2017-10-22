@@ -1,12 +1,14 @@
-import pandas as pd
 import logging
+import operator
+
+import numpy
+import pandas as pd
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-import operator
-from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
-from scripts.phase2.common.util import Util
-import numpy
-from scripts.phase2.task1.phase_2_task_1b import SvdGenreActor
+
+from scripts.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.phase_2_task_1b import SvdGenreActor
+from scripts.util import Util
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

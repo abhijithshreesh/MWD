@@ -3,9 +3,9 @@ import math
 from collections import Counter
 
 import pandas as pd
-
-from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+
+from scripts.config_parser import ParseConfig
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

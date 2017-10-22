@@ -4,7 +4,8 @@ from collections import Counter
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from scripts.phase2.common.util import Util
+
+from scripts.util import Util
 
 
 class UserMovieRecommendation(object):
