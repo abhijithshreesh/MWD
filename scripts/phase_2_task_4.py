@@ -1,17 +1,15 @@
 import argparse
-import os
 from collections import Counter
 
-from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.data_extractor import DataExtractor
-
+from scripts.config_parser import ParseConfig
+from scripts.data_extractor import DataExtractor
 from scripts.util import Util
 
 
 class UserMovieRecommendation(object):
     def __init__(self):
         self.conf = ParseConfig()
-        self.data_set_loc =os.path.join(os.path.abspath(os.path.dirname(__file__)), self.conf.config_section_mapper("filePath").get("data_set_loc"))
+        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.mltags = self.data_extractor.get_mltags_data()

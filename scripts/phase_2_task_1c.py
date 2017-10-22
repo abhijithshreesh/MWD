@@ -3,10 +3,10 @@ import operator
 
 import numpy
 import pandas as pd
-from scripts.phase2.common.config_parser import ParseConfig
-from scripts.phase2.common.data_extractor import DataExtractor
 
 from scripts.actor_actor_similarity_matrix import ActorActorMatrix
+from scripts.config_parser import ParseConfig
+from scripts.data_extractor import DataExtractor
 from scripts.phase_2_task_1b import SvdGenreActor
 from scripts.util import Util
 

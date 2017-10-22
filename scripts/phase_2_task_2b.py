@@ -1,7 +1,7 @@
 import numpy
-from scripts.phase2.common.util import Util
 
 from scripts.coactor_coactor_matrix import CoactorCoactorMatrix
+from scripts.util import Util
 
 
 class CoactorCoactorSVD(object):
