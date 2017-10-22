@@ -8,7 +8,10 @@ import argparse
 from collections import Counter
 from gensim import corpora, models
 import gensim
+import numpy
+import operator
 from scripts.phase2.common.data_extractor import DataExtractor
+from scripts.phase2.common.util import Util
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,8 +23,9 @@ class LdaActorTag(object):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
+        self.util = Util()
 
-    def get_lda_data(self, genre):
+    def get_related_actors_lda(self, actorid):
         mov_act = self.data_extractor.get_movie_actor_data()
         ml_tag = self.data_extractor.get_mltags_data()
         genome_tag = self.data_extractor.get_genome_tags_data()
@@ -34,63 +38,49 @@ class LdaActorTag(object):
         tag_df = merged_data_frame.groupby(['actorid'])['tag'].apply(list).reset_index()
 
         tag_df = tag_df.sort_values('actorid')
-
+        actorid_list = tag_df.actorid.tolist()
         tag_df = list(tag_df.iloc[:,1])
 
+        (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=1000)
 
+        actor_topic_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(actorid_list), num_topics=5)
+        topic_actor_matrix = actor_topic_matrix.transpose()
+        actor_actor_matrix = numpy.dot(actor_topic_matrix,topic_actor_matrix)
 
-        # turn our tokenized documents into a id <-> term dictionary
-        dictionary = corpora.Dictionary(tag_df)
+        numpy.savetxt("actor_actor_matrix_with_svd_latent_values.csv", actor_actor_matrix, delimiter=",")
 
-        # convert tokenized documents into a document-term matrix
-        corpus = [dictionary.doc2bow(text) for text in tag_df]
+        df = pd.DataFrame(pd.read_csv('actor_actor_matrix_with_svd_latent_values.csv', header=None))
+        matrix = df.values
 
-        # generate LDA model
-        lda = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word=dictionary, passes=1)
+        actorids = self.util.get_sorted_actor_ids()
 
-        latent_semantics = lda.print_topics(5,80)
-        for i in range(0, len(latent_semantics)):
-            print (latent_semantics[i])
+        index_actor = None
+        for i, j in enumerate(actorids):
+            if j == actorid:
+                index_actor = i
+                break
 
-        #print (lda.print_topics(5,80))
+        if index_actor == None:
+            print("Actor Id not found.")
+            return None
 
-        corpus = lda[corpus]
+        actor_names = []
+        for actor_id in actorids:
+            actor_name = self.util.get_actor_name_for_id(int(actor_id))
+            actor_names = actor_names + [actor_name]
 
-        for i in range(0, len(corpus)):
-            if len(corpus[i]) == 1:
-                print("\n\n\n")
-                print(i)
-                print("\n\n\n")
-            print(corpus[i])
+        actor_row = matrix[index_actor].tolist()
+        actor_actor_dict = dict(zip(actor_names, actor_row))
+        del actor_actor_dict[self.util.get_actor_name_for_id(int(actorid))]
 
+        # for key in actor_actor_dict.keys():
+        #     actor_actor_dict[key] = abs(actor_actor_dict[key])
 
-
-        #lda = LatentDirichletAllocation(n_topics=4)
-
-        #lda.fit_transform(genre_tag_freq.values)
-        #topics = lda.components_
-
-        #ldamodel = gensim.models.ldamodel.LdaModel(tag_df.values, num_topics=3)
-        #print(ldamodel.print_topics(num_topics=3, num_words=3))
-
-        # Loading the dataset
-        #df = pd.DataFrame(pd.read_csv('tag_df_lda.csv'))
-        #df1 = df.values
-        #print(df1)
-
-        # Encoding the String Variables
-
-        # from sklearn.preprocessing import LabelEncoder
-        # labelencoder_df = LabelEncoder()
-        # df.iloc[:, 1] = labelencoder_df.fit_transform(df.iloc[:, 1])
-        # df.iloc[:, 2] = labelencoder_df.fit_transform(df.iloc[:, 2])
-        #
-        # df1 = df.values
-
-        # Calling the LDA algorithm
+        actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
+        return actor_actor_dict
 
 
 if __name__ == "__main__":
     obj = LdaActorTag()
-    lda_comp = obj.get_lda_data(genre="Action")
-    #print (lda_comp)
+    actor_actor_dict = obj.get_related_actors_lda(actorid=542238)
+    print(actor_actor_dict)

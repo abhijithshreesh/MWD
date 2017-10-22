@@ -7,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
+from gensim import corpora, models
+import gensim
 
 
 class Util(object):
@@ -148,6 +150,45 @@ class Util(object):
         # Calculating PCA
         U, s, Vh = linalg.svd(cov_df)
         return (U, s, Vh)
+
+    def LDA(self, input_compound_list, num_topics, num_features):
+        # turn our tokenized documents into a id <-> term dictionary
+        dictionary = corpora.Dictionary(input_compound_list)
+
+        # convert tokenized documents into a document-term matrix
+        corpus = [dictionary.doc2bow(text) for text in input_compound_list]
+
+        # generate LDA model
+        lda = gensim.models.ldamodel.LdaModel(corpus, num_topics, id2word=dictionary, passes=1)
+
+        latent_semantics = lda.print_topics(num_topics, num_features)
+        # for latent in latent_semantics:
+        #     print(latent)
+
+        corpus = lda[corpus]
+
+        # for i in corpus:
+        #     print(i)
+
+        return (corpus, latent_semantics)
+
+    def get_doc_topic_matrix(self, u, num_docs, num_topics):
+        data = []
+        for i in range(0,(num_docs)):
+            data = data + [0]
+
+        row1 = []
+        i=0
+        for doc in u:
+            row1 = []
+            for (latent, weight_latent) in doc:
+                row1 = row1 + [weight_latent]
+            data[i] = row1;
+            i += 1
+
+        u_matrix = numpy.array(data)
+        return u_matrix
+
 
 if __name__ == "__main__":
     obj = Util()
