@@ -293,7 +293,7 @@ class SimilarActorsFromDiffMoviesLda(object):
         tag_df = movie_tag_data_frame.groupby(['movieid'])['tag'].apply(list).reset_index()
 
         tag_df = tag_df.sort_values('movieid')
-        movies = tag_df.moviename.tolist()
+        movies = tag_df.movieid.tolist()
         tag_df = list(tag_df.iloc[:, 1])
 
         (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=1000)
@@ -302,9 +302,11 @@ class SimilarActorsFromDiffMoviesLda(object):
         topic_movie_matrix = movie_topic_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_topic_matrix,topic_movie_matrix)
 
+
+        input_movieid = self.util.get_movie_id(moviename)
         index_movie = None
         for i, j in enumerate(movies):
-            if j == moviename:
+            if j == input_movieid:
                 index_movie = i
                 break
 
@@ -314,7 +316,7 @@ class SimilarActorsFromDiffMoviesLda(object):
 
         movie_row = movie_movie_matrix[index_movie].tolist()
         movie_movie_dict = dict(zip(movies, movie_row))
-        del movie_movie_dict[moviename]
+        del movie_movie_dict[input_movieid]
 
         for key in movie_movie_dict.keys():
             movie_movie_dict[key] = abs(movie_movie_dict[key])
@@ -327,7 +329,6 @@ class SimilarActorsFromDiffMoviesLda(object):
         for (movie, val) in movie_movie_dict:
             if val <= 0:
                 break
-            movieid = self.util.get_movie_id(movie)
             actors = actors + self.sim_act_diff_mov_tf.get_actors_of_movie(movie)
             if len(actors) >= 10:
                 break

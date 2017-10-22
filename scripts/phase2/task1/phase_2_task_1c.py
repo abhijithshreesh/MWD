@@ -9,7 +9,7 @@ import operator
 from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
 from scripts.phase2.common.util import Util
 import numpy
-from scripts.phase2.task1.phase_2_task_1b_svd import SvdGenreActor
+from scripts.phase2.task1.phase_2_task_1b import SvdGenreActor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -263,14 +263,14 @@ if __name__ == "__main__":
 
     actorid = 542238
 
-    actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
-    print(actor_actor_dict)
-
-    actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
-    print(actor_actor_dict)
-
-    actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
-    print(actor_actor_dict)
+    # actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
+    # print(actor_actor_dict)
+    #
+    # actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
+    # print(actor_actor_dict)
+    #
+    # actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
+    # print(actor_actor_dict)
 
     actor_actor_dict = obj_lda.get_related_actors_lda(actorid)
     print(actor_actor_dict)
