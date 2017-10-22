@@ -263,14 +263,14 @@ if __name__ == "__main__":
 
     actorid = 542238
 
-    # actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
-    # print(actor_actor_dict)
-    #
-    # actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
-    # print(actor_actor_dict)
-    #
-    # actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
-    # print(actor_actor_dict)
+    actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
+    print(actor_actor_dict)
+
+    actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
+    print(actor_actor_dict)
+
+    actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
+    print(actor_actor_dict)
 
     actor_actor_dict = obj_lda.get_related_actors_lda(actorid)
     print(actor_actor_dict)

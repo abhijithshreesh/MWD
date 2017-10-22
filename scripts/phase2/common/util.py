@@ -173,20 +173,14 @@ class Util(object):
         return (corpus, latent_semantics)
 
     def get_doc_topic_matrix(self, u, num_docs, num_topics):
-        data = []
-        for i in range(0,(num_docs)):
-            data = data + [0]
+        u_matrix = numpy.zeros(shape=(num_docs, num_topics))
 
-        row1 = []
-        i=0
-        for doc in u:
-            row1 = []
-            for (latent, weight_latent) in doc:
-                row1 = row1 + [weight_latent]
-            data[i] = row1;
-            i += 1
+        for i in range(0, len(u)):
+            row1 = u[i]
+            for j in range(0, len(row1)):
+                u_matrix[i, j] = row1[j][1]
 
-        u_matrix = numpy.array(data)
+        # u_matrix = numpy.array(data)
         return u_matrix
 
 
