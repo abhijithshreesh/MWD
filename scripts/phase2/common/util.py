@@ -78,8 +78,8 @@ class Util(object):
         for i in range(0, len(matrix)):
             length = 0
             for latent_semantic in matrix[i]:
-                length += abs(latent_semantic)
-            entity_dict[entity_names[i]] = length
+                length += abs(latent_semantic) ** 2
+            entity_dict[entity_names[i]] = math.sqrt(length)
 
         max_length = float(max(entity_dict.values()))
         min_length = float(min(entity_dict.values()))
