@@ -1,16 +1,23 @@
 import numpy
-
+import os
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
 
 
 class CoactorCoactorMatrix(object):
+    """
+    Class to compute the Coactor Matrix which represents the number of movies each pair of actors have acted in, together
+    """
     def __init__(self):
         self.conf = ParseConfig()
-        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
+        self.data_set_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)),self.conf.config_section_mapper("filePath").get("data_set_loc"))
         self.data_extractor = DataExtractor(self.data_set_loc)
 
     def fetchCoactorCoactorSimilarityMatrix(self):
+        """
+        Creates the coactor matrix with all the actors in a given set
+        :return: coactor matrix
+        """
         movie_actor_df = self.data_extractor.get_movie_actor_data()
         movie_actor_set_df = movie_actor_df.groupby(['actorid'])["movieid"].apply(set).reset_index()
         num_of_actors = len(movie_actor_df.actorid.unique())
