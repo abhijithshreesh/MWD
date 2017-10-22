@@ -5,6 +5,9 @@ from scripts.phase2.common.data_extractor import DataExtractor
 from scripts.phase2.common.util import Util
 
 
+# import argparse
+
+
 class UserMovieRecommendation(object):
     def __init__(self):
         self.conf = ParseConfig()
@@ -139,8 +142,11 @@ class UserMovieRecommendation(object):
             highest_percentage_genre = self.get_highest_percentage_genre(genre_counter_copy)
             genre_counter[highest_percentage_genre] = 5
         elif total_movies_count > 5:
-            least_percentage_genre = self.get_least_percentage_genre(genre_counter_copy)
-            genre_counter[least_percentage_genre] -= (total_movies_count - 5)
+            diff = total_movies_count - 5
+            while diff != 0:
+                least_percentage_genre = self.get_least_percentage_genre(genre_counter_copy)
+                genre_counter[least_percentage_genre] -= 1
+                diff -= 1
         elif total_movies_count < 5:
             highest_percentage_genre = self.get_highest_percentage_genre(genre_counter_copy)
             genre_counter[highest_percentage_genre] += (5 - total_movies_count)
@@ -167,8 +173,14 @@ class UserMovieRecommendation(object):
 
 
 if __name__ == "__main__":
-    obj = UserMovieRecommendation()
+    # parser = argparse.ArgumentParser(
+    #     description='phase_2_task_4.py 146',
+    # )
+    # parser.add_argument('user_id', action="store", type=int)
+    # input = vars(parser.parse_args())
+    # user_id = input['user_id']
     user_id = 3
+    obj = UserMovieRecommendation()
     print("Movie recommendation for user id " + str(user_id))
     movies = obj.recommendedMovies(user_id)
     for movie in movies:
