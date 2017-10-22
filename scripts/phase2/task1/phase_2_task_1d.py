@@ -38,7 +38,6 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
     def get_movie_tag_matrix(self):
         data_frame = genre_tag.get_genre_data()
         tag_df = data_frame.reset_index()
-        #temp_df = data_frame[data_frame["genre"] == genre]
         unique_tags = tag_df.tag.unique()
         idf_data = tag_df.groupby(['movieid'])['tag'].apply(set)
         tf_df = tag_df.groupby(['movieid'])['tag'].apply(lambda x: ','.join(x)).reset_index()
@@ -49,8 +48,6 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         idf_weight_dict = genre_tag.assign_idf_weight(idf_data, unique_tags)
         tag_df = genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
         tag_df["total"] = tag_df.groupby(['movieid','tag'])['value'].transform('sum')
-        #tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
-        # actor_tag_dict = dict(zip(tag_df.tag, tag_df.total))
         temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates().reset_index()
 
 
@@ -71,16 +68,6 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         tag_movie_matrix = movie_tag_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_tag_matrix, tag_movie_matrix)
 
-        # (matrix, actorids) = self.fetchActorActorSimilarityMatrix()
-        # #In the pre-processing task above command should be run so that actor_actor_similarity matrix will be generated
-        # #and saved as csv which can be used multiple number of times. Will comment the above line, when its done.
-        #
-        # # Loading the required actor_actor_similarity matrix from csv
-        # df = pd.DataFrame(pd.read_csv('actor_actor_matrix.csv', header=None))
-        # matrix = df.values
-        #
-        # actorids = util.get_sorted_actor_ids()
-        #
         index_movie = None
         for i,j in enumerate(movies):
             if j == moviename:
@@ -138,13 +125,6 @@ class SimilarActorsFromDiffMoviesSvd(object):
         movie_tag_matrix = movie_tag_frame.values
         movies = list(movie_tag_frame.index.values)
         tags = list(movie_tag_frame)
-
-        # # Feature Scaling
-        # sc = StandardScaler()
-        # df_sc = sc.fit_transform(movie_tag_matrix[:, :])
-        #
-        # # Calculating SVD
-        # U, s, Vh = linalg.svd(df_sc)
 
         (U,s,Vh) = util.SVD(movie_tag_matrix)
 
@@ -215,19 +195,7 @@ class SimilarActorsFromDiffMoviesPca(object):
         movies = list(movie_tag_frame.index.values)
         tags = list(movie_tag_frame)
 
-        # # Feature Scaling
-        # sc = StandardScaler()
-        # df_sc = sc.fit_transform(movie_tag_matrix[:, :])
-        #
-        # # Calculating SVD
-        # U, s, Vh = linalg.svd(df_sc)
-
         (U,s,Vh) = util.PCA(movie_tag_matrix)
-
-        # u_frame = pd.DataFrame(U[:, :5], index=movies)
-        # v_frame = pd.DataFrame(Vh[:5, :], columns=tags)
-        # u_frame.to_csv('u_1d_pca.csv', index=True, encoding='utf-8')
-        # v_frame.to_csv('vh_1d_pca.csv', index=True, encoding='utf-8')
 
         tag_latent_matrix = U[:, :5]
         movie_latent_matrix = numpy.dot(movie_tag_matrix, tag_latent_matrix)
@@ -296,14 +264,14 @@ class SimilarActorsFromDiffMoviesLda(object):
         movies = tag_df.movieid.tolist()
         tag_df = list(tag_df.iloc[:, 1])
 
+        input_movieid = self.util.get_movie_id(moviename)
+
         (U, Vh) = self.util.LDA(tag_df, num_topics=5, num_features=1000)
 
         movie_topic_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=5)
         topic_movie_matrix = movie_topic_matrix.transpose()
-        movie_movie_matrix = numpy.dot(movie_topic_matrix,topic_movie_matrix)
+        movie_movie_matrix = numpy.dot(movie_topic_matrix, topic_movie_matrix)
 
-
-        input_movieid = self.util.get_movie_id(moviename)
         index_movie = None
         for i, j in enumerate(movies):
             if j == input_movieid:
@@ -329,7 +297,7 @@ class SimilarActorsFromDiffMoviesLda(object):
         for (movie, val) in movie_movie_dict:
             if val <= 0:
                 break
-            actors = actors + self.sim_act_diff_mov_tf.get_actors_of_movie(movie)
+            actors = actors + self.sim_act_diff_mov_tf.get_actors_of_movie(self.util.get_movie_name_for_id(movie))
             if len(actors) >= 10:
                 break
 

@@ -1,5 +1,5 @@
 import logging
-
+import os
 import configparser
 
 logging.basicConfig(level=logging.INFO)
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 class ParseConfig(object):
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read("../../../config.ini")
+        self.config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)), "..\..\..\config.ini"))
 
     def config_section_mapper(self, section):  # Code to parse a section of the config.ini file
         dict1 = {}
