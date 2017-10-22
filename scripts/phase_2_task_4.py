@@ -1,3 +1,4 @@
+import argparse
 from collections import Counter
 
 import config_parser
@@ -219,12 +220,12 @@ class UserMovieRecommendation(object):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(
-    #     description='phase_2_task_4.py 146',
-    # )
-    # parser.add_argument('user_id', action="store", type=int)
-    # input = vars(parser.parse_args())
-    # user_id = input['user_id']
+    parser = argparse.ArgumentParser(
+        description='phase_2_task_4.py 146',
+    )
+    parser.add_argument('user_id', action="store", type=int)
+    input = vars(parser.parse_args())
+    user_id = input['user_id']
     user_id = 3
     obj = UserMovieRecommendation()
     print("Movie recommendation for user id " + str(user_id))
