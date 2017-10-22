@@ -2,8 +2,7 @@ import logging
 import os
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
+from config_parser import ParseConfig
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

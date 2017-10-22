@@ -3,11 +3,10 @@ import operator
 
 import numpy
 import pandas as pd
-
-from scripts.actor_actor_similarity_matrix import ActorActorMatrix
-from scripts.coactor_coactor_matrix import CoactorCoactorMatrix
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
+from actor_actor_similarity_matrix import ActorActorMatrix
+from coactor_coactor_matrix import CoactorCoactorMatrix
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

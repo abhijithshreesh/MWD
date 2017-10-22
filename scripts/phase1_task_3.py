@@ -1,9 +1,8 @@
 import logging
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
-from scripts.phase1_task_2 import GenreTag
+from config_parser import ParseConfig
+from phase1_task_2 import GenreTag
 
 logging.basicConfig(level=logging.INFO)
 

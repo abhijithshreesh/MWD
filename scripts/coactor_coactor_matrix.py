@@ -1,9 +1,8 @@
 import os
 
 import numpy
-
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 
 
 class CoactorCoactorMatrix(object):

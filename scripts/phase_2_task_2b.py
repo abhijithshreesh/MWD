@@ -1,7 +1,7 @@
 import numpy
 
-from scripts.coactor_coactor_matrix import CoactorCoactorMatrix
-from scripts.util import Util
+from coactor_coactor_matrix import CoactorCoactorMatrix
+from util import Util
 
 
 class CoactorCoactorSVD(object):

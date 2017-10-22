@@ -3,9 +3,8 @@ import math
 from collections import Counter
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

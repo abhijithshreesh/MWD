@@ -1,7 +1,7 @@
 import numpy
 import pandas as pd
 
-from scripts.phase1_task_1 import ActorTag
+from phase1_task_1 import ActorTag
 
 
 class ActorActorMatrix(ActorTag):

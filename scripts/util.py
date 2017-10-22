@@ -4,12 +4,11 @@ import os
 import gensim
 import numpy
 import tensorly.tensorly.decomposition as decomp
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
 from sklearn.preprocessing import StandardScaler
-
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
 
 
 class Util(object):

@@ -1,9 +1,8 @@
 import logging
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
-from scripts.phase1_task_1 import ActorTag
+from config_parser import ParseConfig
+from phase1_task_1 import ActorTag
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)

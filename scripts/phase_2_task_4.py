@@ -1,16 +1,15 @@
-import argparse
 from collections import Counter
 
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
-from scripts.util import Util
+import config_parser
+import data_extractor
+from util import Util
 
 
 class UserMovieRecommendation(object):
     def __init__(self):
-        self.conf = ParseConfig()
+        self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
-        self.data_extractor = DataExtractor(self.data_set_loc)
+        self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.mltags = self.data_extractor.get_mltags_data()
         self.mlmovies = self.data_extractor.get_mlmovies_data()
@@ -220,12 +219,13 @@ class UserMovieRecommendation(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='phase_2_task_4.py 146',
-    )
-    parser.add_argument('user_id', action="store", type=int)
-    input = vars(parser.parse_args())
-    user_id = input['user_id']
+    # parser = argparse.ArgumentParser(
+    #     description='phase_2_task_4.py 146',
+    # )
+    # parser.add_argument('user_id', action="store", type=int)
+    # input = vars(parser.parse_args())
+    # user_id = input['user_id']
+    user_id = 3
     obj = UserMovieRecommendation()
     print("Movie recommendation for user id " + str(user_id))
     movies = obj.get_all_movie_recommendations_for_user(user_id)

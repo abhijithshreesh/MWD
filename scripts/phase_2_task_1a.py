@@ -2,10 +2,9 @@ import logging
 from collections import Counter
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
-from scripts.phase1_task_2 import GenreTag
-from scripts.util import Util
+from config_parser import ParseConfig
+from phase1_task_2 import GenreTag
+from util import Util
 
 logging.basicConfig(level=logging.ERROR)
 

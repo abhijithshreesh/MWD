@@ -3,11 +3,10 @@ import math
 from collections import Counter
 
 import pandas as pd
-
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
-from scripts.phase1_task_2 import GenreTag
-from scripts.util import Util
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
+from phase1_task_2 import GenreTag
+from util import Util
 
 logging.basicConfig(level=logging.INFO)
 

@@ -1,8 +1,8 @@
 import numpy as np
 
-from scripts.config_parser import ParseConfig
-from scripts.data_extractor import DataExtractor
-from scripts.util import Util
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
+from util import Util
 
 
 class ActorMovieYearTensor(object):
