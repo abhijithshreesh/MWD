@@ -4,12 +4,7 @@ from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
 from scripts.phase2.common.task_2 import GenreTag
 from scripts.phase2.common.util import Util
-from sklearn.preprocessing import Imputer
-from sklearn.decomposition import LatentDirichletAllocation
-import argparse
 from collections import Counter
-from gensim import corpora, models
-import gensim
 import math
 
 logging.basicConfig(level=logging.INFO)
@@ -32,6 +27,13 @@ class LdaGenreActor(GenreTag):
         return dict(counter)
 
     def get_lda_data(self, genre):
+        """
+        Does LDA on movie-actor counts and outputs movies in terms of latent semantics as U
+        and actor in terms of latent semantics as Vh
+        :param genre:
+        :return: returns U and Vh
+        """
+
         # Getting movie_genre_data
         movie_genre_data_frame = self.data_extractor.get_mlmovies_data()
         movie_genre_data_frame = self.split_genres(movie_genre_data_frame)
@@ -52,18 +54,13 @@ class LdaGenreActor(GenreTag):
         actor_df = genre_data_frame.groupby(['movieid'])['actorid_string'].apply(list).reset_index()
         actor_df = actor_df.sort_values('movieid')
         actor_df.to_csv('movie_actor_lda.csv', index=True, encoding='utf-8')
-        #movieid_list = tag_df.movieid.tolist()
-        #tag_matrix = tag_df[["tag"]].values
-        #tag_matrix = list(tag_matrix.iloc[:,1])
+
         actor_df = list(actor_df.iloc[:,1])
 
         (U, Vh) = util.LDA(actor_df, num_topics=4, num_features=1000)
 
         for latent in Vh:
             print(latent)
-
-        # for doc in U:
-        #     print(doc)
 
 class SvdGenreActor(GenreTag):
     """
@@ -206,7 +203,6 @@ class SvdGenreActor(GenreTag):
             [str(id) for id in genre_actor_frame.actorid],
             index = genre_actor_frame.index)
 
-        #genre_actor_frame.to_csv('genre_actor_frame.csv', index=False, encoding='utf-8')
         return genre_actor_frame
 
     def svd_genre_actor(self, genre):
@@ -234,11 +230,11 @@ class SvdGenreActor(GenreTag):
         (U, s, Vh) = util.SVD(df1)
 
         # To print latent semantics
-        latents = util.get_latent_semantics(5, Vh)
+        latents = util.get_latent_semantics(4, Vh)
         util.print_latent_semantics(latents, column_headers_names)
 
-        u_frame = pd.DataFrame(U[:, :5], index=row_headers)
-        v_frame = pd.DataFrame(Vh[:5, :], columns=column_headers)
+        u_frame = pd.DataFrame(U[:, :4], index=row_headers)
+        v_frame = pd.DataFrame(Vh[:4, :], columns=column_headers)
         u_frame.to_csv('u_1b_svd.csv', index=True, encoding='utf-8')
         v_frame.to_csv('vh_1b_svd.csv', index=True, encoding='utf-8')
         return (u_frame, v_frame, s)
@@ -278,11 +274,11 @@ class PcaGenreActor(SvdGenreActor):
         (U, s, Vh) = util.PCA(df1)
 
         # To print latent semantics
-        latents = util.get_latent_semantics(5, Vh)
+        latents = util.get_latent_semantics(4, Vh)
         util.print_latent_semantics(latents, column_headers_names)
 
-        u_frame = pd.DataFrame(U[:, :5], index=column_headers)
-        v_frame = pd.DataFrame(Vh[:5, :], columns=column_headers)
+        u_frame = pd.DataFrame(U[:, :4], index=column_headers)
+        v_frame = pd.DataFrame(Vh[:4, :], columns=column_headers)
         u_frame.to_csv('u_1b_pca.csv', index=True, encoding='utf-8')
         v_frame.to_csv('vh_1b_pca.csv', index=True, encoding='utf-8')
         return (u_frame, v_frame, s)

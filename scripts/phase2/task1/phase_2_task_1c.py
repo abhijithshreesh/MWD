@@ -2,9 +2,6 @@ import pandas as pd
 import logging
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from collections import Counter
-import math
-import argparse
 import operator
 from scripts.phase2.common.actor_actor_similarity_matrix import ActorActorMatrix
 from scripts.phase2.common.util import Util
@@ -52,7 +49,6 @@ class SimilarActors(ActorActorMatrix):
         actor_row = matrix[index_actor].tolist()
         actor_actor_dict = dict(zip(actorids, actor_row))
         del actor_actor_dict[actorid]
-        #actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
 
         actor_actor_name_dict = {}
         for key in actor_actor_dict.keys():
@@ -67,7 +63,6 @@ class RelatedActorsSvd(SvdGenreActor):
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
 
     def get_related_actors_svd(self, actorid):
-        actor_actor_matrix = actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
         """
         Triggers the compute function and outputs the result tag vector
         :param genre:
@@ -75,16 +70,11 @@ class RelatedActorsSvd(SvdGenreActor):
         :return: returns a dictionary of Genres to dictionary of tags and weights.
         """
 
+        actor_actor_matrix = actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
+
         # Loading the required dataset
         df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv'))
         df1 = df.values
-
-        # # Feature Scaling
-        # sc = StandardScaler()
-        # df_sc = sc.fit_transform(df1[:, :])
-        #
-        # # Calculating SVD
-        # U, s, Vh = linalg.svd(df_sc)
 
         (U, s, Vh) = util.SVD(df1)
 
@@ -141,23 +131,7 @@ class RelatedActorsPca():
         df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv'))
         df1 = df.values
 
-        # # Feature Scaling
-        # sc = StandardScaler()
-        # df_sc = sc.fit_transform(df1[:, :])
-        #
-        # # Computng covariance matrix
-        # cov_df = numpy.cov(df_sc, rowvar=False)
-        #
-        # # Calculating PCA
-        # U, s, Vh = linalg.svd(cov_df)
-
         (U, s, Vh) = util.PCA(df1)
-
-        u_frame = pd.DataFrame(U[:, :5])
-        v_frame = pd.DataFrame(Vh[:5, :])
-        #u_frame.to_csv('u_1a_svd.csv', index=True, encoding='utf-8')
-        #v_frame.to_csv('vh_1a_svd.csv', index=True, encoding='utf-8')
-        #return (u_frame, v_frame, s)
 
         tag_latent_matrix = U[:, :5]
         actor_tag_matrix = df1
