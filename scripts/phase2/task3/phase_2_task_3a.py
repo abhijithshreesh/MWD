@@ -26,15 +26,16 @@ class PageRankActor(ActorActorMatrix):
         actor_df["row_sum"] = actor_df.sum(axis=1)
         for column in actor_df:
             actor_df[column] = pd.Series(
-                [each/sum if (column!="row_sum" and each > 0 and ind != int(column)) else 0 for ind, each, sum in zip(actor_df.index, actor_df[column], actor_df.row_sum)],
+                [float(each/sum) if (column != "row_sum" and each > 0 and ind != int(column)) else 0 for ind, each, sum in zip(actor_df.index, actor_df[column], actor_df.row_sum)],
                 index=actor_df.index)
         actor_df = actor_df.drop(["row_sum"], axis=1)
-        seed_frame = pd.DataFrame(0.0, index=np.arange(len(actor_df.columns)), columns=actor_df.columns)
-        seed_value = float(1/len(actor_df.columns))
+        no_of_actors = len(actor_df.columns)
+        actor_df.loc[(actor_df.T == 0).all()] = float(1 / (no_of_actors))
+        seed_frame = pd.DataFrame(0.0, index=np.arange(no_of_actors), columns=actor_df.columns)
+        seed_value = float(1/len(seed_actors))
         for each in seed_actors:
             seed_frame[list(actorids).index(each)] = seed_value
         seed_matrix = seed_frame.values
-        actor_df.loc[(actor_df.T == 0).all()] = 1 / (len(actor_df.columns))
         res = 0.85*actor_df.values + 0.15*seed_matrix
         e_values, e_vectors = scipy.sparse.linalg.eigsh(res, k=1, sigma=1)
         page_rank_dict = {i: j[0] for i, j in zip(actorids, e_vectors)}
@@ -43,4 +44,4 @@ class PageRankActor(ActorActorMatrix):
 
 if __name__ == "__main__":
     PRA = PageRankActor()
-    PRA.get_similarity_matrix([3619702, 3426176])#2055016])
+    PRA.get_similarity_matrix([2055016])#3619702, 3426176])#2055016])
