@@ -1,5 +1,5 @@
 import math
-
+import os
 import gensim
 import numpy
 import tensorly.tensorly.decomposition as decomp
@@ -22,7 +22,7 @@ class Util(object):
         Initializing the data extractor object to get data from the csv files
         """
         self.conf = ParseConfig()
-        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
+        self.data_set_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), self.conf.config_section_mapper("filePath").get("data_set_loc"))
         self.data_extractor = DataExtractor(self.data_set_loc)
         self.mlratings = self.data_extractor.get_mlratings_data()
         self.mlmovies = self.data_extractor.get_mlmovies_data()
