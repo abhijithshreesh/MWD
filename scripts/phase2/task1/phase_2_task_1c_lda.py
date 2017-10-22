@@ -8,34 +8,36 @@ import argparse
 from collections import Counter
 from gensim import corpora, models
 import gensim
+from scripts.phase2.common.data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 
 log = logging.getLogger(__name__)
 conf = ParseConfig()
 
-class LdaGenreTag(GenreTag):
+class LdaActorTag(object):
     def __init__(self):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
-
-
-    def get_tag_count(self, tag_series):
-        counter = Counter()
-        for each in tag_series:
-            counter[each] += 1
-        return dict(counter)
+        self.data_extractor = DataExtractor(self.data_set_loc)
 
     def get_lda_data(self, genre):
-        data_frame = self.get_genre_data().reset_index()
-        genre_data_frame = data_frame[data_frame["genre"]==genre]
-        tag_df = genre_data_frame.groupby(['movieid'])['tag'].apply(list).reset_index()
-        tag_df = tag_df.sort_values('movieid')
-        #tag_df.to_csv('movie_tag_lda.csv', index=True, encoding='utf-8')
-        #movieid_list = tag_df.movieid.tolist()
-        #tag_matrix = tag_df[["tag"]].values
-        #tag_matrix = list(tag_matrix.iloc[:,1])
+        mov_act = self.data_extractor.get_movie_actor_data()
+        ml_tag = self.data_extractor.get_mltags_data()
+        genome_tag = self.data_extractor.get_genome_tags_data()
+        actor_info = self.data_extractor.get_imdb_actor_info_data()
+        actor_movie_info = mov_act.merge(actor_info, how="left", left_on="actorid", right_on="id")
+        tag_data_frame = ml_tag.merge(genome_tag, how="left", left_on="tagid", right_on="tagId")
+        merged_data_frame = tag_data_frame.merge(actor_movie_info, how="left", on="movieid")
+
+        merged_data_frame = merged_data_frame.fillna('')
+        tag_df = merged_data_frame.groupby(['actorid'])['tag'].apply(list).reset_index()
+
+        tag_df = tag_df.sort_values('actorid')
+
         tag_df = list(tag_df.iloc[:,1])
+
+
 
         # turn our tokenized documents into a id <-> term dictionary
         dictionary = corpora.Dictionary(tag_df)
@@ -47,15 +49,19 @@ class LdaGenreTag(GenreTag):
         lda = gensim.models.ldamodel.LdaModel(corpus, num_topics=5, id2word=dictionary, passes=1)
 
         latent_semantics = lda.print_topics(5,80)
-        for latent in latent_semantics:
-            print (latent)
+        for i in range(0, len(latent_semantics)):
+            print (latent_semantics[i])
 
         #print (lda.print_topics(5,80))
 
         corpus = lda[corpus]
 
-        for i in corpus:
-            print(i)
+        for i in range(0, len(corpus)):
+            if len(corpus[i]) == 1:
+                print("\n\n\n")
+                print(i)
+                print("\n\n\n")
+            print(corpus[i])
 
 
 
@@ -85,6 +91,6 @@ class LdaGenreTag(GenreTag):
 
 
 if __name__ == "__main__":
-    obj = LdaGenreTag()
+    obj = LdaActorTag()
     lda_comp = obj.get_lda_data(genre="Action")
-    print (lda_comp)
+    #print (lda_comp)
