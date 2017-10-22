@@ -1,14 +1,14 @@
 import math
 
+import gensim
 import numpy
 import tensorly.tensorly.decomposition as decomp
+from gensim import corpora
 from scipy import linalg
 from sklearn.preprocessing import StandardScaler
 
 from scripts.phase2.common.config_parser import ParseConfig
 from scripts.phase2.common.data_extractor import DataExtractor
-from gensim import corpora, models
-import gensim
 
 
 class Util(object):
@@ -81,20 +81,23 @@ class Util(object):
                 length += abs(latent_semantic)
             entity_dict[entity_names[i]] = length
 
-        max_length = max(entity_dict.values())
-        min_length = min(entity_dict.values())
+        max_length = float(max(entity_dict.values()))
+        min_length = float(min(entity_dict.values()))
         length_of_group = (float(max_length) - float(min_length)) / float(no_of_partitions)
 
         groups = {}
         for i in range(0, no_of_partitions):
-            groups["Group " + str(i + 1)] = []
+            groups["Group " + str(i + 1) + " ( " + str(min_length + float(i * length_of_group)) + " , " + str(
+                min_length + float((i + 1) * length_of_group)) + " )"] = []
 
         for key in entity_dict.keys():
             entity_length = entity_dict[key]
             group_no = math.ceil(float(entity_length - min_length) / float(length_of_group))
             if group_no == 0:
                 group_no = 1
-            groups["Group " + str(group_no)].append(key)
+            groups["Group " + str(group_no) + " ( " + str(
+                min_length + float((group_no - 1) * length_of_group)) + " , " + str(
+                min_length + float(group_no * length_of_group)) + " )"].append(key)
 
         return groups
 
