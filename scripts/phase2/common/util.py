@@ -246,6 +246,13 @@ class Util(object):
         return corpus, latent_semantics
 
     def get_doc_topic_matrix(self, u, num_docs, num_topics):
+        """
+        Reconstructing data
+        :param u:
+        :param num_docs:
+        :param num_topics:
+        :return: reconstructed data
+        """
         u_matrix = numpy.zeros(shape=(num_docs, num_topics))
 
         for i in range(0, len(u)):
@@ -253,10 +260,9 @@ class Util(object):
             for j in range(0, len(row1)):
                 u_matrix[i, j] = row1[j][1]
 
-        # u_matrix = numpy.array(data)
         return u_matrix
 
- 
+
 if __name__ == "__main__":
     obj = Util()
     actorids = obj.get_sorted_actor_ids()
