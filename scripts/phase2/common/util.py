@@ -256,7 +256,7 @@ class Util(object):
         # u_matrix = numpy.array(data)
         return u_matrix
 
-
+ 
 if __name__ == "__main__":
     obj = Util()
     actorids = obj.get_sorted_actor_ids()
