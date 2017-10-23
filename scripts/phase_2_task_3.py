@@ -63,7 +63,7 @@ class PageRankActor(ActorActorMatrix):
 
     def print_actors_and_pageranks(self, page_rank_tuple):
         for first, second in page_rank_tuple:
-            print("%s[%s]: %s \n" % (self.util.get_actor_name_for_id(first), first, second))
+            print("%s[%s]: %s" % (self.util.get_actor_name_for_id(first), first, second))
 
     def compute_pagerank(self, seed_actors, actor_matrix, actorids):
         """
