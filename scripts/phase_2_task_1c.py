@@ -235,8 +235,8 @@ class LdaActorTag(object):
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[self.util.get_actor_name_for_id(int(actorid))]
 
-        # for key in actor_actor_dict.keys():
-        #     actor_actor_dict[key] = abs(actor_actor_dict[key])
+        for key in actor_actor_dict.keys():
+            actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
