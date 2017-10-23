@@ -232,7 +232,7 @@ class Util(object):
         corpus = [dictionary.doc2bow(text) for text in input_compound_list]
 
         # generate LDA model
-        lda = gensim.models.ldamodel.LdaModel(corpus, num_topics, id2word=dictionary, passes=1)
+        lda = gensim.models.ldamodel.LdaModel(corpus, num_topics, id2word=dictionary, passes=20)
 
         latent_semantics = lda.print_topics(num_topics, num_features)
         # for latent in latent_semantics:
