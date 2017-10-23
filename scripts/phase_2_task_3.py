@@ -1,6 +1,6 @@
 import logging
 import operator
-
+import argparse
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -10,6 +10,7 @@ from data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+log.disabled = True
 
 conf = ParseConfig()
 
@@ -96,4 +97,15 @@ class PageRankActor(ActorActorMatrix):
 
 if __name__ == "__main__":
     PRA = PageRankActor()
-    PRA.compute_actors_pagerank([3619702, 3426176])#,3619702, 3426176])#2055016])
+    parser = argparse.ArgumentParser(description='phase_2_task_3.py Actor/Coactor seed_actors')
+    parser.add_argument('type', action="store", type=str, choices=set(("Actor", "Coactor")))
+    parser.add_argument('seed_actors', action="store", type=str)
+    input = vars(parser.parse_args())
+    type = input['type']
+    seed_actors = input['seed_actors']
+    seed_actor_list = [int(each) for each in seed_actors.split(",")]
+    if type == "Actor":
+        PRA.compute_actors_pagerank(seed_actor_list)
+    else:
+        PRA.compute_coactors_pagerank(seed_actor_list)
+    #,3619702, 3426176])#2055016])
