@@ -57,8 +57,8 @@ class GenreTag(ActorTag):
         if model != 'TF':
             idf_weight_dict = self.assign_idf_weight(idf_data, unique_tags)
         tag_df = self.get_model_weight(tf_weight_dict, idf_weight_dict, temp_df, model)
-        tag_df["total"] = tag_df.groupby(['tag'])['value'].transform('sum')
-        tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
+        tag_df["total"] = tag_df.groupby(['movieid', 'tag'])['value'].transform('sum')
+        tag_df = tag_df.drop_duplicates(['movieid',"tag"]).sort_values("total", ascending=False)
         #actor_tag_dict = dict(zip(tag_df.tag, tag_df.total))
         return tag_df
 
