@@ -220,7 +220,7 @@ class SvdGenreActor(GenreTag):
         genre_actor_tfidf_df.to_csv('genre_actor_matrix.csv', index=True, encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_actor_matrix.csv'))
-        df1 = df.values[:, 1:]
+        df1 = genre_actor_tfidf_df.values[:, 1:]
         row_headers = list(df["movieid"])
         column_headers = list(df)
         del column_headers[0]
@@ -262,10 +262,10 @@ class PcaGenreActor(SvdGenreActor):
         temp_df = genre_actor_frame[["movieid", "actorid_string", "total"]].drop_duplicates()
         genre_actor_tfidf_df = temp_df.pivot(index='movieid', columns='actorid_string', values='total')
         genre_actor_tfidf_df = genre_actor_tfidf_df.fillna(0)
-        genre_actor_tfidf_df.to_csv('genre_actor_matrix.csv', index = False , encoding='utf-8')
+        genre_actor_tfidf_df.to_csv('genre_actor_matrix.csv', index = True , encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_actor_matrix.csv'))
-        df1 = df.values[:, :]
+        df1 = genre_actor_tfidf_df.values[:, 1:]
         column_headers = list(df)
         #del column_headers[0]
 

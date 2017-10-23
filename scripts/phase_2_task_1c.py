@@ -78,6 +78,7 @@ class RelatedActorsSvd(SvdGenreActor):
 
         actor_actor_matrix = actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
 
+
         # Loading the required dataset
         df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv'))
         df1 = df.values
@@ -114,8 +115,8 @@ class RelatedActorsSvd(SvdGenreActor):
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[util.get_actor_name_for_id(int(actorid))]
 
-        # for key in actor_actor_dict.keys():
-        #     actor_actor_dict[key] = abs(actor_actor_dict[key])
+        for key in actor_actor_dict.keys():
+             actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
@@ -171,6 +172,10 @@ class RelatedActorsPca():
         actor_row = matrix[index_actor].tolist()
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[util.get_actor_name_for_id(int(actorid))]
+
+        for key in actor_actor_dict.keys():
+            actor_actor_dict[key] = abs(actor_actor_dict[key])
+
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
         return actor_actor_dict

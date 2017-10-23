@@ -194,10 +194,9 @@ class Util(object):
 
         # Calculating SVD
         # Feature Scaling
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(matrix[:, :])
-
-        U, s, Vh = linalg.svd(df_sc, full_matrices=False)
+       # sc = StandardScaler()
+       # df_sc = sc.fit_transform(matrix[:, :])
+        U, s, Vh = linalg.svd(matrix, full_matrices=False)
         return (U, s, Vh)
 
     def PCA(self, matrix):
@@ -207,11 +206,11 @@ class Util(object):
         :return: factor matrices and the core matrix
         """
 
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(matrix[:, :])
+        #sc = StandardScaler()
+        #df_sc = sc.fit_transform(matrix[:, :])
 
         # Computng covariance matrix
-        cov_df = numpy.cov(df_sc, rowvar=False)
+        cov_df = numpy.cov(matrix, rowvar=False)
 
         # Calculating PCA
         U, s, Vh = linalg.svd(cov_df)
