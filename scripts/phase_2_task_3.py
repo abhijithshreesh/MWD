@@ -1,6 +1,7 @@
+import argparse
 import logging
 import operator
-import argparse
+
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -98,7 +99,7 @@ class PageRankActor(ActorActorMatrix):
 if __name__ == "__main__":
     PRA = PageRankActor()
     parser = argparse.ArgumentParser(description='phase_2_task_3.py Actor/Coactor seed_actors')
-    parser.add_argument('type', action="store", type=str, choices=set(("Actor", "Coactor")))
+    parser.add_argument('type', action="store", type=str, choices=set(("actor", "coactor")))
     parser.add_argument('seed_actors', action="store", type=str)
     input = vars(parser.parse_args())
     type = input['type']
