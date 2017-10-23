@@ -20,6 +20,10 @@ class TagMovieRatingTensor(object):
         self.factors = self.util.CPDecomposition(self.tensor, 5)
 
     def fetchTagMovieRatingTensor(self):
+        """
+        Create tag movie rating tensor
+        :return: tensor
+        """
         mltags_df = self.data_extractor.get_mltags_data()
 
         tag_id_list = mltags_df["tagid"]
@@ -58,6 +62,10 @@ class TagMovieRatingTensor(object):
         return tensor
 
     def print_latent_semantics(self, r):
+        """
+                Pretty print latent semantics
+                :param r:
+        """
         i = 0
         for factor in self.factors:
             print(self.print_list[i])
@@ -66,6 +74,11 @@ class TagMovieRatingTensor(object):
             i += 1
 
     def get_factor_names(self, i):
+        """
+                Obtain factor names
+                :param i:
+                :return: factor names
+        """
         if i == 0:
             return self.ordered_tag_names
         elif i == 1:
@@ -74,6 +87,11 @@ class TagMovieRatingTensor(object):
             return self.ordered_ratings
 
     def get_partitions(self, no_of_partitions):
+        """
+                Partition factor matrices
+                :param no_of_partitions:
+                :return: list of groupings
+        """
         i = 0
         groupings_list = []
         for factor in self.factors:
@@ -84,6 +102,10 @@ class TagMovieRatingTensor(object):
         return groupings_list
 
     def print_partitioned_entities(self, no_of_partitions):
+        """
+                Pretty print groupings
+                :param no_of_partitions:
+        """
         groupings_list = self.get_partitions(no_of_partitions)
         i = 0
         for groupings in groupings_list:

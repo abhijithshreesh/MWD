@@ -20,6 +20,10 @@ class ActorMovieYearTensor(object):
         self.factors = self.util.CPDecomposition(self.tensor, 5)
 
     def fetchActorMovieYearTensor(self):
+        """
+        Create actor movie year tensor
+        :return: tensor
+        """
         movies_df = self.data_extractor.get_mlmovies_data()
         actor_df = self.data_extractor.get_movie_actor_data()
 
@@ -70,6 +74,10 @@ class ActorMovieYearTensor(object):
         return tensor
 
     def print_latent_semantics(self, r):
+        """
+        Pretty print latent semantics
+        :param r:
+        """
         i = 0
         for factor in self.factors:
             print(self.print_list[i])
@@ -78,6 +86,11 @@ class ActorMovieYearTensor(object):
             i += 1
 
     def get_factor_names(self, i):
+        """
+        Obtain factor names
+        :param i:
+        :return: factor names
+        """
         if i == 0:
             return self.ordered_years
         elif i == 1:
@@ -86,6 +99,11 @@ class ActorMovieYearTensor(object):
             return self.ordered_actor_names
 
     def get_partitions(self, no_of_partitions):
+        """
+        Partition factor matrices
+        :param no_of_partitions:
+        :return: list of groupings
+        """
         i = 0
         groupings_list = []
         for factor in self.factors:
@@ -96,6 +114,10 @@ class ActorMovieYearTensor(object):
         return groupings_list
 
     def print_partitioned_entities(self, no_of_partitions):
+        """
+        Pretty print groupings
+        :param no_of_partitions:
+        """
         groupings_list = self.get_partitions(no_of_partitions)
         i = 0
         for groupings in groupings_list:
