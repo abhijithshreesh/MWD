@@ -17,15 +17,18 @@ conf = ParseConfig()
 util = Util()
 actor_actor_matrix_obj = ActorActorMatrix()
 
+
 class SimilarActors(ActorActorMatrix):
 
     def __init__(self):
         """
         Initialiazing the data extractor object to get data from the csv files
+
         """
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
+        actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
 
     def get_actor_actor_vector(self, actorid):
         """

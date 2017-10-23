@@ -1,6 +1,7 @@
+import argparse
 import logging
 import operator
-import argparse
+
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -15,6 +16,7 @@ log = logging.getLogger(__name__)
 conf = ParseConfig()
 util = Util()
 genre_tag = GenreTag()
+actor_actor_matrix_obj = ActorActorMatrix()
 
 class SimilarActorsFromDiffMovies(ActorActorMatrix):
 
@@ -25,6 +27,7 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
+        actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
 
     def get_actors_of_movie(self, moviename):
         """
