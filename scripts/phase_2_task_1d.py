@@ -1,6 +1,6 @@
 import logging
 import operator
-
+import argparse
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -27,6 +27,11 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         self.data_extractor = DataExtractor(self.data_set_loc)
 
     def get_actors_of_movie(self, moviename):
+        """
+        Function to return the actors of a given movie
+        :param moviename:
+        :return: list(actorids)
+        """
         actor_movie_table = self.data_extractor.get_movie_actor_data()
         movieid = util.get_movie_id(moviename)
         actor_movie_table = actor_movie_table[actor_movie_table['movieid']== movieid]
@@ -34,6 +39,10 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         return actorids
 
     def get_movie_tag_matrix(self):
+        """
+        Function to get movie_tag matrix containing list of tags in each movie
+        :return: movie_tag_matrix
+        """
         data_frame = genre_tag.get_genre_data()
         tag_df = data_frame.reset_index()
         unique_tags = tag_df.tag.unique()
@@ -58,6 +67,11 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
 
 
     def get_movie_movie_vector(self, moviename):
+        """
+        Function which finds movie_movie_similarity_matrix in space of tags using tf-idf
+        :param moviename:
+        :return: row of vector of giver movie
+        """
 
         movie_tag_frame = self.get_movie_tag_matrix()
         movie_tag_matrix = movie_tag_frame.values
@@ -83,6 +97,11 @@ class SimilarActorsFromDiffMovies(ActorActorMatrix):
         return movie_movie_dict
 
     def most_similar_actors(self, moviename):
+        """
+        Function to find similar actors from similar movies
+        :param moviename:
+        :return: actors
+        """
         movieid = util.get_movie_id(moviename)
         movie_movie_dict = self.get_movie_movie_vector(moviename)
         if movie_movie_dict == None:
@@ -119,6 +138,12 @@ class SimilarActorsFromDiffMoviesSvd(object):
         self.sim_act_diff_mov_tf = SimilarActorsFromDiffMovies()
 
     def most_similar_actors_svd(self, moviename):
+        """
+        Function to find related actors from related movies(movie_movie_similarity_matrix using svd)
+        corresponding to the given movie
+        :param moviename:
+        :return: actors
+        """
         movie_tag_frame = self.sim_act_diff_mov_tf.get_movie_tag_matrix()
         movie_tag_matrix = movie_tag_frame.values
         movies = list(movie_tag_frame.index.values)
@@ -188,6 +213,12 @@ class SimilarActorsFromDiffMoviesPca(object):
         self.sim_act_diff_mov_tf = SimilarActorsFromDiffMovies()
 
     def most_similar_actors_pca(self, moviename):
+        """
+        Function to find related actors from related movies(movie_movie_similarity_matrix using pca)
+        corresponding to the given movie
+        :param moviename:
+        :return: actors
+        """
         movie_tag_frame = self.sim_act_diff_mov_tf.get_movie_tag_matrix()
         movie_tag_matrix = movie_tag_frame.values
         movies = list(movie_tag_frame.index.values)
@@ -251,6 +282,12 @@ class SimilarActorsFromDiffMoviesLda(object):
         self.sim_act_diff_mov_tf = SimilarActorsFromDiffMovies()
 
     def most_similar_actors_lda(self, moviename):
+        """
+        Function to find related actors from related movies(movie_movie_similarity_matrix using lda)
+        corresponding to the given movie
+        :param moviename:
+        :return: actors
+        """
         data_frame = self.data_extractor.get_mlmovies_data()
         tag_data_frame = self.data_extractor.get_genome_tags_data()
         movie_data_frame = self.data_extractor.get_mltags_data()
@@ -311,21 +348,28 @@ class SimilarActorsFromDiffMoviesLda(object):
         return actornames
 
 if __name__ == "__main__":
-    obj_tfidf = SimilarActorsFromDiffMovies()
-    obj_svd = SimilarActorsFromDiffMoviesSvd()
-    obj_pca = SimilarActorsFromDiffMoviesPca()
-    obj_lda = SimilarActorsFromDiffMoviesLda()
+    parser = argparse.ArgumentParser(
+        description='phase_2_task_1a.py Action pca',
+    )
+    parser.add_argument('moviename', action="store", type=str)
+    parser.add_argument('model', action="store", choices=set(('tfidf', 'pca', 'svd', 'lda')))
+    input = vars(parser.parse_args())
+    moviename = input['moviename']
+    model = input['model']
 
-    moviename = "Swordfish"
-
-    actors = obj_tfidf.most_similar_actors(moviename)
-    print(actors)
-
-    actors = obj_svd.most_similar_actors_svd(moviename)
-    print(actors)
-
-    actors = obj_pca.most_similar_actors_pca(moviename)
-    print(actors)
-
-    actors = obj_lda.most_similar_actors_lda(moviename)
-    print(actors)
+    if model == 'pca':
+        obj_pca = SimilarActorsFromDiffMoviesPca()
+        actors = obj_pca.most_similar_actors_pca(moviename)
+        print(actors)
+    elif model == 'svd':
+        obj_svd = SimilarActorsFromDiffMoviesSvd()
+        actors = obj_svd.most_similar_actors_svd(moviename)
+        print(actors)
+    elif model == 'lda':
+        obj_lda = SimilarActorsFromDiffMoviesLda()
+        actors = obj_lda.most_similar_actors_lda(moviename)
+        print(actors)
+    else:
+        obj_tfidf = SimilarActorsFromDiffMovies()
+        actors = obj_tfidf.most_similar_actors(moviename)
+        print(actors)

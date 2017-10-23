@@ -1,6 +1,6 @@
 import logging
 from collections import Counter
-
+import argparse
 import pandas as pd
 from config_parser import ParseConfig
 from phase1_task_2 import GenreTag
@@ -18,17 +18,10 @@ class LdaGenreTag(GenreTag):
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.util = Util()
 
-
-    def get_tag_count(self, tag_series):
-        counter = Counter()
-        for each in tag_series:
-            counter[each] += 1
-        return dict(counter)
-
     def get_lda_data(self, genre):
         """
         Does LDA on movie-tag counts and outputs movies in terms of latent semantics as U
-        and features in terms of latent semantics as Vh
+        and tags in terms of latent semantics as Vh
         :param genre:
         :return: returns U and Vh
         """
@@ -53,7 +46,7 @@ class SvdGenreTag(GenreTag):
     def genre_tag(self, genre):
         """
         Does SVD on movie-tag matrix and outputs movies in terms of latent semantics as U
-        and features in terms of latent semantics as Vh
+        and tags in terms of latent semantics as Vh
         :param genre:
         :return: returns U and Vh
         """
@@ -75,11 +68,11 @@ class SvdGenreTag(GenreTag):
         (U, s, Vh) = self.util.SVD(df1)
 
         # To print latent semantics
-        latents = self.util.get_latent_semantics(5, Vh)
+        latents = self.util.get_latent_semantics(4, Vh)
         self.util.print_latent_semantics(latents, column_headers)
 
-        u_frame = pd.DataFrame(U[:,:5], index=row_headers)
-        v_frame = pd.DataFrame(Vh[:5,:], columns=column_headers)
+        u_frame = pd.DataFrame(U[:,:4], index=row_headers)
+        v_frame = pd.DataFrame(Vh[:4,:], columns=column_headers)
         u_frame.to_csv('u_1a_svd.csv', index=True, encoding='utf-8')
         v_frame.to_csv('vh_1a_svd.csv', index=True, encoding='utf-8')
         return (u_frame, v_frame, s)
@@ -93,7 +86,7 @@ class PcaGenreTag(GenreTag):
     def genre_tag(self, genre):
         """
         Does PCA on movie-tag matrix and outputs movies in terms of latent semantics as U
-        and features in terms of latent semantics as Vh
+        and tags in terms of latent semantics as Vh
         :param genre:
         :return: returns U and Vh
         """
@@ -113,24 +106,31 @@ class PcaGenreTag(GenreTag):
         (U, s, Vh) = self.util.PCA(df1)
 
         # To print latent semantics
-        latents = self.util.get_latent_semantics(5, Vh)
+        latents = self.util.get_latent_semantics(4, Vh)
         self.util.print_latent_semantics(latents, column_headers)
 
-        u_frame = pd.DataFrame(U[:, :5], index=column_headers)
-        v_frame = pd.DataFrame(Vh[:5, :], columns=column_headers)
+        u_frame = pd.DataFrame(U[:, :4], index=column_headers)
+        v_frame = pd.DataFrame(Vh[:4, :], columns=column_headers)
         u_frame.to_csv('u_1a_pca.csv', index=True, encoding='utf-8')
         v_frame.to_csv('vh_1a_pca.csv', index=True, encoding='utf-8')
         return (u_frame, v_frame, s)
 
 if __name__ == "__main__":
-    obj_lda = LdaGenreTag()
-    obj_svd = SvdGenreTag()
-    obj_pca = PcaGenreTag()
+    parser = argparse.ArgumentParser(
+        description='phase_2_task_1a.py Action pca',
+    )
+    parser.add_argument('genre', action="store", type=str)
+    parser.add_argument('model', action="store", choices=set(('pca','svd','lda')))
+    input = vars(parser.parse_args())
+    genre = input['genre']
+    model = input['model']
 
-    genre = "Action"
-
-    (u_frame, v_frame, s) = obj_svd.genre_tag(genre)
-
-    (u_frame, v_frame, s) = obj_pca.genre_tag(genre)
-
-    lda_comp = obj_lda.get_lda_data(genre)
+    if model == 'pca':
+        obj_pca = PcaGenreTag()
+        obj_pca.genre_tag(genre)
+    elif model == 'svd':
+        obj_svd = SvdGenreTag()
+        obj_svd.genre_tag(genre)
+    else :
+        obj_lda = LdaGenreTag()
+        obj_lda.get_lda_data(genre)

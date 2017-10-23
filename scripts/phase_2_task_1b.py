@@ -1,7 +1,7 @@
 import logging
 import math
 from collections import Counter
-
+import argparse
 import pandas as pd
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
@@ -19,13 +19,6 @@ class LdaGenreActor(GenreTag):
         super().__init__()
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
-
-
-    def get_tag_count(self, tag_series):
-        counter = Counter()
-        for each in tag_series:
-            counter[each] += 1
-        return dict(counter)
 
     def get_lda_data(self, genre):
         """
@@ -183,6 +176,10 @@ class SvdGenreActor(GenreTag):
         return actor_df
 
     def get_genre_actor_data_frame(self):
+        """
+        Function to merge mutiple tables and get the required dataframe for tf-idf calculation
+        :return: dataframe
+        """
         # Getting movie_genre_data
         movie_genre_data_frame = self.data_extractor.get_mlmovies_data()
         movie_genre_data_frame = self.split_genres(movie_genre_data_frame)
@@ -207,6 +204,12 @@ class SvdGenreActor(GenreTag):
         return genre_actor_frame
 
     def svd_genre_actor(self, genre):
+        """
+        Does SVD on movie-actor matrix and outputs movies in terms of latent semantics as U
+        and actors in terms of latent semantics as Vh
+        :param genre:
+        :return: returns U and Vh
+        """
         genre_actor_frame = self.get_genre_actor_data_frame()
         rank_weight_dict = self.assign_rank_weight(genre_actor_frame[['movieid', 'actor_movie_rank']])
         genre_actor_frame = self.combine_computed_weights(genre_actor_frame, rank_weight_dict, "TFIDF", genre)
@@ -247,10 +250,10 @@ class PcaGenreActor(SvdGenreActor):
 
     def pca_genre_actor(self, genre):
         """
-        Triggers the compute function and outputs the result tag vector
+        Does PCA on movie-actor matrix and outputs movies in terms of latent semantics as U
+        and actors in terms of latent semantics as Vh
         :param genre:
-        :param model:
-        :return: returns a dictionary of Genres to dictionary of tags and weights.
+        :return: returns U and Vh
         """
 
         genre_actor_frame = self.get_genre_actor_data_frame()
@@ -285,14 +288,21 @@ class PcaGenreActor(SvdGenreActor):
         return (u_frame, v_frame, s)
 
 if __name__ == "__main__":
-    obj_svd = SvdGenreActor()
-    obj_pca = PcaGenreActor()
-    obj_lda = LdaGenreActor()
+    parser = argparse.ArgumentParser(
+        description='phase_2_task_1b.py Action pca',
+    )
+    parser.add_argument('genre', action="store", type=str)
+    parser.add_argument('model', action="store", choices=set(('pca', 'svd', 'lda')))
+    input = vars(parser.parse_args())
+    genre = input['genre']
+    model = input['model']
 
-    genre = "Action"
-
-    (u_frame, v_frame, s) = obj_svd.svd_genre_actor(genre)
-
-    (u_frame, v_frame, s) = obj_pca.pca_genre_actor(genre)
-
-    lda_comp = obj_lda.get_lda_data(genre)
+    if model == 'pca':
+        obj_pca = PcaGenreActor()
+        obj_pca.pca_genre_actor(genre)
+    elif model == 'svd':
+        obj_svd = SvdGenreActor()
+        obj_svd.svd_genre_actor(genre)
+    else:
+        obj_lda = LdaGenreActor()
+        obj_lda.get_lda_data(genre)

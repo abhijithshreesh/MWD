@@ -1,6 +1,6 @@
 import logging
 import operator
-
+import argparse
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -27,6 +27,11 @@ class SimilarActors(ActorActorMatrix):
         self.data_extractor = DataExtractor(self.data_set_loc)
 
     def get_actor_actor_vector(self, actorid):
+        """
+        Function to find similarity between actors using actor-actor similarity vector in tag space using tf-idf
+        :param actorid:
+        :return:
+        """
         (matrix, actorids) = self.fetchActorActorSimilarityMatrix()
         #In the pre-processing task above command should be run so that actor_actor_similarity matrix will be generated
         #and saved as csv which can be used multiple number of times. Will comment the above line, when its done.
@@ -56,6 +61,7 @@ class SimilarActors(ActorActorMatrix):
             actor_actor_name_dict[util.get_actor_name_for_id(int(key))] = actor_actor_dict[key]
 
         actor_actor_name_dict = sorted(actor_actor_name_dict.items(), key=operator.itemgetter(1), reverse=True)
+        print(actor_actor_name_dict[0:10])
         return actor_actor_name_dict
 
 class RelatedActorsSvd(SvdGenreActor):
@@ -65,10 +71,9 @@ class RelatedActorsSvd(SvdGenreActor):
 
     def get_related_actors_svd(self, actorid):
         """
-        Triggers the compute function and outputs the result tag vector
-        :param genre:
-        :param model:
-        :return: returns a dictionary of Genres to dictionary of tags and weights.
+        Function to find similarity between actors using actor-actor similarity vector in tag space using svd
+        :param actorid:
+        :return:
         """
 
         actor_actor_matrix = actor_actor_matrix_obj.fetchActorActorSimilarityMatrix()
@@ -113,6 +118,7 @@ class RelatedActorsSvd(SvdGenreActor):
         #     actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
+        print(actor_actor_dict[0:10])
         return actor_actor_dict
 
 class RelatedActorsPca():
@@ -122,10 +128,9 @@ class RelatedActorsPca():
 
     def get_related_actors_pca(self, actorid):
         """
-        Triggers the compute function and outputs the result tag vector
-        :param genre:
-        :param model:
-        :return: returns a dictionary of Genres to dictionary of tags and weights.
+        Function to find similarity between actors using actor-actor similarity vector in tag space using pca
+        :param actorid:
+        :return:
         """
 
         # Loading the required dataset
@@ -167,6 +172,7 @@ class RelatedActorsPca():
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[util.get_actor_name_for_id(int(actorid))]
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
+        print(actor_actor_dict[0:10])
         return actor_actor_dict
 
 class LdaActorTag(object):
@@ -177,6 +183,11 @@ class LdaActorTag(object):
         self.util = Util()
 
     def get_related_actors_lda(self, actorid):
+        """
+        Function to find similarity between actors using actor-actor similarity vector in tag space using lda
+        :param actorid:
+        :return:
+        """
         mov_act = self.data_extractor.get_movie_actor_data()
         ml_tag = self.data_extractor.get_mltags_data()
         genome_tag = self.data_extractor.get_genome_tags_data()
@@ -228,24 +239,28 @@ class LdaActorTag(object):
         #     actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
-        return actor_actor_dict
+        print(actor_actor_dict[0:10])
+        return actor_actor_dict[0:10]
 
 if __name__ == "__main__":
-    obj_lda = LdaActorTag()
-    obj_svd = RelatedActorsSvd()
-    obj_pca = RelatedActorsPca()
-    obj_tfidf = SimilarActors()
+    parser = argparse.ArgumentParser(
+        description='phase_2_task_1a.py Action pca',
+    )
+    parser.add_argument('actorid', action="store", type=int)
+    parser.add_argument('model', action="store", choices=set(('tfidf', 'pca', 'svd', 'lda')))
+    input = vars(parser.parse_args())
+    actorid = input['actorid']
+    model = input['model']
 
-    actorid = 542238
-
-    actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
-    print(actor_actor_dict)
-
-    actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
-    print(actor_actor_dict)
-
-    actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
-    print(actor_actor_dict)
-
-    actor_actor_dict = obj_lda.get_related_actors_lda(actorid)
-    print(actor_actor_dict)
+    if model == 'pca':
+        obj_pca = RelatedActorsPca()
+        actor_actor_dict = obj_pca.get_related_actors_pca(actorid)
+    elif model == 'svd':
+        obj_svd = RelatedActorsSvd()
+        actor_actor_dict = obj_svd.get_related_actors_svd(actorid)
+    elif model == 'lda':
+        obj_lda = LdaActorTag()
+        actor_actor_dict = obj_lda.get_related_actors_lda(actorid)
+    else:
+        obj_tfidf = SimilarActors()
+        actor_actor_dict = obj_tfidf.get_actor_actor_vector(actorid)
