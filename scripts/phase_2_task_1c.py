@@ -1,6 +1,7 @@
+import argparse
 import logging
 import operator
-import argparse
+
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -149,7 +150,7 @@ class RelatedActorsPca():
         actor_actor_matrix = numpy.dot(actor_latent_matrix, latent_actor_matrix)
         numpy.savetxt("actor_actor_matrix_with_pca_latent_values.csv", actor_actor_matrix, delimiter=",")
 
-        df = pd.DataFrame(pd.read_csv('actor_actor_matrix_with_svd_latent_values.csv', header=None))
+        df = pd.DataFrame(pd.read_csv('actor_actor_matrix_with_pca_latent_values.csv', header=None))
         matrix = df.values
 
         actorids = util.get_sorted_actor_ids()
