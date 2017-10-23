@@ -26,7 +26,6 @@ class ActorActorSVD(object):
         """
         Fetches all the non-overlapping partitions
         :param no_of_partitions: no of partitions the space needs to be partitioned to
-        :return:
         """
         actor_names_list = self.get_actor_names_list()
         groupings = self.util.partition_factor_matrix(self.u, no_of_partitions, actor_names_list)
@@ -37,12 +36,15 @@ class ActorActorSVD(object):
         """
         Prints the partitions and the actors in each partition
         :param no_of_partitions: no of partitions the space needs to be partitioned to
-        :return:
         """
         groupings = self.get_partitions(no_of_partitions)
         self.util.print_partitioned_entities(groupings)
 
     def print_latent_semantics(self, r):
+        """
+        Pretty print latent semantics
+        :param r:
+        """
         latent_semantics = self.util.get_latent_semantics(r, self.vt)
         actor_names_list = self.get_actor_names_list()
         self.util.print_latent_semantics(latent_semantics, actor_names_list)
