@@ -79,13 +79,13 @@ class ActorTag(object):
         """
         if model == "TF":
             tag_df["value"] = pd.Series(
-                [(ts_weight + tf_weight_dict.get(tag, 0) + rank_weight_dict.get((movieid, rank), 0)) for
+                [(tf_weight_dict.get(movieid, 0).get(tag, 0)*100) + rank_weight_dict.get((movieid, rank), 0) for
                  index, ts_weight, tag, movieid, rank
                  in zip(tag_df.index, tag_df.timestamp_weight, tag_df.tag, tag_df.movieid, tag_df.actor_movie_rank)],
                 index=tag_df.index)
         else:
             tag_df["value"] = pd.Series(
-                [(ts_weight + tf_weight_dict.get(tag, 0)*idf_weight_dict.get(tag, 0) + rank_weight_dict.get((movieid, rank), 0)) for
+                [(ts_weight + (tf_weight_dict.get(movieid, 0).get(tag, 0)*(idf_weight_dict.get(tag, 0))*100) + rank_weight_dict.get((movieid, rank), 0))  for
                  index, ts_weight, tag, movieid, rank
                  in zip(tag_df.index, tag_df.timestamp_weight, tag_df.tag, tag_df.movieid, tag_df.actor_movie_rank)],
                 index=tag_df.index)
@@ -100,7 +100,9 @@ class ActorTag(object):
         :return: dictionary of tags and weights
         """
         tag_df = data_frame.reset_index()
-        tf_weight_dict = self.assign_tf_weight(tag_df.tag)
+        temp_df = tag_df.groupby(['movieid'])['tag'].apply(lambda x: ','.join(x)).reset_index()
+        movie_tag_dict = dict(zip(temp_df.movieid, temp_df.tag))
+        tf_weight_dict = {movie: self.assign_tf_weight(tags.split(',')) for movie, tags in list(movie_tag_dict.items())}
         tag_df = self.get_model_weight(tf_weight_dict, idf_weight_dict, rank_weight_dict, tag_df, model)
         tag_df["total"] = tag_df.groupby(['tag'])['value'].transform('sum')
         tag_df = tag_df.drop_duplicates("tag").sort_values("total", ascending=False)
@@ -125,12 +127,12 @@ class ActorTag(object):
         merged_data_frame = merged_data_frame[merged_data_frame['timestamp'].notnull()]
         merged_data_frame = merged_data_frame.drop(["userid"], axis=1)
         rank_weight_dict = self.assign_rank_weight(merged_data_frame[['movieid', 'actor_movie_rank']])
-        merged_data_frame = merged_data_frame.sort_values("timestamp", ascending=True)
+        merged_data_frame = merged_data_frame.sort_values("timestamp", ascending=True).reset_index()
         data_frame_len = len(merged_data_frame.index)
         merged_data_frame["timestamp_weight"] = pd.Series([(index + 1) / data_frame_len * 10 for index in merged_data_frame.index],
                                                    index=merged_data_frame.index)
         if model == 'TFIDF':
-            idf_weight_dict = self.assign_idf_weight(merged_data_frame.groupby('actorid')['tag'].apply(set), merged_data_frame.tag.unique())
+            idf_weight_dict = self.assign_idf_weight(merged_data_frame.groupby('movieid')['tag'].apply(set), merged_data_frame.tag.unique())
             tag_dict = self.combine_computed_weights(merged_data_frame[merged_data_frame['actorid'] == actorid], rank_weight_dict, idf_weight_dict, model)
         else:
             tag_dict = self.combine_computed_weights(merged_data_frame[merged_data_frame['actorid'] == actorid], rank_weight_dict, {},model)
@@ -140,7 +142,7 @@ class ActorTag(object):
 
 if __name__ == "__main__":
     obj = ActorTag()
-    actor_id = 810424
+    actor_id = 17838
     model = "TFIDF"
     print("TFIDF tag values for actor:\n")
     print(obj.merge_movie_actor_and_tag(actor_id, model))
