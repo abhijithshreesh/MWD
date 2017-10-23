@@ -8,7 +8,6 @@ from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
-from sklearn.preprocessing import StandardScaler
 
 
 class Util(object):
@@ -191,12 +190,9 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-        # Feature Scaling
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(matrix[:, :])
 
         # Calculating SVD
-        U, s, Vh = linalg.svd(df_sc)
+        U, s, Vh = linalg.svd(matrix)
         return (U, s, Vh)
 
     def PCA(self, matrix):
@@ -205,12 +201,9 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-        # Feature Scaling
-        sc = StandardScaler()
-        df_sc = sc.fit_transform(matrix[:, :])
 
         # Computng covariance matrix
-        cov_df = numpy.cov(df_sc, rowvar=False)
+        cov_df = numpy.cov(matrix, rowvar=False)
 
         # Calculating PCA
         U, s, Vh = linalg.svd(cov_df)

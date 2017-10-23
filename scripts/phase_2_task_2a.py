@@ -1,15 +1,13 @@
-import numpy
-
 from actor_actor_similarity_matrix import ActorActorMatrix
 from util import Util
 
 
 class ActorActorSVD(object):
     def __init__(self):
+        self.util = Util()
         self.actor_actor_matrix_object = ActorActorMatrix()
         self.actor_actor_similarity_matrix, self.actor_ids = self.actor_actor_matrix_object.fetchActorActorSimilarityMatrix()
-        self.u, self.s, self.vt = numpy.linalg.svd(self.actor_actor_similarity_matrix, full_matrices=False)
-        self.util = Util()
+        self.u, self.s, self.vt = self.util.SVD(self.actor_actor_similarity_matrix)
 
     def get_actor_names_list(self):
         """

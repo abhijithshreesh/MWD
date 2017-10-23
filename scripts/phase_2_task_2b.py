@@ -1,15 +1,14 @@
-import numpy
-
 from coactor_coactor_matrix import CoactorCoactorMatrix
 from util import Util
 
 
 class CoactorCoactorSVD(object):
     def __init__(self):
+        self.util = Util()
         self.coactor_coactor_matrix_object = CoactorCoactorMatrix()
         self.coactor_coactor_similarity_matrix, self.actor_ids = self.coactor_coactor_matrix_object.fetchCoactorCoactorSimilarityMatrix()
-        self.u, self.s, self.vt = numpy.linalg.svd(self.coactor_coactor_similarity_matrix, full_matrices=False)
-        self.util = Util()
+        self.u, self.s, self.vt = self.util.SVD(self.coactor_coactor_similarity_matrix)
+
 
     def get_actor_names_list(self):
         """
