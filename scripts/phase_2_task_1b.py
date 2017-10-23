@@ -268,7 +268,7 @@ class PcaGenreActor(SvdGenreActor):
         df = pd.DataFrame(pd.read_csv('genre_actor_matrix.csv'))
         df1 = genre_actor_tfidf_df.values[:, :]
         column_headers = list(df)
-        #del column_headers[0]
+        del column_headers[0]
 
         column_headers_names = []
 
