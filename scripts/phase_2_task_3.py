@@ -1,6 +1,7 @@
+import argparse
 import logging
 import operator
-
+from util import Util
 import numpy
 import pandas as pd
 from actor_actor_similarity_matrix import ActorActorMatrix
@@ -10,6 +11,7 @@ from data_extractor import DataExtractor
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+log.disabled = True
 
 conf = ParseConfig()
 
@@ -22,6 +24,7 @@ class PageRankActor(ActorActorMatrix):
         self.actor_matrix, self.actorids = self.fetchActorActorSimilarityMatrix()
         self.coactor_obj = CoactorCoactorMatrix()
         self.coactor_matrix, self.coactorids = self.coactor_obj.fetchCoactorCoactorSimilarityMatrix()
+        self.util = Util()
 
     def get_transition_dataframe(self, data_frame):
         """
@@ -58,6 +61,10 @@ class PageRankActor(ActorActorMatrix):
             seed_matrix[list(actorids).index(each)] = seed_value
         return seed_matrix
 
+    def print_actors_and_pageranks(self, page_rank_tuple):
+        for first, second in page_rank_tuple:
+            print("%s[%s]: %s" % (self.util.get_actor_name_for_id(first), first, second))
+
     def compute_pagerank(self, seed_actors, actor_matrix, actorids):
         """
         Function to compute the Personalised Pagerank for the given input
@@ -76,7 +83,7 @@ class PageRankActor(ActorActorMatrix):
             result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
         page_rank_dict = {i: j for i, j in zip(actorids, result_list)}
         sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
-        print(sorted_rank[0:len(seed_actors)+10])
+        self.print_actors_and_pageranks(sorted_rank[0:len(seed_actors)+10])
 
     def compute_actors_pagerank(self, seed_list):
         """
@@ -96,4 +103,16 @@ class PageRankActor(ActorActorMatrix):
 
 if __name__ == "__main__":
     PRA = PageRankActor()
-    PRA.compute_actors_pagerank([3619702, 3426176])#,3619702, 3426176])#2055016])
+    parser = argparse.ArgumentParser(description='phase_2_task_3.py Actor/Coactor seed_actors')
+    parser.add_argument('type', action="store", type=str, choices=set(("actor", "coactor")))
+    parser.add_argument('seed_actors', action="store", type=str)
+    input = vars(parser.parse_args())
+    type = input['type']
+    seed_actors = input['seed_actors']
+    seed_actor_list = [int(each) for each in seed_actors.split(",")]
+    if type == "actor":
+        PRA.compute_actors_pagerank(seed_actor_list)
+    else:
+        PRA.compute_coactors_pagerank(seed_actor_list)
+    # PRA.compute_coactors_pagerank([1860883])#3619702, 3426176])  # 2055016])
+
