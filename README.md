@@ -2,7 +2,7 @@ Vector space modeling of MovieLens & IMDB data - Phase 2
 
 Hardware requirements:
 Operating System: Windows 10 Home
-Processor: Intel® Core™ i5-6200U CPU @ 2.30Ghz 2.40Ghz
+Processor: Intelï¿½ Coreï¿½ i5-6200U CPU @ 2.30Ghz 2.40Ghz
 System type: 64-bit operating system, X64 based processor
 
 Software requirements:
@@ -65,7 +65,7 @@ Example: python phase_2_task_2d.py
 Task 3:
 Command line interface - phase_2_task_3.py
 Usage: python phase_2_task_3.py <similarity-matrix-type> <comma-separated-seed-actors>
-Example: python phase_2_task_3.py 109 tf
+Example: python phase_2_task_3.py actor 3619702,3426176
 
 Task 4:
 Command line interface - phase_2_task_4.py
