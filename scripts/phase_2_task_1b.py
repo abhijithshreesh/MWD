@@ -1,7 +1,8 @@
+import argparse
 import logging
 import math
 from collections import Counter
-import argparse
+
 import pandas as pd
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
@@ -220,7 +221,7 @@ class SvdGenreActor(GenreTag):
         genre_actor_tfidf_df.to_csv('genre_actor_matrix.csv', index=True, encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_actor_matrix.csv'))
-        df1 = genre_actor_tfidf_df.values[:, 1:]
+        df1 = genre_actor_tfidf_df.values[:, :]
         row_headers = list(df["movieid"])
         column_headers = list(df)
         del column_headers[0]
@@ -265,7 +266,7 @@ class PcaGenreActor(SvdGenreActor):
         genre_actor_tfidf_df.to_csv('genre_actor_matrix.csv', index = True , encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_actor_matrix.csv'))
-        df1 = genre_actor_tfidf_df.values[:, 1:]
+        df1 = genre_actor_tfidf_df.values[:, :]
         column_headers = list(df)
         #del column_headers[0]
 

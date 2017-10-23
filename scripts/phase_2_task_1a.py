@@ -1,6 +1,6 @@
-import logging
-from collections import Counter
 import argparse
+import logging
+
 import pandas as pd
 from config_parser import ParseConfig
 from phase1_task_2 import GenreTag
@@ -60,7 +60,7 @@ class SvdGenreTag(GenreTag):
         genre_tag_tfidf_df.to_csv('genre_tag_matrix.csv', index=True, encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_tag_matrix.csv'))
-        df1 = genre_tag_tfidf_df.values[:, 1:]
+        df1 = genre_tag_tfidf_df.values[:, :]
         row_headers = list(df["moviename"])
         column_headers = list(df)
         del column_headers[0]
@@ -99,7 +99,7 @@ class PcaGenreTag(GenreTag):
         genre_tag_tfidf_df.to_csv('genre_tag_matrix.csv', index = True , encoding='utf-8')
 
         df = pd.DataFrame(pd.read_csv('genre_tag_matrix.csv'))
-        df1 = genre_tag_tfidf_df.values[:,1:]
+        df1 = genre_tag_tfidf_df.values[:, :]
         column_headers = list(df)
         del column_headers[0]
 
