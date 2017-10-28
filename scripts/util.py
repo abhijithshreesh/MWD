@@ -8,7 +8,6 @@ from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
-from sklearn.preprocessing import StandardScaler
 
 
 class Util(object):
@@ -169,10 +168,12 @@ class Util(object):
         """
         for latent_semantic in latent_semantics:
             print("Latent Semantic:")
+            dict1 = {}
             for i in range(0, len(entity_names_list)):
-                print(str(latent_semantic[i]) + "*(" + str(entity_names_list[i]) + ")", end="")
-                if i != len(entity_names_list) - 1:
-                    print(" + ", end="")
+                dict1[entity_names_list[i]] = float(latent_semantic[i])
+            for s in sorted(dict1, key=dict1.get, reverse=True):  # value-based sorting
+                print(str(s) + "*(" + str(dict1[s]) + ")", end="")
+                print(" + ", end="")
             print("\n")
 
     def CPDecomposition(self, tensor, rank):
