@@ -8,7 +8,9 @@ from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
-
+from sklearn.preprocessing import StandardScaler
+import logging
+logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
 class Util(object):
     """

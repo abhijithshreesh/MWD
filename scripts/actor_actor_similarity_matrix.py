@@ -21,7 +21,7 @@ class ActorActorMatrix(ActorTag):
 
         actor_actor_matrix = numpy.dot(actor_tag_matrix, tag_actor_matrix)
 
-        matrix.to_csv('actor_tag_matrix.csv', index=False, encoding='utf-8')
+        #matrix.to_csv('actor_tag_matrix.csv', index=False, encoding='utf-8')
         numpy.savetxt("actor_tag_matrix.csv", actor_tag_matrix, delimiter=",")
         numpy.savetxt("tag_actor_matrix.csv", tag_actor_matrix, delimiter=",")
         numpy.savetxt("actor_actor_matrix.csv", actor_actor_matrix, delimiter=",")

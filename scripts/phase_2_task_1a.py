@@ -35,6 +35,7 @@ class LdaGenreTag(GenreTag):
         (U, Vh) = self.util.LDA(tag_df, num_topics=4, num_features=1000)
 
         for latent in Vh:
+            print ("\n")
             print(latent)
 
 class SvdGenreTag(GenreTag):

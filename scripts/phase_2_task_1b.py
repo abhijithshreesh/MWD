@@ -55,6 +55,7 @@ class LdaGenreActor(GenreTag):
         (U, Vh) = util.LDA(actor_df, num_topics=4, num_features=1000)
 
         for latent in Vh:
+            print ("\n")
             print(latent)
 
 class SvdGenreActor(GenreTag):

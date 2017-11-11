@@ -84,7 +84,7 @@ class RelatedActorsSvd(SvdGenreActor):
 
 
         # Loading the required dataset
-        df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv'))
+        df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv', header=None))
         df1 = df.values
 
         (U, s, Vh) = util.SVD(df1)
@@ -119,8 +119,8 @@ class RelatedActorsSvd(SvdGenreActor):
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[util.get_actor_name_for_id(int(actorid))]
 
-        for key in actor_actor_dict.keys():
-             actor_actor_dict[key] = abs(actor_actor_dict[key])
+        # for key in actor_actor_dict.keys():
+        #      actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
@@ -139,7 +139,7 @@ class RelatedActorsPca():
         """
 
         # Loading the required dataset
-        df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv'))
+        df = pd.DataFrame(pd.read_csv('actor_tag_matrix.csv', header=None))
         df1 = df.values
 
         (U, s, Vh) = util.PCA(df1)
@@ -177,8 +177,8 @@ class RelatedActorsPca():
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[util.get_actor_name_for_id(int(actorid))]
 
-        for key in actor_actor_dict.keys():
-            actor_actor_dict[key] = abs(actor_actor_dict[key])
+        # for key in actor_actor_dict.keys():
+        #     actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
@@ -244,8 +244,8 @@ class LdaActorTag(object):
         actor_actor_dict = dict(zip(actor_names, actor_row))
         del actor_actor_dict[self.util.get_actor_name_for_id(int(actorid))]
 
-        for key in actor_actor_dict.keys():
-            actor_actor_dict[key] = abs(actor_actor_dict[key])
+        # for key in actor_actor_dict.keys():
+        #     actor_actor_dict[key] = abs(actor_actor_dict[key])
 
         actor_actor_dict = sorted(actor_actor_dict.items(), key=operator.itemgetter(1), reverse=True)
         print(actor_actor_dict[0:10])
