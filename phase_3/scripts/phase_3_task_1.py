@@ -1,11 +1,9 @@
-import argparse
-import numpy
-import pandas as pd
-
 import config_parser
 import data_extractor
-from util import Util
+import numpy
 from phase1_task_2 import GenreTag
+from util import Util
+
 
 class UserMovieRecommendation(object):
     def __init__(self):
@@ -38,11 +36,6 @@ class UserMovieRecommendation(object):
         :return: dataframe which combines all the necessary fields needed for the recommendation system
         """
         result = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
-        # del result['year']
-        # del result['timestamp']
-        # del result['rating']
-        # del result['imdbid']
-
         return result
 
     def get_movie_tag_matrix(self):
@@ -65,6 +58,7 @@ class UserMovieRecommendation(object):
         temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates().reset_index()
         genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag')
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
+
         return genre_tag_tfidf_df
 
     def get_movie_movie_matrix(self, model):
@@ -132,6 +126,7 @@ class UserMovieRecommendation(object):
             (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
         elif model == "TD":
             (movies, movie_movie_matrix) = self.tensor_decompose(model)
+
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(

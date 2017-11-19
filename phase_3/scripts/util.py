@@ -1,17 +1,19 @@
+import logging
 import math
-import os
-import pandas as pd
 import operator
+import os
+
 import gensim
 import numpy
+import pandas as pd
 import tensorly.tensorly.decomposition as decomp
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
-from sklearn.preprocessing import StandardScaler
-import logging
+
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
+
 
 class Util(object):
     """
@@ -195,11 +197,6 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-
-        # Calculating SVD
-        # Feature Scaling
-       # sc = StandardScaler()
-       # df_sc = sc.fit_transform(matrix[:, :])
         U, s, Vh = linalg.svd(matrix, full_matrices=False)
         return (U, s, Vh)
 
@@ -209,15 +206,9 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-
-        #sc = StandardScaler()
-        #df_sc = sc.fit_transform(matrix[:, :])
-
-        # Computng covariance matrix
         cov_df = numpy.cov(matrix, rowvar=False)
-
-        # Calculating PCA
         U, s, Vh = linalg.svd(cov_df)
+
         return (U, s, Vh)
 
     def LDA(self, input_compound_list, num_topics, num_features):
@@ -228,23 +219,11 @@ class Util(object):
         :param num_features:
         :return: topics and object topic distribution
         """
-        # turn our tokenized documents into a id <-> term dictionary
         dictionary = corpora.Dictionary(input_compound_list)
-
-        # convert tokenized documents into a document-term matrix
         corpus = [dictionary.doc2bow(text) for text in input_compound_list]
-
-        # generate LDA model
         lda = gensim.models.ldamodel.LdaModel(corpus, num_topics, id2word=dictionary, passes=20)
-
         latent_semantics = lda.print_topics(num_topics, num_features)
-        # for latent in latent_semantics:
-        #     print(latent)
-
         corpus = lda[corpus]
-
-        # for i in corpus:
-        #     print(i)
 
         return corpus, latent_semantics
 
