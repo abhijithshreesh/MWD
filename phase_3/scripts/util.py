@@ -302,7 +302,9 @@ class Util(object):
         seed_matrix = self.get_seed_matrix(transition_df, seed_nodes, nodes)
         result_list = seed_matrix
         temp_list = []
-        while(temp_list!=result_list):
+        num_of_iter = 0
+        while(temp_list!=result_list and num_of_iter <= 1000):
+            num_of_iter += 1
             temp_list = result_list
             result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
         page_rank_dict = {i: j for i, j in zip(nodes, result_list)}
