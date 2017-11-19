@@ -37,11 +37,11 @@ class UserMovieRecommendation(object):
         The data set under consideration for movie recommendation
         :return: dataframe which combines all the necessary fields needed for the recommendation system
         """
-        result = self.mlratings.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
-        del result['year']
-        del result['timestamp']
-        del result['rating']
-        del result['imdbid']
+        result = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
+        # del result['year']
+        # del result['timestamp']
+        # del result['rating']
+        # del result['imdbid']
 
         return result
 
@@ -67,7 +67,7 @@ class UserMovieRecommendation(object):
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
         return genre_tag_tfidf_df
 
-    def get_movie_movie_matrix(self, model="SVD"):
+    def get_movie_movie_matrix(self, model):
         """
         Finds movie_tag matrix and returns movie_movie_similarity matrix
         :param model:
@@ -82,6 +82,7 @@ class UserMovieRecommendation(object):
             tag_df = movie_tag_data_frame.groupby(['movieid'])['tag'].apply(list).reset_index()
             tag_df = tag_df.sort_values('movieid')
             movies = tag_df.movieid.tolist()
+            movies = [self.util.get_movie_name_for_id(movieid) for movieid in movies]
             tag_df = list(tag_df.iloc[:, 1])
             (U, Vh) = self.util.LDA(tag_df, num_topics=10, num_features=1000)
             movie_latent_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=10)
@@ -101,14 +102,36 @@ class UserMovieRecommendation(object):
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
         return (movies, movie_movie_matrix)
 
+    def compute_pagerank(self):
+        movie_tag_frame = self.get_movie_tag_matrix()
+        movie_tag_matrix = movie_tag_frame.values
+        movies = list(movie_tag_frame.index.values)
+        tags = list(movie_tag_frame)
+        tag_movie_matrix = movie_tag_matrix.transpose()
+        movie_movie_matrix = numpy.dot(movie_tag_matrix, tag_movie_matrix)
+        seed_movies = self.get_all_movies_for_user(user_id)
+        return self.util.compute_pagerank(seed_movies, movie_movie_matrix, movies)
+
+    def tensor_decompose(self, model):
+        return (None, None)
+
     def get_result(self, user_id, model):
         """
-        This method is yet to be implemented.
+        This method is yet to fully implemented.
         :param model:
         :return: List of recommended movies
         """
-        (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
         watched_movies = self.get_all_movies_for_user(user_id)
+        if watched_movies == None:
+            print("THIS USER HAS NOT WATCHED ANY MOVIE")
+            exit(1)
+        if model == "PageRank":
+            recommended_movies = self.compute_pagerank()
+            print(recommended_movies)
+        elif model == "SVD" or model == "PCA" or model == "LDA":
+            (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
+        elif model == "TD":
+            (movies, movie_movie_matrix) = self.tensor_decompose(model)
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
@@ -117,6 +140,6 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 75
+    user_id = 11824
     obj = UserMovieRecommendation()
     obj.get_result(user_id=user_id, model="LDA")

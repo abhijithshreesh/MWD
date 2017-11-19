@@ -1,6 +1,7 @@
 import math
 import os
-
+import pandas as pd
+import operator
 import gensim
 import numpy
 import tensorly.tensorly.decomposition as decomp
@@ -263,6 +264,66 @@ class Util(object):
                 u_matrix[i, j] = row1[j][1]
 
         return u_matrix
+
+    def get_transition_dataframe(self, data_frame):
+        """
+        Function to get the transition matrix for Random walk
+        :param data_frame:
+        :return: transition matrix
+        """
+        for column in data_frame:
+            data_frame[column] = pd.Series(
+                [0 if ind == int(column) else each for ind, each in zip(data_frame.index, data_frame[column])],
+                index=data_frame.index)
+        data_frame["row_sum"] = data_frame.sum(axis=1)
+        for column in data_frame:
+            data_frame[column] = pd.Series(
+                [each / sum if (column != "row_sum" and each > 0 and ind != int(column) and sum!=0) else each for ind, each, sum in
+                 zip(data_frame.index, data_frame[column], data_frame.row_sum)],
+                index=data_frame.index)
+        data_frame = data_frame.drop(["row_sum"], axis=1)
+        data_frame.loc[(data_frame.T == 0).all()] = float(1 / (len(data_frame.columns)))
+        data_frame = data_frame.transpose()
+        return data_frame
+
+    def get_seed_matrix(self, transition_df, seed_nodes, nodes):
+        """
+        Function to get the Restart matrix for entries in the seed list
+        :param transition_df:
+        :param seed_nodes:
+        :param nodeids:
+        :return: seed_matrix
+        """
+        seed_matrix = [0.0 for each in range(len(transition_df.columns))]
+        seed_value = float(1 / len(seed_nodes))
+        for each in seed_nodes:
+            seed_matrix[list(nodes).index(each)] = seed_value
+        return seed_matrix
+
+    def print_nodes_and_pageranks(self, page_rank_tuple):
+        for first, second in page_rank_tuple:
+            print("%s[%s]: %s" % (first, self.get_movie_id(first), second))
+
+    def compute_pagerank(self, seed_nodes, node_matrix, nodes):
+        """
+        Function to compute the Personalised Pagerank for the given input
+        :param seed_actors:
+        :param actor_matrix:
+        :param actorids:
+        :return:
+        """
+        data_frame = pd.DataFrame(node_matrix)
+        transition_df = self.get_transition_dataframe(data_frame)
+        seed_matrix = self.get_seed_matrix(transition_df, seed_nodes, nodes)
+        result_list = seed_matrix
+        temp_list = []
+        while(temp_list!=result_list):
+            temp_list = result_list
+            result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
+        page_rank_dict = {i: j for i, j in zip(nodes, result_list)}
+        sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
+        self.print_nodes_and_pageranks(sorted_rank[0:len(seed_nodes)+5])
+        return sorted_rank[0:len(seed_nodes)+5]
 
 
 if __name__ == "__main__":
