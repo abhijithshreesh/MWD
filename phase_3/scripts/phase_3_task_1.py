@@ -26,6 +26,7 @@ class UserMovieRecommendation(object):
         :return: list of movies watched by the user
         """
         user_data = self.combined_data[self.combined_data['userid'] == user_id]
+        user_data = user_data.sort_values('timestamp', ascending=False)
         movies = user_data['moviename'].unique()
 
         return movies
@@ -116,7 +117,7 @@ class UserMovieRecommendation(object):
         :return: List of recommended movies
         """
         watched_movies = self.get_all_movies_for_user(user_id)
-        if watched_movies == None:
+        if len(watched_movies) == 0:
             print("THIS USER HAS NOT WATCHED ANY MOVIE")
             exit(1)
         if model == "PageRank":
@@ -135,6 +136,6 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 11824
+    user_id = 146
     obj = UserMovieRecommendation()
-    obj.get_result(user_id=user_id, model="LDA")
+    obj.get_result(user_id=user_id, model="PageRank")

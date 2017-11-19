@@ -275,8 +275,14 @@ class Util(object):
         """
         seed_matrix = [0.0 for each in range(len(transition_df.columns))]
         seed_value = float(1 / len(seed_nodes))
+        seed_value_list = [seed_value for seed in seed_nodes]
+        delta = seed_value / len(seed_nodes)
+        for i in range(0, len(seed_nodes) - 1):
+            seed_value_list[i] = seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta
+            for j in range(i + 1, len(seed_nodes)):
+                seed_value_list[j] = seed_value_list[j] - delta
         for each in seed_nodes:
-            seed_matrix[list(nodes).index(each)] = seed_value
+            seed_matrix[list(nodes).index(each)] = seed_value_list[list(seed_nodes).index(each)]
         return seed_matrix
 
     def print_nodes_and_pageranks(self, page_rank_tuple):
