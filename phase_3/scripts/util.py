@@ -2,15 +2,15 @@ import logging
 import math
 import operator
 import os
-
 import gensim
 import numpy
 import pandas as pd
 import tensorly.tensorly.decomposition as decomp
-from config_parser import ParseConfig
-from data_extractor import DataExtractor
 from gensim import corpora
 from scipy import linalg
+
+from config_parser import ParseConfig
+from data_extractor import DataExtractor
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
@@ -309,7 +309,6 @@ class Util(object):
             result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
         page_rank_dict = {i: j for i, j in zip(nodes, result_list)}
         sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
-        self.print_nodes_and_pageranks(sorted_rank[0:len(seed_nodes)+5])
         return sorted_rank[0:len(seed_nodes)+5]
 
     def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):

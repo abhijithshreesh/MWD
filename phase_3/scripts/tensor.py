@@ -23,14 +23,10 @@ class MovieTagGenreTensor(object):
 
     def fetchMovieGenreTagTensor(self):
         """
-        Create actor movie year tensor
+        Create Movie Genre Tag tensor
         :return: tensor
         """
-        #movies_df = self.data_extractor.get_mlmovies_data()
-        #actor_df = self.data_extractor.get_movie_actor_data()
         genre_data = self.genre_tag_data.get_genre_data()
-        #genre_data.to_csv('genre_data.csv', index=True, encoding='utf-8')
-        #movie_actor_df = actor_df.merge(movies_df, how="left", on="movieid")
         movie_list = genre_data["moviename"]
         movie_count = 0
         movie_dict = {}

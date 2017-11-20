@@ -1,6 +1,8 @@
+import operator
+import numpy
+
 import config_parser
 import data_extractor
-import numpy
 from phase1_task_2 import GenreTag
 from util import Util
 from tensor import MovieTagGenreTensor
@@ -13,10 +15,7 @@ class UserMovieRecommendation(object):
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.mltags = self.data_extractor.get_mltags_data()
-        self.mlmovies = self.data_extractor.get_mlmovies_data()
-        self.mlratings = self.data_extractor.get_mlratings_data()
         self.combined_data = self.get_combined_data()
-        self.users = self.data_extractor.get_mlusers_data()
         self.util = Util()
         self.genre_tag = GenreTag()
         self.tensor = MovieTagGenreTensor()
@@ -71,9 +70,9 @@ class UserMovieRecommendation(object):
         :return: movie_movie_similarity matrix
         """
         if model == "LDA":
-            data_frame = self.data_extractor.get_mlmovies_data()
+            data_frame = self.mlmovies
             tag_data_frame = self.data_extractor.get_genome_tags_data()
-            movie_data_frame = self.data_extractor.get_mltags_data()
+            movie_data_frame = self.mltags
             movie_tag_data_frame = movie_data_frame.merge(tag_data_frame, how="left", left_on="tagid", right_on="tagId")
             movie_tag_data_frame = movie_tag_data_frame.merge(data_frame, how="left", left_on="movieid", right_on="movieid")
             tag_df = movie_tag_data_frame.groupby(['movieid'])['tag'].apply(list).reset_index()
@@ -103,6 +102,10 @@ class UserMovieRecommendation(object):
         return (movies, movie_movie_matrix)
 
     def compute_pagerank(self):
+        """
+        Function to prepare data for pageRank and calling pageRank method
+        :return: list of (movie,weight) tuple
+        """
         movie_tag_frame = self.get_movie_tag_matrix()
         movie_tag_matrix = movie_tag_frame.values
         movies = list(movie_tag_frame.index.values)
@@ -112,21 +115,93 @@ class UserMovieRecommendation(object):
         seed_movies = self.get_all_movies_for_user(user_id)
         return self.util.compute_pagerank(seed_movies, movie_movie_matrix, movies)
 
-    def get_result(self, user_id, model):
+    def get_recommendation(self, user_id, model):
         """
-        This method is yet to fully implemented.
+        Function to recommend movies for a given user_id based on the given model
+        :param user_id:
         :param model:
-        :return: List of recommended movies
+        :return: list of movies for the given user as a recommendation
         """
         watched_movies = self.get_all_movies_for_user(user_id)
+        recommended_movies = []
         if len(watched_movies) == 0:
             print("THIS USER HAS NOT WATCHED ANY MOVIE")
             exit(1)
         if model == "PageRank":
-            recommended_movies = self.compute_pagerank()
-            print(recommended_movies)
+            recommended_dict = self.compute_pagerank()
+            for movie_p, weight_p in recommended_dict:
+                if len(recommended_movies) == 5:
+                    break
+                if movie_p not in watched_movies:
+                    recommended_movies.append(movie_p)
+            return recommended_movies
         elif model == "SVD" or model == "PCA" or model == "LDA" or model == "TD":
             (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
+            movie_row_dict = {}
+            for i in range(0, len(movies)):
+                if movies[i] in watched_movies:
+                    movie_row_dict[self.util.get_movie_id(movies[i])] = movie_movie_matrix[i]
+            distribution_list = self.get_distribution_count(watched_movies, 5)
+            index = 0
+            for movie in watched_movies:
+                movie_row = movie_row_dict[self.util.get_movie_id(movie)]
+                labelled_movie_row = dict(zip(movies, movie_row))
+                num_of_movies_to_pick = distribution_list[index]
+                # Remove the movies which are already watched
+                for each in watched_movies:
+                    del labelled_movie_row[each]
+                # Remove the movies which are already in recommendation_list
+                for each in recommended_movies:
+                    del labelled_movie_row[each]
+                for key in labelled_movie_row.keys():
+                    labelled_movie_row[key] = abs(labelled_movie_row[key])
+                labelled_movie_row_sorted = sorted(labelled_movie_row.items(), key=operator.itemgetter(1), reverse=True)
+                labelled_movie_row_sorted = labelled_movie_row_sorted[0:num_of_movies_to_pick]
+                for (m,v) in labelled_movie_row_sorted:
+                    recommended_movies.append(m)
+                index += 1
+            return recommended_movies
+
+    def get_distribution_count(self, seed_nodes, num_of_seeds_to_recommend):
+        """
+        Given the number of seeds to be recommended and the seed_nodes,
+        returns the distribution for each seed_node considering order
+        :param seed_nodes:
+        :param num_of_seeds_to_recommend:
+        :return: distribution_list
+        """
+        seed_value = float(num_of_seeds_to_recommend / len(seed_nodes))
+        seed_value_list = [seed_value for seed in seed_nodes]
+        delta = seed_value / len(seed_nodes)
+        for i in range(0, len(seed_nodes) - 1):
+            seed_value_list[i] = round(seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta)
+            for j in range(i + 1, len(seed_nodes)):
+                seed_value_list[j] = seed_value_list[j] - delta
+        seed_value_list[len(seed_nodes) - 1] = round(seed_value_list[len(seed_nodes) - 1])
+        total_count = 0
+        for val in seed_value_list:
+            total_count = total_count + val
+        difference = num_of_seeds_to_recommend - total_count
+        if(difference > 0):
+            for i in range(0, len(seed_value_list)):
+                if seed_value_list[i] == 0:
+                    seed_value_list[i] = 1
+                    difference -= 1
+                    if difference == 0:
+                        return seed_value_list
+            for i in range(0, len(seed_value_list)):
+                seed_value_list[i] += 1
+                difference -= 1
+                if difference == 0:
+                    return seed_value_list
+        elif(difference < 0):
+            for i in range(0, len(seed_value_list)):
+                if seed_value_list[len(seed_value_list) - 1 - i] != 0:
+                    seed_value_list[len(seed_value_list) - 1 - i] -= 1
+                    difference += 1
+                if difference == 0:
+                    return seed_value_list
+        return seed_value_list
 
 
 if __name__ == "__main__":
@@ -136,6 +211,15 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 146
+    user_id = 11613
     obj = UserMovieRecommendation()
-    obj.get_result(user_id=user_id, model="TD")
+    recommended_movies = obj.get_recommendation(user_id=user_id, model="SVD")
+    print("SVD : ", recommended_movies)
+    recommended_movies = obj.get_recommendation(user_id=user_id, model="PCA")
+    print("PCA : ", recommended_movies)
+    recommended_movies = obj.get_recommendation(user_id=user_id, model="LDA")
+    print("LDA : ", recommended_movies)
+    recommended_movies = obj.get_recommendation(user_id=user_id, model="TD")
+    print("TD : ", recommended_movies)
+    recommended_movies = obj.get_recommendation(user_id=user_id, model="PageRank")
+    print("PageRank : ", recommended_movies)
