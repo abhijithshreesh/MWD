@@ -3,6 +3,7 @@ import data_extractor
 import numpy
 from phase1_task_2 import GenreTag
 from util import Util
+from tensor import MovieTagGenreTensor
 
 
 class UserMovieRecommendation(object):
@@ -18,6 +19,7 @@ class UserMovieRecommendation(object):
         self.users = self.data_extractor.get_mlusers_data()
         self.util = Util()
         self.genre_tag = GenreTag()
+        self.tensor = MovieTagGenreTensor()
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -93,6 +95,9 @@ class UserMovieRecommendation(object):
                 (U, s, Vh) = self.util.PCA(movie_tag_matrix)
                 tag_latent_matrix = U[:, :10]
                 movie_latent_matrix = numpy.dot(movie_tag_matrix, tag_latent_matrix)
+        elif model == "TD":
+            movies = self.tensor.ordered_movie_names
+            movie_latent_matrix = self.tensor.factors[0]
         latent_movie_matrix = movie_latent_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
         return (movies, movie_movie_matrix)
@@ -107,9 +112,6 @@ class UserMovieRecommendation(object):
         seed_movies = self.get_all_movies_for_user(user_id)
         return self.util.compute_pagerank(seed_movies, movie_movie_matrix, movies)
 
-    def tensor_decompose(self, model):
-        return (None, None)
-
     def get_result(self, user_id, model):
         """
         This method is yet to fully implemented.
@@ -123,10 +125,8 @@ class UserMovieRecommendation(object):
         if model == "PageRank":
             recommended_movies = self.compute_pagerank()
             print(recommended_movies)
-        elif model == "SVD" or model == "PCA" or model == "LDA":
+        elif model == "SVD" or model == "PCA" or model == "LDA" or model == "TD":
             (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
-        elif model == "TD":
-            (movies, movie_movie_matrix) = self.tensor_decompose(model)
 
 
 if __name__ == "__main__":
@@ -138,4 +138,4 @@ if __name__ == "__main__":
     # user_id = input['user_id']
     user_id = 146
     obj = UserMovieRecommendation()
-    obj.get_result(user_id=user_id, model="PageRank")
+    obj.get_result(user_id=user_id, model="TD")

@@ -1,11 +1,4 @@
-import logging
-import math
-import operator
-import os
-import gensim
-import numpy
 import pandas as pd
-import tensorly.tensorly.decomposition as decomp
 
 from phase_3_task_1 import UserMovieRecommendation
 
@@ -18,13 +11,11 @@ class MovieLSH(UserMovieRecommendation):
         (self.U, self.s, self.Vt) = self.util.SVD(self.movie_tag_df.values)
 
     def assign_group(self, value, group_range):
-        if value>=group_range[-1]:
-            return len(group_range)-1
         for i in range(0,len(group_range)):
             if value>=group_range[i] and value<group_range[i+1]:
-                return i+1
+                return i
 
-    def index_data(self):
+    def group_data(self):
         U_dataframe = pd.DataFrame(self.U)
         group_length = {}
         column_groups = {}
@@ -36,11 +27,12 @@ class MovieLSH(UserMovieRecommendation):
             for i in range(0, 11):
                 column_groups[column].append(sum)
                 sum = sum+group_length[column]
+            column_groups[column][-1] += 1
         interval_df = pd.DataFrame()
         for column in U_dataframe:
             interval_df[column] = pd.Series([self.assign_group(each, column_groups[column]) for each in U_dataframe[column]],
                                   index=U_dataframe.index)
-        a=1
+
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
     #     description='phase_2_task_1a.py 146',
@@ -49,4 +41,4 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     obj = MovieLSH()
-    obj.index_data()
+    obj.group_data()
