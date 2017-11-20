@@ -5,7 +5,6 @@ import config_parser
 import data_extractor
 from phase1_task_2 import GenreTag
 from util import Util
-from tensor import MovieTagGenreTensor
 
 
 class UserMovieRecommendation(object):
@@ -18,7 +17,9 @@ class UserMovieRecommendation(object):
         self.combined_data = self.get_combined_data()
         self.util = Util()
         self.genre_tag = GenreTag()
-        self.tensor = MovieTagGenreTensor()
+        self.ordered_genre = []
+        self.ordered_movie_names = []
+        self.ordered_tag = []
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -95,8 +96,10 @@ class UserMovieRecommendation(object):
                 tag_latent_matrix = U[:, :10]
                 movie_latent_matrix = numpy.dot(movie_tag_matrix, tag_latent_matrix)
         elif model == "TD":
-            movies = self.tensor.ordered_movie_names
-            movie_latent_matrix = self.tensor.factors[0]
+            tensor = self.fetchMovieGenreTagTensor()
+            factors = self.util.CPDecomposition(tensor, 10)
+            movies = self.ordered_movie_names
+            movie_latent_matrix = factors[0]
         latent_movie_matrix = movie_latent_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
         return (movies, movie_movie_matrix)
@@ -162,6 +165,68 @@ class UserMovieRecommendation(object):
                 index += 1
             return recommended_movies
 
+    def fetchMovieGenreTagTensor(self):
+        """
+        Create Movie Genre Tag tensor
+        :return: tensor
+        """
+        genre_data = self.genre_tag.get_genre_data()
+        movie_list = genre_data["moviename"]
+        movie_count = 0
+        movie_dict = {}
+        for element in movie_list:
+            if element in movie_dict.keys():
+                continue
+            movie_dict[element] = movie_count
+            movie_count += 1
+            self.ordered_movie_names.append(element)
+
+        genre_list = genre_data["genre"]
+        genre_count = 0
+        genre_dict = {}
+        for element in genre_list:
+            if element in genre_dict.keys():
+                continue
+            genre_dict[element] = genre_count
+            genre_count += 1
+            self.ordered_genre.append(element)
+
+        tag_list = genre_data["tag"]
+        tag_count = 0
+        tag_dict = {}
+        for element in tag_list:
+            if element in tag_dict.keys():
+                continue
+            tag_dict[element] = tag_count
+            tag_count += 1
+            self.ordered_tag.append(element)
+
+        tensor = numpy.zeros((movie_count, genre_count, tag_count))
+
+        for index, row in genre_data.iterrows():
+            movie = row["moviename"]
+            genre = row["genre"]
+            tag = row["tag"]
+            movie_name = movie_dict[movie]
+            genre_name = genre_dict[genre]
+            tag_name = tag_dict[tag]
+            tensor[movie_name][genre_name][tag_name] = 1
+
+        return tensor
+
+    def get_factor_names(self, i):
+        """
+        Obtain factor names
+        :param i:
+        :return: factor names
+        """
+        if i == 0:
+            return self.ordered_movie_names
+        elif i == 1:
+            return self.ordered_genre
+        elif i == 2:
+            return self.ordered_tag
+
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
@@ -171,7 +236,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 11613
-    model = "SVD" # SVD,PCA,LDA,TD,PageRank
+    model = "PCA" # SVD,PCA,LDA,TD,PageRank
     obj = UserMovieRecommendation()
     recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
