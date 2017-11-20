@@ -1,11 +1,4 @@
-import logging
-import math
-import operator
-import os
-import gensim
-import numpy
 import pandas as pd
-import tensorly.tensorly.decomposition as decomp
 
 from phase_3_task_1 import UserMovieRecommendation
 
