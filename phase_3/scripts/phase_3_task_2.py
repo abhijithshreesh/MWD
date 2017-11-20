@@ -3,6 +3,7 @@ import math
 import config_parser
 import data_extractor
 import numpy as np
+from util import Util
 
 
 class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
@@ -18,6 +19,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         self.movies_dict = {}
         self.tags_dict = {}
         self.movie_tag_matrix = self.get_movie_tag_matrix()
+        self.util = Util()
 
     def get_combined_data(self):
         """
@@ -84,7 +86,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
             print("Relevance feedback information missing.\nAborting...")
             exit(1)
 
-        user_feedback_data = self.feedback_data[self.feedback_data['user_id'] == self.user_id]
+        user_feedback_data = self.feedback_data[self.feedback_data['user-id'] == self.user_id]
         user_relevant_data = user_feedback_data[user_feedback_data['relevancy'] == 'relevant']
         user_relevant_movies = user_relevant_data['movie-name'].unique()
         user_irrelevant_data = user_feedback_data[user_feedback_data['relevancy'] == 'irrelevant']
@@ -134,11 +136,12 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
 
         return movie_recommendations
 
+    def print_movie_recommendations_and_collect_feedback(self):
+        movies = self.get_movie_recommendations()
+        self.util.print_movie_recommendations_and_collect_feedback(movies, 2, self.user_id)
+
 
 if __name__ == "__main__":
     user_id = 3
     prop_rel_feed_rec = ProbabilisticRelevanceFeedbackUserMovieRecommendation(user_id)
-    movies = prop_rel_feed_rec.get_movie_recommendations()
-    print("Movie recommendations for user id " + str(user_id) + ": ")
-    for movie in movies:
-        print(movie)
+    prop_rel_feed_rec.print_movie_recommendations_and_collect_feedback()
