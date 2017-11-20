@@ -312,6 +312,72 @@ class Util(object):
         self.print_nodes_and_pageranks(sorted_rank[0:len(seed_nodes)+5])
         return sorted_rank[0:len(seed_nodes)+5]
 
+    def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):
+        print("Movie recommendations: ")
+        count = 1
+        movie_dict = {}
+        for movie in movies:
+            print(str(count) + ". " + str(movie))
+            movie_dict[count] = movie
+            count += 1
+
+        done = False
+        rel_movies = []
+        irrel_movies = []
+        while not done:
+            movies_list = input("\nPlease enter comma separated ids of the relevant movies: ")
+            rel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
+            if len(rel_ids) > 5:
+                print("Incorrect number of movies entered as relevant.")
+                continue
+            incorrect = False
+            for item in rel_ids:
+                if int(item) not in [1, 2, 3, 4, 5]:
+                    print("Incorrect movie ID selected.")
+                    incorrect = True
+                    break
+            if incorrect:
+                continue
+
+            confirmation = input("Are you sure these are the relevant movies? " + str(list(rel_ids)) + " (y/Y/n/N): ")
+            if confirmation != "y" and confirmation != "Y":
+                continue
+
+            done = True
+            for item in rel_ids:
+                rel_movies.append(movie_dict[int(item)])
+
+            for movie in movies:
+                if movie not in rel_movies:
+                    irrel_movies.append(movie)
+
+        if task_no == 1 or task_no == 2:
+            if not os.path.isfile(self.data_set_loc + "/task2-feedback.csv"):
+                df = pd.DataFrame(columns=['movie-name', 'relevancy', 'user-id'])
+            else:
+                df = self.data_extractor.get_task2_feedback_data()
+
+            for movie in rel_movies:
+                df = df.append({'movie-name': movie, 'relevancy': 'relevant', 'user-id': user_id}, ignore_index=True)
+            for movie in irrel_movies:
+                df = df.append({'movie-name': movie, 'relevancy': 'irrelevant', 'user-id': user_id}, ignore_index=True)
+
+            df.to_csv(self.data_set_loc + "/task2-feedback.csv", index=False)
+        elif task_no == 3 or task_no == 4:
+            if not os.path.isfile(self.data_set_loc + "/task4-feedback.csv"):
+                df = pd.DataFrame(columns=['movie-name', 'relevancy'])
+            else:
+                df = self.data_extractor.get_task4_feedback_data()
+
+            for movie in rel_movies:
+                df = df.append({'movie-name': movie, 'relevancy': 'relevant'}, ignore_index=True)
+            for movie in irrel_movies:
+                df = df.append({'movie-name': movie, 'relevancy': 'irrelevant'}, ignore_index=True)
+
+            df.to_csv(self.data_set_loc + "/task4-feedback.csv", index=False)
+        else:
+            print("Incorrect task number - " + task_no + "\nAborting...")
+            exit(1)
 
 if __name__ == "__main__":
     obj = Util()
