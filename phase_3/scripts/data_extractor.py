@@ -38,6 +38,12 @@ class DataExtractor(object):
     def get_mlusers_data(self):
         return self.data_extractor("mlusers.csv")
 
+    def get_task2_feedback_data(self):
+        return self.data_extractor("task2-feedback.csv")
+
+    def get_task4_feedback_data(self):
+        return self.data_extractor("task4-feedback.csv")
+
 
 if __name__ == "__main__":
     conf = ParseConfig()
