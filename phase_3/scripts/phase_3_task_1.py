@@ -141,7 +141,7 @@ class UserMovieRecommendation(object):
             for i in range(0, len(movies)):
                 if movies[i] in watched_movies:
                     movie_row_dict[self.util.get_movie_id(movies[i])] = movie_movie_matrix[i]
-            distribution_list = self.get_distribution_count(watched_movies, 5)
+            distribution_list = self.util.get_distribution_count(watched_movies, 5)
             index = 0
             for movie in watched_movies:
                 movie_row = movie_row_dict[self.util.get_movie_id(movie)]
@@ -162,47 +162,6 @@ class UserMovieRecommendation(object):
                 index += 1
             return recommended_movies
 
-    def get_distribution_count(self, seed_nodes, num_of_seeds_to_recommend):
-        """
-        Given the number of seeds to be recommended and the seed_nodes,
-        returns the distribution for each seed_node considering order
-        :param seed_nodes:
-        :param num_of_seeds_to_recommend:
-        :return: distribution_list
-        """
-        seed_value = float(num_of_seeds_to_recommend / len(seed_nodes))
-        seed_value_list = [seed_value for seed in seed_nodes]
-        delta = seed_value / len(seed_nodes)
-        for i in range(0, len(seed_nodes) - 1):
-            seed_value_list[i] = round(seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta)
-            for j in range(i + 1, len(seed_nodes)):
-                seed_value_list[j] = seed_value_list[j] - delta
-        seed_value_list[len(seed_nodes) - 1] = round(seed_value_list[len(seed_nodes) - 1])
-        total_count = 0
-        for val in seed_value_list:
-            total_count = total_count + val
-        difference = num_of_seeds_to_recommend - total_count
-        if(difference > 0):
-            for i in range(0, len(seed_value_list)):
-                if seed_value_list[i] == 0:
-                    seed_value_list[i] = 1
-                    difference -= 1
-                    if difference == 0:
-                        return seed_value_list
-            for i in range(0, len(seed_value_list)):
-                seed_value_list[i] += 1
-                difference -= 1
-                if difference == 0:
-                    return seed_value_list
-        elif(difference < 0):
-            for i in range(0, len(seed_value_list)):
-                if seed_value_list[len(seed_value_list) - 1 - i] != 0:
-                    seed_value_list[len(seed_value_list) - 1 - i] -= 1
-                    difference += 1
-                if difference == 0:
-                    return seed_value_list
-        return seed_value_list
-
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
@@ -212,14 +171,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 11613
+    model = "SVD" # SVD,PCA,LDA,TD,PageRank
     obj = UserMovieRecommendation()
-    recommended_movies = obj.get_recommendation(user_id=user_id, model="SVD")
-    print("SVD : ", recommended_movies)
-    recommended_movies = obj.get_recommendation(user_id=user_id, model="PCA")
-    print("PCA : ", recommended_movies)
-    recommended_movies = obj.get_recommendation(user_id=user_id, model="LDA")
-    print("LDA : ", recommended_movies)
-    recommended_movies = obj.get_recommendation(user_id=user_id, model="TD")
-    print("TD : ", recommended_movies)
-    recommended_movies = obj.get_recommendation(user_id=user_id, model="PageRank")
-    print("PageRank : ", recommended_movies)
+    recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
+    obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
