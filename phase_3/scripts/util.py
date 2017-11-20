@@ -1,15 +1,15 @@
 import logging
 import operator
 import os
+
 import gensim
 import numpy
 import pandas as pd
 import tensorly.tensorly.decomposition as decomp
-from gensim import corpora
-from scipy import linalg
-
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
+from gensim import corpora
+from scipy import linalg
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
@@ -175,7 +175,14 @@ class Util(object):
         return sorted_rank[0:len(seed_nodes)+5]
 
     def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):
-        print("Movie recommendations: ")
+        if task_no in [1, 2]:
+            print("Movie recommendations: ")
+        elif task_no in [3, 4]:
+            print("Nearest movies: ")
+        else:
+            print("Incorrect task number - " + task_no + "\nAborting...")
+            exit(1)
+            
         count = 1
         movie_dict = {}
         for movie in movies:
@@ -237,9 +244,6 @@ class Util(object):
                 df = df.append({'movie-name': movie, 'relevancy': 'irrelevant'}, ignore_index=True)
 
             df.to_csv(self.data_set_loc + "/task4-feedback.csv", index=False)
-        else:
-            print("Incorrect task number - " + task_no + "\nAborting...")
-            exit(1)
 
     def get_distribution_count(self, seed_nodes, num_of_seeds_to_recommend):
         """
