@@ -9,7 +9,6 @@ import tensorly.tensorly.decomposition as decomp
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
-from scipy import linalg
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
@@ -56,6 +55,7 @@ class Util(object):
         :return: factor matrices obtained after decomposition
         """
         factors = decomp.parafac(tensor, rank)
+
         return factors
 
     def SVD(self, matrix):
@@ -64,7 +64,7 @@ class Util(object):
         :param matrix:
         :return: factor matrices and the core matrix
         """
-        U, s, Vh = linalg.svd(matrix, full_matrices=False)
+        U, s, Vh = numpy.linalg.svd(matrix, full_matrices=False)
         return (U, s, Vh)
 
     def PCA(self, matrix):
@@ -74,7 +74,7 @@ class Util(object):
         :return: factor matrices and the core matrix
         """
         cov_df = numpy.cov(matrix, rowvar=False)
-        U, s, Vh = linalg.svd(cov_df)
+        U, s, Vh = numpy.linalg.svd(cov_df)
 
         return (U, s, Vh)
 
@@ -105,9 +105,11 @@ class Util(object):
         u_matrix = numpy.zeros(shape=(num_docs, num_topics))
 
         for i in range(0, len(u)):
-            row1 = u[i]
-            for j in range(0, len(row1)):
-                u_matrix[i, j] = row1[j][1]
+            doc = u[i]
+            for j in range(0, len(doc)):
+                # u_matrix[i, j] = row1[j][1]
+                (topic_no, prob) = doc[j]
+                u_matrix[i, topic_no] = prob
 
         return u_matrix
 
@@ -130,6 +132,7 @@ class Util(object):
         data_frame = data_frame.drop(["row_sum"], axis=1)
         data_frame.loc[(data_frame.T == 0).all()] = float(1 / (len(data_frame.columns)))
         data_frame = data_frame.transpose()
+
         return data_frame
 
     def get_seed_matrix(self, transition_df, seed_nodes, nodes):
@@ -150,6 +153,7 @@ class Util(object):
                 seed_value_list[j] = seed_value_list[j] - delta
         for each in seed_nodes:
             seed_matrix[list(nodes).index(each)] = seed_value_list[list(seed_nodes).index(each)]
+
         return seed_matrix
 
     def compute_pagerank(self, seed_nodes, node_matrix, nodes):
@@ -172,6 +176,7 @@ class Util(object):
             result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
         page_rank_dict = {i: j for i, j in zip(nodes, result_list)}
         sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
+
         return sorted_rank[0:len(seed_nodes)+5]
 
     def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):
@@ -284,6 +289,7 @@ class Util(object):
                     difference += 1
                 if difference == 0:
                     return seed_value_list
+
         return seed_value_list
 
 
