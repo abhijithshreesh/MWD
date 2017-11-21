@@ -75,6 +75,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
             numerator = p_i * (1 - u_i)
             denominator = u_i * (1 - p_i)
             temp = tag * (math.log(numerator / denominator))
+            tag_index += 1
             similarity += temp
 
         return similarity
