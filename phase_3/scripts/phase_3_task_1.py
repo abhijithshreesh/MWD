@@ -20,7 +20,6 @@ class UserMovieRecommendation(object):
         self.util = Util()
         self.genre_tag = GenreTag()
         self.genre_data = self.genre_tag.get_genre_data()
-        self.ordered_movie_names = []
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -104,7 +103,7 @@ class UserMovieRecommendation(object):
         elif model == "TD":
             tensor = self.fetch_movie_genre_tag_tensor()
             factors = self.util.CPDecomposition(tensor, 10)
-            movies = self.ordered_movie_names
+            movies = self.genre_data["moviename"]
             movie_latent_matrix = factors[0]
         latent_movie_matrix = movie_latent_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
@@ -185,7 +184,6 @@ class UserMovieRecommendation(object):
                 continue
             movie_dict[element] = movie_count
             movie_count += 1
-            self.ordered_movie_names.append(element)
 
         genre_list = self.genre_data["genre"]
         genre_count = 0
