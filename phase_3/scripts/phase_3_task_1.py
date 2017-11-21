@@ -1,5 +1,6 @@
 import operator
 import numpy
+import pandas as pd
 
 import config_parser
 import data_extractor
@@ -47,19 +48,22 @@ class UserMovieRecommendation(object):
         :return: movie_tag_matrix
         """
         data_frame = self.genre_tag.get_genre_data()
+        data_frame["tag_string"] = pd.Series(
+            [str(tag) for tag in data_frame.tag],
+            index=data_frame.index)
         tag_df = data_frame.reset_index()
-        unique_tags = tag_df.tag.unique()
-        idf_data = tag_df.groupby(['movieid'])['tag'].apply(set)
-        tf_df = tag_df.groupby(['movieid'])['tag'].apply(lambda x: ','.join(x)).reset_index()
-        movie_tag_dict = dict(zip(tf_df.movieid, tf_df.tag))
+        unique_tags = tag_df.tag_string.unique()
+        idf_data = tag_df.groupby(['movieid'])['tag_string'].apply(set)
+        tf_df = tag_df.groupby(['movieid'])['tag_string'].apply(lambda x: ','.join(x)).reset_index()
+        movie_tag_dict = dict(zip(tf_df.movieid, tf_df.tag_string))
         tf_weight_dict = {movie: self.genre_tag.assign_tf_weight(tags.split(',')) for movie, tags in
                           list(movie_tag_dict.items())}
         idf_weight_dict = {}
         idf_weight_dict = self.genre_tag.assign_idf_weight(idf_data, unique_tags)
         tag_df = self.genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
-        tag_df["total"] = tag_df.groupby(['movieid','tag'])['value'].transform('sum')
-        temp_df = tag_df[["moviename", "tag", "total"]].drop_duplicates().reset_index()
-        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag')
+        tag_df["total"] = tag_df.groupby(['movieid','tag_string'])['value'].transform('sum')
+        temp_df = tag_df[["moviename", "tag_string", "total"]].drop_duplicates().reset_index()
+        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag_string')
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
 
         return genre_tag_tfidf_df
@@ -76,7 +80,10 @@ class UserMovieRecommendation(object):
             movie_data_frame = self.mltags
             movie_tag_data_frame = movie_data_frame.merge(tag_data_frame, how="left", left_on="tagid", right_on="tagId")
             movie_tag_data_frame = movie_tag_data_frame.merge(data_frame, how="left", left_on="movieid", right_on="movieid")
-            tag_df = movie_tag_data_frame.groupby(['movieid'])['tag'].apply(list).reset_index()
+            movie_tag_data_frame["tag_string"] = pd.Series(
+                [str(tag) for tag in movie_tag_data_frame.tag],
+                index=movie_tag_data_frame.index)
+            tag_df = movie_tag_data_frame.groupby(['movieid'])['tag_string'].apply(list).reset_index()
             tag_df = tag_df.sort_values('movieid')
             movies = tag_df.movieid.tolist()
             movies = [self.util.get_movie_name_for_id(movieid) for movieid in movies]
@@ -236,7 +243,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 11613
-    model = "PCA" # SVD,PCA,LDA,TD,PageRank
+    model = "TD" # SVD,PCA,LDA,TD,PageRank
     obj = UserMovieRecommendation()
     recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
