@@ -35,18 +35,6 @@ class Util(object):
 
         return movie_id[0]
 
-    def get_movie_name_for_id(self, movieid):
-        """
-        movie name for movie id
-        :param movieid:
-        :return: movie name
-        """
-        all_movie_data = self.mlmovies
-        movie_data = all_movie_data[all_movie_data['movieid'] == movieid]
-        movie_name = movie_data['moviename'].unique()
-
-        return movie_name[0]
-
     def CPDecomposition(self, tensor, rank):
         """
         Perform CP Decomposition
