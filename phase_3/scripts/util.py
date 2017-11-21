@@ -107,7 +107,6 @@ class Util(object):
         for i in range(0, len(u)):
             doc = u[i]
             for j in range(0, len(doc)):
-                # u_matrix[i, j] = row1[j][1]
                 (topic_no, prob) = doc[j]
                 u_matrix[i, topic_no] = prob
 
