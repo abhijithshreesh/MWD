@@ -1,9 +1,9 @@
 import operator
-import numpy
-import pandas as pd
 
 import config_parser
 import data_extractor
+import numpy
+import pandas as pd
 from phase1_task_2 import GenreTag
 from util import Util
 
@@ -20,9 +20,7 @@ class UserMovieRecommendation(object):
         self.util = Util()
         self.genre_tag = GenreTag()
         self.genre_data = self.genre_tag.get_genre_data()
-        self.ordered_genre = []
         self.ordered_movie_names = []
-        self.ordered_tag = []
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -83,6 +81,8 @@ class UserMovieRecommendation(object):
         :param model:
         :return: movie_movie_similarity matrix
         """
+        movie_latent_matrix = None
+        movies = None
         if model == "LDA":
             movie_tag_data_frame = self.combined_data
             tag_df = movie_tag_data_frame.groupby(['moviename'])['tag_string'].apply(list).reset_index()
@@ -109,7 +109,7 @@ class UserMovieRecommendation(object):
         latent_movie_matrix = movie_latent_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
 
-        return (movies, movie_movie_matrix)
+        return movies, movie_movie_matrix
 
     def compute_pagerank(self):
         """
@@ -195,7 +195,6 @@ class UserMovieRecommendation(object):
                 continue
             genre_dict[element] = genre_count
             genre_count += 1
-            self.ordered_genre.append(element)
 
         tag_list = self.genre_data["tag"]
         tag_count = 0
@@ -205,7 +204,6 @@ class UserMovieRecommendation(object):
                 continue
             tag_dict[element] = tag_count
             tag_count += 1
-            self.ordered_tag.append(element)
 
         tensor = numpy.zeros((movie_count, genre_count, tag_count))
 
