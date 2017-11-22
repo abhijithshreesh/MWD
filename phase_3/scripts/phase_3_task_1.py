@@ -105,6 +105,11 @@ class UserMovieRecommendation(object):
             factors = self.util.CPDecomposition(tensor, 10)
             movies = self.genre_data["moviename"]
             movie_latent_matrix = factors[0]
+        elif model == "PageRank":
+            movie_tag_frame = self.get_movie_tag_matrix()
+            movie_tag_matrix = movie_tag_frame.values
+            movies = list(movie_tag_frame.index.values)
+            movie_latent_matrix = movie_tag_matrix
         latent_movie_matrix = movie_latent_matrix.transpose()
         movie_movie_matrix = numpy.dot(movie_latent_matrix, latent_movie_matrix)
 
@@ -115,11 +120,11 @@ class UserMovieRecommendation(object):
         Function to prepare data for pageRank and calling pageRank method
         :return: list of (movie,weight) tuple
         """
-        movie_tag_frame = self.get_movie_tag_matrix()
-        movie_tag_matrix = movie_tag_frame.values
-        movies = list(movie_tag_frame.index.values)
-        tag_movie_matrix = movie_tag_matrix.transpose()
-        movie_movie_matrix = numpy.dot(movie_tag_matrix, tag_movie_matrix)
+        # movie_tag_frame = self.get_movie_tag_matrix()
+        # movie_tag_matrix = movie_tag_frame.values
+        # movies = list(movie_tag_frame.index.values)
+        # tag_movie_matrix = movie_tag_matrix.transpose()
+        (movies, movie_movie_matrix) = self.get_movie_movie_matrix("PageRank")
         seed_movies = self.get_all_movies_for_user(user_id)
 
         return self.util.compute_pagerank(seed_movies, movie_movie_matrix, movies)
