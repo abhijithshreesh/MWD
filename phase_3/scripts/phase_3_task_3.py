@@ -37,25 +37,23 @@ class MovieLSH(UserMovieRecommendation):
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
-        group_length = {}
-        column_groups = {}
+        w_length = min(self.lsh_range_dict.values())/100
+        column_groups = {vector:[] for vector in self.lsh_range_dict.keys()}
 
         for vector, vector_range in list(self.lsh_range_dict.items()):
-            group_length[vector] = vector_range/10
-            column_groups[vector] = []
-
-        for vector, vector_range in list(self.lsh_range_dict.items()):
-            interval_min = 0
-            for i in range(0, 11):
+            interval_min = -1*vector_range
+            for i in range(0, int(vector_range*2/w_length)):
                 column_groups[vector].append(interval_min)
-                interval_min = interval_min+group_length[vector]
+                interval_min = interval_min+w_length
             column_groups[vector][-1] += 1
         interval_matrix = numpy.zeros(shape=(len(self.U), len(self.lsh_points_dict)))
         U_matrix = U_dataframe.values
         for vector in range(0, len(self.lsh_points_dict)):
             for row in range(0, len(U_matrix)):
                 interval_matrix[row][vector] = self.assign_group(numpy.dot(numpy.array(U_matrix[row]), numpy.array(self.lsh_points_dict[vector])), column_groups[vector])
-
+        movie_df = self.movie_tag_df.reset_index()
+        movie_name_df = pd.DataFrame(movie_df["moviename"])
+        return pd.DataFrame(interval_matrix).join(movie_name_df, how="left")
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
@@ -68,4 +66,5 @@ if __name__ == "__main__":
     num_hashs = 4
     movie_id_list = []
     obj = MovieLSH(num_layers, num_hashs, movie_id_list)
-    obj.group_data()
+    df = obj.group_data()
+    z=1
