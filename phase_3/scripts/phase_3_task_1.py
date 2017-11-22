@@ -103,7 +103,8 @@ class UserMovieRecommendation(object):
         elif model == "TD":
             tensor = self.fetch_movie_genre_tag_tensor()
             factors = self.util.CPDecomposition(tensor, 10)
-            movies = self.genre_data["moviename"]
+            movies = self.genre_data["moviename"].unique()
+            movies.sort()
             movie_latent_matrix = factors[0]
         elif model == "PageRank":
             movie_tag_frame = self.get_movie_tag_matrix()
@@ -181,30 +182,27 @@ class UserMovieRecommendation(object):
         Create Movie Genre Tag tensor
         :return: tensor
         """
-        movie_list = self.genre_data["moviename"]
+        movie_list = self.genre_data["moviename"].unique()
+        movie_list.sort()
         movie_count = 0
         movie_dict = {}
         for element in movie_list:
-            if element in movie_dict.keys():
-                continue
             movie_dict[element] = movie_count
             movie_count += 1
 
-        genre_list = self.genre_data["genre"]
+        genre_list = self.genre_data["genre"].unique()
+        genre_list.sort()
         genre_count = 0
         genre_dict = {}
         for element in genre_list:
-            if element in genre_dict.keys():
-                continue
             genre_dict[element] = genre_count
             genre_count += 1
 
-        tag_list = self.genre_data["tag"]
+        tag_list = self.genre_data["tag"].unique()
+        tag_list.sort()
         tag_count = 0
         tag_dict = {}
         for element in tag_list:
-            if element in tag_dict.keys():
-                continue
             tag_dict[element] = tag_count
             tag_count += 1
 
@@ -230,7 +228,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 11613
-    model = "SVD" # SVD,PCA,LDA,TD,PageRank
+    model = "TD" # SVD,PCA,LDA,TD,PageRank
     obj = UserMovieRecommendation()
     recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
