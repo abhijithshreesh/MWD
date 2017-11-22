@@ -198,7 +198,10 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        tag_list = self.genre_data["tag"].unique()
+        self.genre_data["tag_string"] = pd.Series(
+            [str(tag) for tag in self.genre_data.tag],
+            index=self.genre_data.index)
+        tag_list = self.genre_data["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
         tag_dict = {}
@@ -211,7 +214,7 @@ class UserMovieRecommendation(object):
         for index, row in self.genre_data.iterrows():
             movie = row["moviename"]
             genre = row["genre"]
-            tag = row["tag"]
+            tag = row["tag_string"]
             movie_name = movie_dict[movie]
             genre_name = genre_dict[genre]
             tag_name = tag_dict[tag]
