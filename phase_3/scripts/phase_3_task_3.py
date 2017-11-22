@@ -6,11 +6,12 @@ import numpy
 
 class MovieLSH(UserMovieRecommendation):
 
-    def __init__(self, num_layers, num_hashs):
+    def __init__(self, num_layers, num_hashs, movie_id_list):
         super().__init__()
         self.movie_tag_df = self.get_movie_tag_matrix()
         self.num_layers = num_layers
         self.num_hashs = num_hashs
+        self.movie_id_list = movie_id_list
         self.latent_range_dict = {}
         self.lsh_points_dict = {}
         self.lsh_range_dict ={}
@@ -63,5 +64,8 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    obj = MovieLSH(3,4)
+    num_layers = 3
+    num_hashs = 4
+    movie_id_list = []
+    obj = MovieLSH(num_layers, num_hashs, movie_id_list)
     obj.group_data()
