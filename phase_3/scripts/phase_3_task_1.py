@@ -230,8 +230,8 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 11613
-    model = "TD" # SVD,PCA,LDA,TD,PageRank
+    user_id = 20
+    model = "PageRank" # SVD,PCA,LDA,TD,PageRank
     obj = UserMovieRecommendation()
     recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)

@@ -31,7 +31,7 @@ class GenreTag(ActorTag):
                 index=tag_df.index)
         else:
             tag_df["value"] = pd.Series(
-                [(ts_weight + (tf_weight_dict.get(movieid, 0).get(tag, 0)*(idf_weight_dict.get(tag, 0)))) for
+                [(ts_weight + (tf_weight_dict.get(movieid, 0).get(str(tag), 0)*(idf_weight_dict.get(str(tag), 0)))) for
                  index, ts_weight, tag, movieid
                  in zip(tag_df.index, tag_df.timestamp_weight, tag_df.tag, tag_df.movieid)],
                 index=tag_df.index)
