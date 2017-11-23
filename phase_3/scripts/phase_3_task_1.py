@@ -154,11 +154,11 @@ class UserMovieRecommendation(object):
             movie_row_dict = {}
             for i in range(0, len(movies)):
                 if movies[i] in watched_movies:
-                    movie_row_dict[self.util.get_movie_id(movies[i])] = movie_movie_matrix[i]
+                    movie_row_dict[movies[i]] = movie_movie_matrix[i]
             distribution_list = self.util.get_distribution_count(watched_movies, 5)
             index = 0
             for movie in watched_movies:
-                movie_row = movie_row_dict[self.util.get_movie_id(movie)]
+                movie_row = movie_row_dict[movie]
                 labelled_movie_row = dict(zip(movies, movie_row))
                 num_of_movies_to_pick = distribution_list[index]
                 # Remove the movies which are already watched
