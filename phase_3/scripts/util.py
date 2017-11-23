@@ -1,14 +1,15 @@
 import logging
 import operator
 import os
-
 import gensim
 import numpy
 import pandas as pd
 import tensorly.tensorly.decomposition as decomp
+from gensim import corpora
+
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
-from gensim import corpora
+from phase1_task_2 import GenreTag
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
 
@@ -22,6 +23,8 @@ class Util(object):
         self.data_set_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), self.conf.config_section_mapper("filePath").get("data_set_loc"))
         self.data_extractor = DataExtractor(self.data_set_loc)
         self.mlmovies = self.data_extractor.get_mlmovies_data()
+        self.genre_tag = GenreTag()
+        self.genre_data = self.genre_tag.get_genre_data()
 
     def get_movie_id(self, movie):
         """
@@ -278,6 +281,30 @@ class Util(object):
                     return seed_value_list
 
         return seed_value_list
+
+    def get_movie_tag_matrix(self):
+        """
+        Function to get movie_tag matrix containing list of tags in each movie
+        :return: movie_tag_matrix
+        """
+        tag_df = self.genre_data
+        tag_df["tag_string"] = pd.Series(
+            [str(tag) for tag in tag_df.tag],
+            index=tag_df.index)
+        unique_tags = tag_df.tag_string.unique()
+        idf_data = tag_df.groupby(['movieid'])['tag_string'].apply(set)
+        tf_df = tag_df.groupby(['movieid'])['tag_string'].apply(list).reset_index()
+        movie_tag_dict = dict(zip(tf_df.movieid, tf_df.tag_string))
+        tf_weight_dict = {movie: self.genre_tag.assign_tf_weight(tags) for movie, tags in
+                          list(movie_tag_dict.items())}
+        idf_weight_dict = self.genre_tag.assign_idf_weight(idf_data, unique_tags)
+        tag_df = self.genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
+        tag_df["total"] = tag_df.groupby(['movieid','tag_string'])['value'].transform('sum')
+        temp_df = tag_df[["moviename", "tag_string", "total"]].drop_duplicates().reset_index()
+        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag_string')
+        genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
+
+        return genre_tag_tfidf_df
 
 
 if __name__ == "__main__":

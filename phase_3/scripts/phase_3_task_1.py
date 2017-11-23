@@ -19,8 +19,7 @@ class UserMovieRecommendation(object):
         self.genome_tags = self.data_extractor.get_genome_tags_data()
         self.combined_data = self.get_combined_data()
         self.util = Util()
-        self.genre_tag = GenreTag()
-        self.genre_data = self.genre_tag.get_genre_data()
+        self.genre_data = self.util.genre_data
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -51,30 +50,6 @@ class UserMovieRecommendation(object):
 
         return merged_result
 
-    def get_movie_tag_matrix(self):
-        """
-        Function to get movie_tag matrix containing list of tags in each movie
-        :return: movie_tag_matrix
-        """
-        tag_df = self.genre_data
-        tag_df["tag_string"] = pd.Series(
-            [str(tag) for tag in tag_df.tag],
-            index=tag_df.index)
-        unique_tags = tag_df.tag_string.unique()
-        idf_data = tag_df.groupby(['movieid'])['tag_string'].apply(set)
-        tf_df = tag_df.groupby(['movieid'])['tag_string'].apply(list).reset_index()
-        movie_tag_dict = dict(zip(tf_df.movieid, tf_df.tag_string))
-        tf_weight_dict = {movie: self.genre_tag.assign_tf_weight(tags) for movie, tags in
-                          list(movie_tag_dict.items())}
-        idf_weight_dict = self.genre_tag.assign_idf_weight(idf_data, unique_tags)
-        tag_df = self.genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
-        tag_df["total"] = tag_df.groupby(['movieid','tag_string'])['value'].transform('sum')
-        temp_df = tag_df[["moviename", "tag_string", "total"]].drop_duplicates().reset_index()
-        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag_string')
-        genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
-
-        return genre_tag_tfidf_df
-
     def get_movie_movie_matrix(self, model):
         """
         Finds movie_tag matrix and returns movie_movie_similarity matrix
@@ -91,7 +66,7 @@ class UserMovieRecommendation(object):
             (U, Vh) = self.util.LDA(movies_tags_list, num_topics=10, num_features=len(self.combined_data.tag_string.unique()))
             movie_latent_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=10)
         elif model == "SVD" or model == "PCA":
-            movie_tag_frame = self.get_movie_tag_matrix()
+            movie_tag_frame = self.util.get_movie_tag_matrix()
             movie_tag_matrix = movie_tag_frame.values
             movies = list(movie_tag_frame.index.values)
             if model == "SVD":
@@ -108,7 +83,7 @@ class UserMovieRecommendation(object):
             movies.sort()
             movie_latent_matrix = factors[0]
         elif model == "PageRank":
-            movie_tag_frame = self.get_movie_tag_matrix()
+            movie_tag_frame = self.util.get_movie_tag_matrix()
             movie_tag_matrix = movie_tag_frame.values
             movies = list(movie_tag_frame.index.values)
             movie_latent_matrix = movie_tag_matrix
@@ -253,7 +228,7 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 20
+    user_id = 146
     model = "Combination" # SVD,PCA,LDA,TD,PageRank,Combination
     recommended_movies = None
     obj = UserMovieRecommendation()
