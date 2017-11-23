@@ -257,7 +257,7 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 146
+    user_id = 20
     model = "Combination" # SVD,PCA,LDA,TD,PageRank,Combination
     recommended_movies = None
     obj = UserMovieRecommendation()
