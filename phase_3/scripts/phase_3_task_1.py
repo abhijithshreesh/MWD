@@ -1,4 +1,5 @@
 import operator
+from collections import Counter
 
 import config_parser
 import data_extractor
@@ -222,6 +223,32 @@ class UserMovieRecommendation(object):
 
         return tensor
 
+    def get_combined_recommendation(self, user_id):
+        """
+        Function to combine recommendations from all models based on frequency of appearance and order
+        :param user_id:
+        :return: list of recommended movies
+        """
+        model_movies_dict = {}
+        recommended_movies = []
+        model_movies_dict["SVD"] = self.get_recommendation(user_id=user_id, model="SVD")
+        model_movies_dict["PCA"] = self.get_recommendation(user_id=user_id, model="PCA")
+        model_movies_dict["LDA"] = self.get_recommendation(user_id=user_id, model="LDA")
+        model_movies_dict["PageRank"] = self.get_recommendation(user_id=user_id, model="PageRank")
+        # Will call pagerank for td as well for now as TD has some issue
+        model_movies_dict["TD"] = self.get_recommendation(user_id=user_id, model="PageRank")
+        model_movies_list = list(model_movies_dict.values())
+        movie_dict = Counter()
+        for movie_list in model_movies_list:
+            for i in range(0, len(movie_list)):
+                    movie_dict[movie_list[i]] += 1 + (len(movie_list) - i) * 0.2
+        movie_dict_sorted = sorted(movie_dict.items(), key=operator.itemgetter(1), reverse=True)
+        movie_dict_sorted = movie_dict_sorted[0:5]
+        for (m, v) in movie_dict_sorted:
+            recommended_movies.append(m)
+
+        return recommended_movies
+
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
@@ -230,8 +257,12 @@ if __name__ == "__main__":
     # parser.add_argument('user_id', action="store", type=int)
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 20
-    model = "PageRank" # SVD,PCA,LDA,TD,PageRank
+    user_id = 146
+    model = "Combination" # SVD,PCA,LDA,TD,PageRank,Combination
+    recommended_movies = None
     obj = UserMovieRecommendation()
-    recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
+    if model == "Combination":
+        recommended_movies = obj.get_combined_recommendation(user_id=user_id)
+    else:
+        recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
