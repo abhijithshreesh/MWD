@@ -122,10 +122,6 @@ class UserMovieRecommendation(object):
         Function to prepare data for pageRank and calling pageRank method
         :return: list of (movie,weight) tuple
         """
-        # movie_tag_frame = self.get_movie_tag_matrix()
-        # movie_tag_matrix = movie_tag_frame.values
-        # movies = list(movie_tag_frame.index.values)
-        # tag_movie_matrix = movie_tag_matrix.transpose()
         (movies, movie_movie_matrix) = self.get_movie_movie_matrix("PageRank")
         seed_movies = self.get_all_movies_for_user(user_id)
 
@@ -141,7 +137,7 @@ class UserMovieRecommendation(object):
         watched_movies = self.get_all_movies_for_user(user_id)
         recommended_movies = []
         if len(watched_movies) == 0:
-            print("THIS USER HAS NOT WATCHED ANY MOVIE")
+            print("THIS USER HAS NOT WATCHED ANY MOVIE.\nAborting...")
             exit(1)
         if model == "PageRank":
             recommended_dict = self.compute_pagerank()
