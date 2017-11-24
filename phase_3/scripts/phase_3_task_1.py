@@ -184,13 +184,15 @@ class UserMovieRecommendation(object):
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
-    #     description='phase_2_task_1a.py 146',
+    #     description='phase_3_task_1.py user_id model',
     # )
     # parser.add_argument('user_id', action="store", type=int)
+    # parser.add_argument('model', action="store", choices=set(('SVD', 'PCA', 'LDA', 'TD', 'PageRank', 'Combination')))
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
-    user_id = 146
-    model = "Combination"  # SVD,PCA,LDA,TD,PageRank,Combination
+    # model = input['model']
+    user_id = 20
+    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
