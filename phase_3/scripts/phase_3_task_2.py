@@ -2,7 +2,6 @@ import math
 
 import config_parser
 import data_extractor
-import numpy as np
 from util import Util
 
 
@@ -12,55 +11,13 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
-        self.mlmovies = self.data_extractor.get_mlmovies_data()
-        self.mltags = self.data_extractor.get_mltags_data()
-        self.genome_tags = self.data_extractor.get_genome_tags_data()
-        self.combined_data = self.get_combined_data()
         self.movies_dict = {}
-        self.tags_dict = {}
-        self.movie_tag_matrix = self.get_movie_tag_matrix()
         self.util = Util()
-
-    def get_combined_data(self):
-        """
-        The data set under consideration for movie recommendation
-        :return: dataframe which combines all the necessary fields needed for the recommendation system
-        """
-        temp = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
-        result = temp.merge(self.genome_tags, left_on="tagid", right_on="tagId", how="left")
-        del result['timestamp']
-        del result['tagid']
-        del result['tagId']
-        del result['year']
-        del result['movieid']
-        del result['genres']
-
-        return result
+        self.movie_tag_matrix = self.get_movie_tag_matrix()
 
     def get_movie_tag_matrix(self):
-        tags = self.combined_data['tag'].unique()
-        tags.sort()
-        tag_index = 0
-        tag_dict = {}
-        for element in tags:
-            tag_dict[element] = tag_index
-            tag_index += 1
-        self.tags_dict = tag_dict
-
-        movies = self.combined_data['moviename'].unique()
-        movies.sort()
-        movieid_index = 0
-        movieid_dict = {}
-        for element in movies:
-            movieid_dict[element] = movieid_index
-            movieid_index += 1
-        self.movies_dict = movieid_dict
-
-        movie_tag_matrix = np.zeros((movieid_index, tag_index))
-        for index, row in self.combined_data.iterrows():
-            tag_index = self.tags_dict[row['tag']]
-            movie_index = self.movies_dict[row['moviename']]
-            movie_tag_matrix[movie_index][tag_index] = 1
+        movie_tag_matrix = self.util.get_movie_tag_matrix()
+        movie_tag_matrix[movie_tag_matrix > 0] = 1
 
         return movie_tag_matrix
 
@@ -127,13 +84,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         for movie in self.movies_dict.keys():
             movie_similarity[movie] = self.get_movie_similarity(movie)
 
-        count = 0
         movie_recommendations = []
         for movie in sorted(movie_similarity, key=movie_similarity.get, reverse=True):
-            if count == 5:
+            if len(movie_recommendations) == 5:
                 break
             movie_recommendations.append(movie)
-            count += 1
 
         return movie_recommendations
 
