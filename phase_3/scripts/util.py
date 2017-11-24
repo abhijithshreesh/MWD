@@ -167,6 +167,10 @@ class Util(object):
         return sorted_rank[0:len(seed_nodes)+5]
 
     def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):
+        if len(movies) == 0:
+            print("No movies found.")
+            exit(1)
+
         if task_no in [1, 2]:
             print("Movie recommendations: ")
         elif task_no in [3, 4]:
