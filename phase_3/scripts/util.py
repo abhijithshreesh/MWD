@@ -134,13 +134,7 @@ class Util(object):
         :return: seed_matrix
         """
         seed_matrix = [0.0 for each in range(len(transition_df.columns))]
-        seed_value = float(1) / len(seed_nodes)
-        seed_value_list = [seed_value for seed in seed_nodes]
-        delta = seed_value / len(seed_nodes)
-        for i in range(0, len(seed_nodes) - 1):
-            seed_value_list[i] = seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta
-            for j in range(i + 1, len(seed_nodes)):
-                seed_value_list[j] = seed_value_list[j] - delta
+        seed_value_list = self.distribute(seed_nodes, num_of_seeds_to_recommend=1)
         for each in seed_nodes:
             seed_matrix[list(nodes).index(each)] = seed_value_list[list(seed_nodes).index(each)]
 
@@ -248,14 +242,8 @@ class Util(object):
         :param num_of_seeds_to_recommend:
         :return: distribution_list
         """
-        seed_value = float(num_of_seeds_to_recommend) / len(seed_nodes)
-        seed_value_list = [seed_value for seed in seed_nodes]
-        delta = seed_value / len(seed_nodes)
-        for i in range(0, len(seed_nodes) - 1):
-            seed_value_list[i] = round(seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta)
-            for j in range(i + 1, len(seed_nodes)):
-                seed_value_list[j] = seed_value_list[j] - delta
-        seed_value_list[len(seed_nodes) - 1] = round(seed_value_list[len(seed_nodes) - 1])
+        seed_value_list = self.distribute(seed_nodes, num_of_seeds_to_recommend)
+        seed_value_list = [round(each) for each in seed_value_list]
         total_count = 0
         for val in seed_value_list:
             total_count = total_count + val
@@ -305,6 +293,17 @@ class Util(object):
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
 
         return genre_tag_tfidf_df
+
+    def distribute(self, seed_nodes, num_of_seeds_to_recommend):
+        seed_value = float(num_of_seeds_to_recommend) / len(seed_nodes)
+        seed_value_list = [seed_value for seed in seed_nodes]
+        delta = seed_value / len(seed_nodes)
+        for i in range(0, len(seed_nodes) - 1):
+            seed_value_list[i] = seed_value_list[i] + (len(seed_nodes) - 1 - i) * delta
+            for j in range(i + 1, len(seed_nodes)):
+                seed_value_list[j] = seed_value_list[j] - delta
+
+        return seed_value_list
 
 
 if __name__ == "__main__":

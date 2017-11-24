@@ -234,7 +234,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 146
-    model = "TD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
