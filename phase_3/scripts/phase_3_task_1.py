@@ -1,22 +1,12 @@
 import operator
 from collections import Counter
 
-import config_parser
-import data_extractor
 import numpy
-import pandas as pd
 from util import Util
 
 
 class UserMovieRecommendation(object):
     def __init__(self, user_id):
-        self.conf = config_parser.ParseConfig()
-        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
-        self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
-        self.mlmovies = self.data_extractor.get_mlmovies_data()
-        self.mltags = self.data_extractor.get_mltags_data()
-        self.genome_tags = self.data_extractor.get_genome_tags_data()
-        self.combined_data = self.get_combined_data()
         self.util = Util()
         self.genre_data = self.util.genre_data
         self.user_id = user_id
@@ -28,28 +18,11 @@ class UserMovieRecommendation(object):
         :param user_id:
         :return: list of movies watched by the user
         """
-        user_data = self.combined_data[self.combined_data['userid'] == user_id]
+        user_data = self.genre_data[self.genre_data['userid'] == user_id]
         user_data = user_data.sort_values('timestamp', ascending=False)
         movies = user_data['moviename'].unique()
 
         return movies
-
-    def get_combined_data(self):
-        """
-        The data set under consideration for movie recommendation
-        :return: dataframe which combines all the necessary fields needed for the recommendation system
-        """
-        result = self.mltags.merge(self.mlmovies, left_on="movieid", right_on="movieid", how="left")
-        merged_result = result.merge(self.genome_tags, left_on="tagid", right_on="tagId", how="left")
-        merged_result["tag_string"] = pd.Series(
-            [str(tag) for tag in merged_result.tag],
-            index=merged_result.index)
-        del merged_result['tagid']
-        del merged_result['tagId']
-        del merged_result['year']
-        del merged_result['genres']
-
-        return merged_result
 
     def get_movie_movie_matrix(self, model):
         """
@@ -60,11 +33,11 @@ class UserMovieRecommendation(object):
         movie_latent_matrix = None
         movies = None
         if model == "LDA":
-            movie_tag_data_frame = self.combined_data
+            movie_tag_data_frame = self.genre_data
             tag_df = movie_tag_data_frame.groupby(['moviename'])['tag_string'].apply(list).reset_index()
             movies = tag_df.moviename.tolist()
             movies_tags_list = list(tag_df.tag_string)
-            (U, Vh) = self.util.LDA(movies_tags_list, num_topics=10, num_features=len(self.combined_data.tag_string.unique()))
+            (U, Vh) = self.util.LDA(movies_tags_list, num_topics=10, num_features=len(self.genre_data.tag_string.unique()))
             movie_latent_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=10)
         elif model == "SVD" or model == "PCA":
             movie_tag_frame = self.util.get_movie_tag_matrix()
@@ -154,10 +127,7 @@ class UserMovieRecommendation(object):
         Create Movie Genre Tag tensor
         :return: tensor
         """
-        self.genre_data["tag_string"] = pd.Series(
-            [str(tag) for tag in self.genre_data.tag],
-            index=self.genre_data.index)
-        user_df = self.genre_data[self.genre_data["moviename"].isin(self.watched_movies)]
+        user_df = self.genre_data[self.genre_data['userid'] == user_id]
 
         movie_list = self.genre_data["moviename"].unique()
         movie_list.sort()
@@ -232,7 +202,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 146
-    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "Combination"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)

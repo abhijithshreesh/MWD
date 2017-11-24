@@ -90,11 +90,14 @@ class GenreTag(ActorTag):
         movie_tag_data_frame = movie_data_frame.merge(tag_data_frame, how="left", left_on="tagid", right_on="tagId")
         genre_tag_frame = data_frame.merge(movie_tag_data_frame, how="left", on="movieid")
         genre_tag_frame = genre_tag_frame[genre_tag_frame['timestamp'].notnull()].reset_index()
-        genre_tag_frame = genre_tag_frame[["movieid", "moviename", "genre", "timestamp", "tagid", "tag"]]
+        genre_tag_frame = genre_tag_frame[["userid", "movieid", "moviename", "genre", "timestamp", "tagid", "tag"]]
         genre_tag_frame = genre_tag_frame.sort_values("timestamp", ascending=True)
         data_frame_len = len(genre_tag_frame.index)
         genre_tag_frame["timestamp_weight"] = pd.Series(
             [(index + 1) / data_frame_len * 10 for index in genre_tag_frame.index],
+            index=genre_tag_frame.index)
+        genre_tag_frame["tag_string"] = pd.Series(
+            [str(tag) for tag in genre_tag_frame.tag],
             index=genre_tag_frame.index)
         return genre_tag_frame
 

@@ -281,9 +281,6 @@ class Util(object):
         :return: movie_tag_matrix
         """
         tag_df = self.genre_data
-        tag_df["tag_string"] = pd.Series(
-            [str(tag) for tag in tag_df.tag],
-            index=tag_df.index)
         unique_tags = tag_df.tag_string.unique()
         idf_data = tag_df.groupby(['movieid'])['tag_string'].apply(set)
         tf_df = tag_df.groupby(['movieid'])['tag_string'].apply(list).reset_index()
