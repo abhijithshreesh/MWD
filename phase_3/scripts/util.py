@@ -134,7 +134,7 @@ class Util(object):
         :return: seed_matrix
         """
         seed_matrix = [0.0 for each in range(len(transition_df.columns))]
-        seed_value = float(1 / len(seed_nodes))
+        seed_value = float(1) / len(seed_nodes)
         seed_value_list = [seed_value for seed in seed_nodes]
         delta = seed_value / len(seed_nodes)
         for i in range(0, len(seed_nodes) - 1):
@@ -248,7 +248,7 @@ class Util(object):
         :param num_of_seeds_to_recommend:
         :return: distribution_list
         """
-        seed_value = float(num_of_seeds_to_recommend / len(seed_nodes))
+        seed_value = float(num_of_seeds_to_recommend) / len(seed_nodes)
         seed_value_list = [seed_value for seed in seed_nodes]
         delta = seed_value / len(seed_nodes)
         for i in range(0, len(seed_nodes) - 1):

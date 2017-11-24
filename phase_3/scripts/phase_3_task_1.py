@@ -1,16 +1,15 @@
 import operator
 from collections import Counter
+import numpy
+import pandas as pd
 
 import config_parser
 import data_extractor
-import numpy
-import pandas as pd
-from phase1_task_2 import GenreTag
 from util import Util
 
 
 class UserMovieRecommendation(object):
-    def __init__(self):
+    def __init__(self, user_id):
         self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
@@ -20,6 +19,8 @@ class UserMovieRecommendation(object):
         self.combined_data = self.get_combined_data()
         self.util = Util()
         self.genre_data = self.util.genre_data
+        self.user_id = user_id
+        self.watched_movies = self.get_all_movies_for_user(self.user_id)
 
     def get_all_movies_for_user(self, user_id):
         """
@@ -98,20 +99,19 @@ class UserMovieRecommendation(object):
         :return: list of (movie,weight) tuple
         """
         (movies, movie_movie_matrix) = self.get_movie_movie_matrix("PageRank")
-        seed_movies = self.get_all_movies_for_user(user_id)
+        seed_movies = self.watched_movies
 
         return self.util.compute_pagerank(seed_movies, movie_movie_matrix, movies)
 
-    def get_recommendation(self, user_id, model):
+    def get_recommendation(self, model):
         """
         Function to recommend movies for a given user_id based on the given model
         :param user_id:
         :param model:
         :return: list of movies for the given user as a recommendation
         """
-        watched_movies = self.get_all_movies_for_user(user_id)
         recommended_movies = []
-        if len(watched_movies) == 0:
+        if len(self.watched_movies) == 0:
             print("THIS USER HAS NOT WATCHED ANY MOVIE.\nAborting...")
             exit(1)
         if model == "PageRank":
@@ -119,22 +119,22 @@ class UserMovieRecommendation(object):
             for movie_p, weight_p in recommended_dict:
                 if len(recommended_movies) == 5:
                     break
-                if movie_p not in watched_movies:
+                if movie_p not in self.watched_movies:
                     recommended_movies.append(movie_p)
         elif model == "SVD" or model == "PCA" or model == "LDA" or model == "TD":
             (movies, movie_movie_matrix) = self.get_movie_movie_matrix(model)
             movie_row_dict = {}
             for i in range(0, len(movies)):
-                if movies[i] in watched_movies:
+                if movies[i] in self.watched_movies:
                     movie_row_dict[movies[i]] = movie_movie_matrix[i]
-            distribution_list = self.util.get_distribution_count(watched_movies, 5)
+            distribution_list = self.util.get_distribution_count(self.watched_movies, 5)
             index = 0
-            for movie in watched_movies:
+            for movie in self.watched_movies:
                 movie_row = movie_row_dict[movie]
                 labelled_movie_row = dict(zip(movies, movie_row))
                 num_of_movies_to_pick = distribution_list[index]
                 # Remove the movies which are already watched
-                for each in watched_movies:
+                for each in self.watched_movies:
                     del labelled_movie_row[each]
                 # Remove the movies which are already in recommendation_list
                 for each in recommended_movies:
@@ -162,7 +162,10 @@ class UserMovieRecommendation(object):
             movie_dict[element] = movie_count
             movie_count += 1
 
-        genre_list = self.genre_data["genre"].unique()
+        # User specific dataframe
+
+        user_df = self.genre_data[self.genre_data["moviename"].isin(self.watched_movies)]
+        genre_list = user_df["genre"].unique()
         genre_list.sort()
         genre_count = 0
         genre_dict = {}
@@ -170,10 +173,10 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        self.genre_data["tag_string"] = pd.Series(
-            [str(tag) for tag in self.genre_data.tag],
-            index=self.genre_data.index)
-        tag_list = self.genre_data["tag_string"].unique()
+        user_df["tag_string"] = pd.Series(
+            [str(tag) for tag in user_df.tag],
+            index=user_df.index)
+        tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
         tag_dict = {}
@@ -187,6 +190,8 @@ class UserMovieRecommendation(object):
             movie = row["moviename"]
             genre = row["genre"]
             tag = row["tag_string"]
+            if genre not in genre_list or tag not in tag_list:
+                continue
             movie_name = movie_dict[movie]
             genre_name = genre_dict[genre]
             tag_name = tag_dict[tag]
@@ -194,7 +199,7 @@ class UserMovieRecommendation(object):
 
         return tensor
 
-    def get_combined_recommendation(self, user_id):
+    def get_combined_recommendation(self):
         """
         Function to combine recommendations from all models based on frequency of appearance and order
         :param user_id:
@@ -202,12 +207,12 @@ class UserMovieRecommendation(object):
         """
         model_movies_dict = {}
         recommended_movies = []
-        model_movies_dict["SVD"] = self.get_recommendation(user_id=user_id, model="SVD")
-        model_movies_dict["PCA"] = self.get_recommendation(user_id=user_id, model="PCA")
-        model_movies_dict["LDA"] = self.get_recommendation(user_id=user_id, model="LDA")
-        model_movies_dict["PageRank"] = self.get_recommendation(user_id=user_id, model="PageRank")
+        model_movies_dict["SVD"] = self.get_recommendation(model="SVD")
+        model_movies_dict["PCA"] = self.get_recommendation(model="PCA")
+        model_movies_dict["LDA"] = self.get_recommendation(model="LDA")
+        model_movies_dict["PageRank"] = self.get_recommendation(model="PageRank")
         # Will call pagerank for td as well for now as TD has some issue
-        model_movies_dict["TD"] = self.get_recommendation(user_id=user_id, model="PageRank")
+        model_movies_dict["TD"] = self.get_recommendation(model="TD")
         model_movies_list = list(model_movies_dict.values())
         movie_dict = Counter()
         for movie_list in model_movies_list:
@@ -231,9 +236,17 @@ if __name__ == "__main__":
     user_id = 146
     model = "Combination" # SVD,PCA,LDA,TD,PageRank,Combination
     recommended_movies = None
-    obj = UserMovieRecommendation()
-    if model == "Combination":
-        recommended_movies = obj.get_combined_recommendation(user_id=user_id)
-    else:
-        recommended_movies = obj.get_recommendation(user_id=user_id, model=model)
+    obj = UserMovieRecommendation(user_id=user_id)
+    if model == "SVD":
+        recommended_movies = obj.get_recommendation(model=model)
+    elif model == "PCA":
+        recommended_movies = obj.get_recommendation(model=model)
+    elif model == "LDA":
+        recommended_movies = obj.get_recommendation(model=model)
+    elif model == "TD":
+        recommended_movies = obj.get_recommendation(model=model)
+    elif model == "PageRank":
+        recommended_movies = obj.get_recommendation(model=model)
+    elif model == "Combination":
+        recommended_movies = obj.get_combined_recommendation()
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)

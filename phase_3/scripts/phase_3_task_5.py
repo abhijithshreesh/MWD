@@ -1,8 +1,5 @@
 import config_parser
 import data_extractor
-import numpy
-import pandas as pd
-from phase1_task_2 import GenreTag
 from util import Util
 
 class ClassifierTask(object):
@@ -10,9 +7,11 @@ class ClassifierTask(object):
         self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
+        self.util = Util()
 
     def get_data_for_classifier(self):
-        return None
+        movie_tag_frame = self.util.get_movie_tag_matrix()
+        return movie_tag_frame
 
 if __name__ == "__main__":
     obj = ClassifierTask()
