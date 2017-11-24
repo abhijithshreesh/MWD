@@ -295,6 +295,12 @@ class Util(object):
         return genre_tag_tfidf_df
 
     def distribute(self, seed_nodes, num_of_seeds_to_recommend):
+        """
+        Distributes importance among seed_nodes based on order of occurrence
+        :param seed_nodes:
+        :param num_of_seeds_to_recommend:
+        :return: list of size num_of_seeds_to_recommend with distributed values
+        """
         seed_value = float(num_of_seeds_to_recommend) / len(seed_nodes)
         seed_value_list = [seed_value for seed in seed_nodes]
         delta = seed_value / len(seed_nodes)
