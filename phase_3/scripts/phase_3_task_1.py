@@ -154,6 +154,10 @@ class UserMovieRecommendation(object):
         Create Movie Genre Tag tensor
         :return: tensor
         """
+        self.genre_data["tag_string"] = pd.Series(
+            [str(tag) for tag in self.genre_data.tag],
+            index=self.genre_data.index)
+
         movie_list = self.genre_data["moviename"].unique()
         movie_list.sort()
         movie_count = 0
@@ -173,9 +177,6 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        user_df["tag_string"] = pd.Series(
-            [str(tag) for tag in user_df.tag],
-            index=user_df.index)
         tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
@@ -234,7 +235,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     user_id = 146
-    model = "Combination" # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "TD" # SVD,PCA,LDA,TD,PageRank,Combination
     recommended_movies = None
     obj = UserMovieRecommendation(user_id=user_id)
     if model == "SVD":
