@@ -112,13 +112,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
                 count += 1
         n_i = count
 
-        n_i_by_N = n_i / float(N)
-
-        numerator = r_i + n_i_by_N
+        numerator = r_i + 0.5
         denominator = R + 1
         p_i = numerator / float(denominator)
 
-        numerator = n_i - r_i + n_i_by_N
+        numerator = n_i - r_i + 0.5
         denominator = N - R + 1
         u_i = numerator / float(denominator)
 
