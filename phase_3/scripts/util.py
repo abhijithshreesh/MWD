@@ -313,6 +313,12 @@ class Util(object):
 
         return seed_value_list
 
+    def get_tag_list_for_movie(self, movie):
+        movie_specific_data = self.genre_data[self.genre_data["moviename"] == movie]
+        tags_list = movie_specific_data["tag_string"].unique()
+
+        return tags_list
+
 
 if __name__ == "__main__":
     obj = Util()
