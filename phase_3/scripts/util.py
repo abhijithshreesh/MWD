@@ -331,6 +331,12 @@ class Util(object):
 
         return tags_list
 
+    def get_movies_for_tag(self, tag):
+        tag_specific_data = self.genre_data[self.genre_data["tag_string"] == tag]
+        movies_list = tag_specific_data["moviename"].unique()
+
+        return movies_list
+
 
 if __name__ == "__main__":
     obj = Util()
