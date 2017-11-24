@@ -337,6 +337,18 @@ class Util(object):
 
         return movies_list
 
+    def get_all_movies_for_user(self, user_id):
+        """
+        Obtain all movies watched by the user
+        :param user_id:
+        :return: list of movies watched by the user
+        """
+        user_data = self.genre_data[self.genre_data['userid'] == user_id]
+        user_data = user_data.sort_values('timestamp', ascending=False)
+        movies = user_data['moviename'].unique()
+
+        return movies
+
 
 if __name__ == "__main__":
     obj = Util()

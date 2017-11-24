@@ -10,19 +10,7 @@ class UserMovieRecommendation(object):
         self.util = Util()
         self.genre_data = self.util.genre_data
         self.user_id = user_id
-        self.watched_movies = self.get_all_movies_for_user(self.user_id)
-
-    def get_all_movies_for_user(self, user_id):
-        """
-        Obtain all movies watched by the user
-        :param user_id:
-        :return: list of movies watched by the user
-        """
-        user_data = self.genre_data[self.genre_data['userid'] == user_id]
-        user_data = user_data.sort_values('timestamp', ascending=False)
-        movies = user_data['moviename'].unique()
-
-        return movies
+        self.watched_movies = self.util.get_all_movies_for_user(self.user_id)
 
     def get_movie_movie_matrix(self, model):
         """

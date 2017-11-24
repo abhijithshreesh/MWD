@@ -16,6 +16,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         self.movies_dict = {}
         self.tag_dict = {}
         self.movie_tag_matrix = self.get_movie_tag_matrix()
+        self.feedback_metadata_dict = {}
         (self.relevant_tag_indices, self.relevant_movies) = self.get_relevant_tag_indices_and_movies()
 
     def get_relevant_tag_indices_and_movies(self):
@@ -35,6 +36,9 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
             tag_movies = self.util.get_movies_for_tag(tag)
             for movie in tag_movies:
                 relevant_movies.add(movie)
+
+        watched_movies = self.util.get_all_movies_for_user(self.user_id)
+        relevant_movies = set(relevant_movies) - set(watched_movies)
 
         return list(relevant_tag_indices), list(relevant_movies)
 
@@ -72,7 +76,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
 
         similarity = 0
         for tag in self.relevant_tag_indices:
-            (p_i, u_i) = self.get_feedback_metadata(tag)
+            if tag in self.feedback_metadata_dict.keys():
+                (p_i, u_i) = self.feedback_metadata_dict[tag]
+            else:
+                (p_i, u_i) = self.get_feedback_metadata(tag)
+                self.feedback_metadata_dict[tag] = (p_i, u_i)
             numerator = p_i * (1 - u_i)
             denominator = u_i * (1 - p_i)
             temp = movie_tag_values[tag] * (math.log(numerator / denominator))
