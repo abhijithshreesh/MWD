@@ -1,14 +1,14 @@
 import logging
 import operator
 import os
+
 import gensim
 import numpy
 import pandas as pd
 import tensorly.tensorly.decomposition as decomp
-from gensim import corpora
-
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
+from gensim import corpora
 from phase1_task_2 import GenreTag
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
@@ -20,7 +20,7 @@ class Util(object):
     """
     def __init__(self):
         self.conf = ParseConfig()
-        self.data_set_loc = os.path.join(os.path.abspath(os.path.dirname(__file__)), self.conf.config_section_mapper("filePath").get("data_set_loc"))
+        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = DataExtractor(self.data_set_loc)
         self.mlmovies = self.data_extractor.get_mlmovies_data()
         self.genre_tag = GenreTag()
@@ -56,7 +56,8 @@ class Util(object):
         :return: factor matrices and the core matrix
         """
         U, s, Vh = numpy.linalg.svd(matrix, full_matrices=False)
-        return (U, s, Vh)
+
+        return U, s, Vh
 
     def PCA(self, matrix):
         """
@@ -67,7 +68,7 @@ class Util(object):
         cov_df = numpy.cov(matrix, rowvar=False)
         U, s, Vh = numpy.linalg.svd(cov_df)
 
-        return (U, s, Vh)
+        return U, s, Vh
 
     def LDA(self, input_compound_list, num_topics, num_features):
         """
@@ -154,10 +155,12 @@ class Util(object):
         result_list = seed_matrix
         temp_list = []
         num_of_iter = 0
-        while(temp_list!=result_list and num_of_iter <= 1000):
+        while temp_list != result_list and num_of_iter <= 1000:
             num_of_iter += 1
             temp_list = result_list
-            result_list = list(0.85*numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list))+ 0.15*numpy.array(seed_matrix))
+            result_list = list(
+                0.85 * numpy.matmul(numpy.array(transition_df.values), numpy.array(result_list)) + 0.15 * numpy.array(
+                    seed_matrix))
         page_rank_dict = {i: j for i, j in zip(nodes, result_list)}
         sorted_rank = sorted(page_rank_dict.items(), key=operator.itemgetter(1), reverse=True)
 
@@ -244,11 +247,9 @@ class Util(object):
         """
         seed_value_list = self.distribute(seed_nodes, num_of_seeds_to_recommend)
         seed_value_list = [round(each) for each in seed_value_list]
-        total_count = 0
-        for val in seed_value_list:
-            total_count = total_count + val
+        total_count = sum(seed_value_list)
         difference = num_of_seeds_to_recommend - total_count
-        if(difference > 0):
+        if difference > 0:
             for i in range(0, len(seed_value_list)):
                 if seed_value_list[i] == 0:
                     seed_value_list[i] = 1
@@ -260,7 +261,7 @@ class Util(object):
                 difference -= 1
                 if difference == 0:
                     return seed_value_list
-        elif(difference < 0):
+        elif difference < 0:
             for i in range(0, len(seed_value_list)):
                 if seed_value_list[len(seed_value_list) - 1 - i] != 0:
                     seed_value_list[len(seed_value_list) - 1 - i] -= 1

@@ -135,10 +135,8 @@ class UserMovieRecommendation(object):
                 movie_row = movie_row_dict[movie]
                 labelled_movie_row = dict(zip(movies, movie_row))
                 num_of_movies_to_pick = distribution_list[index]
-                # Remove the movies which are already watched
                 for each in self.watched_movies:
                     del labelled_movie_row[each]
-                # Remove the movies which are already in recommendation_list
                 for each in recommended_movies:
                     del labelled_movie_row[each]
                 labelled_movie_row_sorted = sorted(labelled_movie_row.items(), key=operator.itemgetter(1), reverse=True)
