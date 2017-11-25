@@ -5,7 +5,7 @@ import os
 import gensim
 import numpy
 import pandas as pd
-import tensorly.decomposition as decomp
+import tensorly.tensorly.decomposition as decomp
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora

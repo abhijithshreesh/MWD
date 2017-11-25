@@ -21,13 +21,16 @@ class ClassifierTask(object):
         movie_label_dict = {}
         print("Provide set of labelled movies")
         while True:
-            movieid = input("Enter movie ID: ")
-            if int(movieid) not in movie_id_list:
-                print("Invalid movie ID entered, hence skipping this movie!")
-                continue
-            movie_name = self.util.get_movie_name_for_id(int(movieid))
-            label = input("Enter label for " + movie_name + ": ")
-            movie_label_dict[movie_name] = label
+            label = input("Enter the label: ")
+            label = str(label)
+            movieids = input("\nPlease enter comma separated ids of the movies belonging to label \'" + label + "\': ")
+            movieids = set(movieids.strip(" ").strip(",").replace(" ", "").split(","))
+            for movieid in movieids:
+                if int(movieid) not in movie_id_list:
+                    print("Invalid movie ID \'"+ movieid +"\' entered, hence skipping this movie!")
+                    continue
+                movie_name = self.util.get_movie_name_for_id(int(movieid))
+                movie_label_dict[movie_name] = label
             confirmation = input("Are you done entering labelled movies? (y/Y/n/N): ")
             if confirmation == "y" or confirmation == "Y":
                 break
