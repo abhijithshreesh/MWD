@@ -8,32 +8,28 @@ import data_extractor
 from util import Util
 
 class ClassifierTask(object):
-    def __init__(self):
+    def __init__(self, r):
         self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.util = Util()
+        self.r = r
         self.movie_tag_frame = self.util.get_movie_tag_matrix()
         self.movies = list(self.movie_tag_frame.index.values)
+        self.label_movies_json_data = self.data_extractor.get_json()
 
     def get_labelled_movies(self):
         movie_id_list = [self.util.get_movie_id(each) for each in self.movies]
         movie_label_dict = {}
-        print("Provide set of labelled movies")
-        while True:
-            label = input("Enter the label: ")
-            label = str(label)
-            movieids = input("\nPlease enter comma separated ids of the movies belonging to label \'" + label + "\': ")
-            movieids = set(movieids.strip(" ").strip(",").replace(" ", "").split(","))
-            for movieid in movieids:
+        print("Extracting labelled movies from the json provided!")
+        for label in self.label_movies_json_data.keys():
+            for movieid in self.label_movies_json_data[label]:
                 if int(movieid) not in movie_id_list:
-                    print("Invalid movie ID \'"+ movieid +"\' entered, hence skipping this movie!")
+                    print("Invalid movie ID \'" + movieid + "\' entered, hence skipping this movie!")
                     continue
                 movie_name = self.util.get_movie_name_for_id(int(movieid))
                 movie_label_dict[movie_name] = label
-            confirmation = input("Are you done entering labelled movies? (y/Y/n/N): ")
-            if confirmation == "y" or confirmation == "Y":
-                break
+        print("Finished extracting!")
 
         return movie_label_dict
 
@@ -43,10 +39,10 @@ class ClassifierTask(object):
         movie_movie_matrix = numpy.dot(movie_tag_matrix, tag_movie_matrix)
         return movie_movie_matrix
 
-    def predict_label(self, movie, distance_to_labelled_movies, movie_label_dict, r):
+    def predict_label(self, movie, distance_to_labelled_movies, movie_label_dict):
         label_count_dict = Counter()
         distance_to_labelled_movies_sorted = sorted(distance_to_labelled_movies.items(), key=operator.itemgetter(1))
-        distance_to_labelled_movies_sorted = distance_to_labelled_movies_sorted[0:r]
+        distance_to_labelled_movies_sorted = distance_to_labelled_movies_sorted[0:self.r]
         for (labelled_movie, distance) in distance_to_labelled_movies_sorted:
             label_count_dict[movie_label_dict[labelled_movie]] += 1
         label_count_dict_sorted = sorted(label_count_dict.items(), key=operator.itemgetter(1), reverse=True)
@@ -54,19 +50,17 @@ class ClassifierTask(object):
 
     def predict_label_for_all_movies(self):
         movie_label_dict = self.get_labelled_movies()
-        print("Classifying the rest of the movies, please wait!")
+        print("Classifying the rest of the movies using the extracted data, please wait!")
         movie_movie_matrix = self.get_movie_movie_distance_matrix()
         distance_to_labelled_movies = {}
         predicted_movie_label_dict = {}
-        r = input("Enter the value of r: ")
-        r = int(r)
         for i in range(0, len(self.movies)):
             labelled_movies = movie_label_dict.keys()
             if self.movies[i] in labelled_movies:
                 continue
             for labelled_movie in labelled_movies:
                 distance_to_labelled_movies[labelled_movie] = movie_movie_matrix[i][self.movies.index(labelled_movie)]
-            (label, count) = self.predict_label(self.movies[i], distance_to_labelled_movies, movie_label_dict, r)
+            (label, count) = self.predict_label(self.movies[i], distance_to_labelled_movies, movie_label_dict)
             predicted_movie_label_dict[self.movies[i]] = label
 
         return predicted_movie_label_dict
@@ -90,5 +84,6 @@ class ClassifierTask(object):
 
 
 if __name__ == "__main__":
-    obj = ClassifierTask()
+    r = 3
+    obj = ClassifierTask(r)
     obj.demo_output()

@@ -1,5 +1,6 @@
 import logging
 import os
+import json
 
 import pandas as pd
 from config_parser import ParseConfig
@@ -43,6 +44,11 @@ class DataExtractor(object):
 
     def get_task4_feedback_data(self):
         return self.data_extractor("task4-feedback.csv")
+
+    def get_json(self):
+        file_loc = os.path.join(self.file_path, "label_movies.json")
+        json_movie_label_dict = json.load(open(file_loc))
+        return json_movie_label_dict
 
 
 if __name__ == "__main__":
