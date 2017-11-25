@@ -108,7 +108,7 @@ class MovieLSH():
         query_movie_name = self.util.get_movie_name_for_id(query_movie_id)
         query_vector = self.movie_latent_df[self.movie_latent_df["moviename"] == query_movie_name]
         query_vector = query_vector.iloc[0].tolist()[0:-1]
-        self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
+        return self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
 
 
     def query_for_nearest_neighbours(self, query_vector, no_of_nearest_neighbours):
@@ -125,10 +125,8 @@ class MovieLSH():
             row_list = selected_movie_vectors.iloc[i].tolist()
             distance_from_query_list.append((row_list[-1], distance.euclidean(row_list[0:-1], query_vector)))
         distance_from_query_list = sorted(distance_from_query_list, key=lambda x: x[1])
-        a = distance_from_query_list[0:no_of_nearest_neighbours]
-        z=1
-        #select_nearest_neighbours(vector, no_of_nearest_neighbours)
-
+        nearest_neighbours = [each[0] for each in distance_from_query_list[1:no_of_nearest_neighbours+1]]
+        return nearest_neighbours
 
 
 if __name__ == "__main__":
@@ -145,4 +143,5 @@ if __name__ == "__main__":
     no_of_nearest_neighbours = 5
     obj = MovieLSH(num_layers, num_hashs)
     obj.create_index_structure(movie_list)
-    obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    nearest_neighbour = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    obj.util.print_movie_recommendations_and_collect_feedback(nearest_neighbour, 3, None)
