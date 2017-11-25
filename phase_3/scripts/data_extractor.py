@@ -45,6 +45,7 @@ class DataExtractor(object):
         return self.data_extractor("task4-feedback.csv")
 
 
+
 if __name__ == "__main__":
     conf = ParseConfig()
     data_set_location = conf.config_section_mapper("filePath").get("data_set_loc")

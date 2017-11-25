@@ -5,7 +5,7 @@ import os
 import gensim
 import numpy
 import pandas as pd
-import tensorly.tensorly.decomposition as decomp
+import tensorly.decomposition as decomp
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
 from gensim import corpora
@@ -232,14 +232,14 @@ class Util(object):
             df.to_csv(self.data_set_loc + "/task2-feedback.csv", index=False)
         elif task_no == 3 or task_no == 4:
             if not os.path.isfile(self.data_set_loc + "/task4-feedback.csv"):
-                df = pd.DataFrame(columns=['movie-name', 'relevancy'])
+                df = pd.DataFrame(columns=['moviename', 'relevancy'])
             else:
                 df = self.data_extractor.get_task4_feedback_data()
 
             for movie in rel_movies:
-                df = df.append({'movie-name': movie, 'relevancy': 'relevant'}, ignore_index=True)
+                df = df.append({'moviename': movie, 'relevancy': 1}, ignore_index=True)
             for movie in irrel_movies:
-                df = df.append({'movie-name': movie, 'relevancy': 'irrelevant'}, ignore_index=True)
+                df = df.append({'moviename': movie, 'relevancy': 0}, ignore_index=True)
 
             df.to_csv(self.data_set_loc + "/task4-feedback.csv", index=False)
 
