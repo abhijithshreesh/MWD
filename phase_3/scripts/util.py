@@ -192,6 +192,8 @@ class Util(object):
         while not done:
             movies_list = input("\nPlease enter comma separated ids of the relevant movies: ")
             rel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
+            while '' in rel_ids:
+                rel_ids.remove('')
             if len(rel_ids) > 5:
                 print("Incorrect number of movies entered as relevant.")
                 continue
