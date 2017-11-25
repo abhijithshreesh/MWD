@@ -195,4 +195,4 @@ if __name__ == "__main__":
     model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
-    obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 2, user_id)
+    obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
