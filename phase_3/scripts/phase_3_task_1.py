@@ -11,6 +11,7 @@ class UserMovieRecommendation(object):
         self.genre_data = self.util.genre_data
         self.user_id = user_id
         self.watched_movies = self.util.get_all_movies_for_user(self.user_id)
+        self.model_movies_dict = {}
 
     def get_movie_movie_matrix(self, model):
         """
@@ -40,7 +41,7 @@ class UserMovieRecommendation(object):
                 movie_latent_matrix = numpy.dot(movie_tag_matrix, tag_latent_matrix)
         elif model == "TD":
             tensor = self.fetch_movie_genre_tag_tensor()
-            factors = self.util.CPDecomposition(tensor, 10)
+            factors = self.util.CPDecomposition(tensor, 5)
             movies = self.genre_data["moviename"].unique()
             movies.sort()
             movie_latent_matrix = factors[0]
@@ -123,7 +124,7 @@ class UserMovieRecommendation(object):
             movie_dict[element] = movie_count
             movie_count += 1
 
-        user_df = self.genre_data[self.genre_data['userid'] == user_id]
+        user_df = self.genre_data[self.genre_data['moviename'].isin(self.watched_movies)]
         genre_list = user_df["genre"].unique()
         genre_list.sort()
         genre_count = 0
@@ -132,12 +133,13 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        tag_list = []
-        for watched_movie in self.watched_movies:
-            tag_list_for_movie = self.util.get_tag_list_for_movie(watched_movie)
-            for eachtag in tag_list_for_movie:
-                if eachtag not in tag_list:
-                    tag_list.append(eachtag)
+        # tag_list = []
+        # for watched_movie in self.watched_movies:
+        #     tag_list_for_movie = self.util.get_tag_list_for_movie(watched_movie)
+        #     for eachtag in tag_list_for_movie:
+        #         if eachtag not in tag_list:
+        #             tag_list.append(eachtag)
+        tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
         tag_dict = {}
@@ -166,14 +168,8 @@ class UserMovieRecommendation(object):
         :param user_id:
         :return: list of recommended movies
         """
-        model_movies_dict = {}
         recommended_movies = []
-        model_movies_dict["SVD"] = self.get_recommendation(model="SVD")
-        model_movies_dict["PCA"] = self.get_recommendation(model="PCA")
-        model_movies_dict["LDA"] = self.get_recommendation(model="LDA")
-        model_movies_dict["PageRank"] = self.get_recommendation(model="PageRank")
-        model_movies_dict["TD"] = self.get_recommendation(model="TD")
-        model_movies_list = list(model_movies_dict.values())
+        model_movies_list = list(self.model_movies_dict.values())
         movie_dict = Counter()
         for movie_list in model_movies_list:
             for i in range(0, len(movie_list)):
@@ -196,7 +192,16 @@ if __name__ == "__main__":
     # user_id = input['user_id']
     # model = input['model']
     user_id = 20
-    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "TD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
+    obj.model_movies_dict[model] = recommended_movies
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
+    while True:
+        confirmation = input("Are you done checking recommendation for all models? (y/Y/n/N): ")
+        if confirmation == "y" or confirmation == "Y":
+            break
+        model = input("Please enter the next model you want to use for recommendation: ")
+        recommended_movies = obj.get_recommendation(model)
+        obj.model_movies_dict[model] = recommended_movies
+        obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
