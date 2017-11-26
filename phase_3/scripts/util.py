@@ -196,12 +196,10 @@ class Util(object):
             rel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
             while '' in rel_ids:
                 rel_ids.remove('')
-            if len(rel_ids) > 5:
-                print("Incorrect number of movies entered as relevant.")
-                continue
+
             incorrect = False
             for item in rel_ids:
-                if int(item) not in [1, 2, 3, 4, 5]:
+                if int(item) not in [num for num in range(1, len(movies) + 1)]:
                     print("Incorrect movie ID selected.")
                     incorrect = True
                     break
@@ -216,12 +214,10 @@ class Util(object):
             irrel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
             while '' in irrel_ids:
                 irrel_ids.remove('')
-            if len(irrel_ids) > 5:
-                print("Incorrect number of movies entered as relevant.")
-                continue
             incorrect = False
             for item in irrel_ids:
-                if int(item) not in list(set(list([1, 2, 3, 4, 5])) - set(int(num) for num in rel_ids)):
+                if int(item) not in list(set(list([num for num in range(1, len(movies) + 1)])) - set(
+                        int(num) for num in rel_ids)):
                     print("Incorrect movie ID selected.")
                     incorrect = True
                     break
