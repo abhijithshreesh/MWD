@@ -130,7 +130,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
             movie_similarity[movie] = self.get_movie_similarity(movie)
 
         movie_recommendations = []
-        for movie in sorted(movie_similarity, key=operator.itemgetter(1), reverse=True):
+        for movie, value in sorted(movie_similarity.items(), key=operator.itemgetter(1), reverse=True):
             if len(movie_recommendations) == 5:
                 break
             movie_recommendations.append(movie)
