@@ -167,7 +167,7 @@ class UserMovieRecommendation(object):
         movie_dict = Counter()
         for movie_list in model_movies_list:
             for i in range(0, len(movie_list)):
-                    movie_dict[movie_list[i]] += 1 + (len(movie_list) - i) * 0.2
+                movie_dict[movie_list[i]] += 1 + (len(movie_list) - i) * 0.2
         movie_dict_sorted = sorted(movie_dict.items(), key=operator.itemgetter(1), reverse=True)
         movie_dict_sorted = movie_dict_sorted[0:5]
         for (m, v) in movie_dict_sorted:
@@ -192,10 +192,10 @@ if __name__ == "__main__":
     obj.model_movies_dict[model] = recommended_movies
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
     while True:
-        confirmation = input("Are you done checking recommendation for all models? (y/Y/n/N): ")
+        confirmation = input("\n\nAre you done checking recommendation for all models? (y/Y/n/N): ")
         if confirmation == "y" or confirmation == "Y":
             break
-        model = input("Please enter the next model you want to use for recommendation: ")
+        model = input("\n\nPlease enter the next model you want to use for recommendation: ")
         recommended_movies = obj.get_recommendation(model)
         obj.model_movies_dict[model] = recommended_movies
         obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
