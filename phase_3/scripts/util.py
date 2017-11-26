@@ -45,6 +45,8 @@ class Util(object):
         :param rank:
         :return: factor matrices obtained after decomposition
         """
+        (movie_count, genre_count, tag_count) = tensor.shape
+        rank = min(rank, movie_count-1, genre_count-1, tag_count-1)
         factors = decomp.parafac(tensor, rank)
 
         return factors

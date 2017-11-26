@@ -41,7 +41,7 @@ class UserMovieRecommendation(object):
                 movie_latent_matrix = numpy.dot(movie_tag_matrix, tag_latent_matrix)
         elif model == "TD":
             tensor = self.fetch_movie_genre_tag_tensor()
-            factors = self.util.CPDecomposition(tensor, 5)
+            factors = self.util.CPDecomposition(tensor, 10)
             movies = self.genre_data["moviename"].unique()
             movies.sort()
             movie_latent_matrix = factors[0]
@@ -124,8 +124,7 @@ class UserMovieRecommendation(object):
             movie_dict[element] = movie_count
             movie_count += 1
 
-        user_df = self.genre_data[self.genre_data['moviename'].isin(self.watched_movies)]
-        genre_list = user_df["genre"].unique()
+        genre_list = self.genre_data["genre"].unique()
         genre_list.sort()
         genre_count = 0
         genre_dict = {}
@@ -133,12 +132,7 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        # tag_list = []
-        # for watched_movie in self.watched_movies:
-        #     tag_list_for_movie = self.util.get_tag_list_for_movie(watched_movie)
-        #     for eachtag in tag_list_for_movie:
-        #         if eachtag not in tag_list:
-        #             tag_list.append(eachtag)
+        user_df = self.genre_data[self.genre_data['moviename'].isin(self.watched_movies)]
         tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
@@ -191,7 +185,7 @@ if __name__ == "__main__":
     # input = vars(parser.parse_args())
     # user_id = input['user_id']
     # model = input['model']
-    user_id = 20
+    user_id = 25
     model = "TD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
