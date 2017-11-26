@@ -210,13 +210,32 @@ class Util(object):
             if confirmation != "y" and confirmation != "Y":
                 continue
 
+            movies_list = input("\nPlease enter comma separated ids of the irrelevant movies: ")
+            irrel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
+            while '' in irrel_ids:
+                irrel_ids.remove('')
+            if len(irrel_ids) > 5:
+                print("Incorrect number of movies entered as relevant.")
+                continue
+            incorrect = False
+            for item in irrel_ids:
+                if int(item) not in list(set(list([1, 2, 3, 4, 5])) - set(int(num) for num in rel_ids)):
+                    print("Incorrect movie ID selected.")
+                    incorrect = True
+                    break
+            if incorrect:
+                continue
+
+            confirmation = input(
+                "Are you sure these are the irrelevant movies? " + str(list(irrel_ids)) + " (y/Y/n/N): ")
+            if confirmation != "y" and confirmation != "Y":
+                continue
+
             done = True
             for item in rel_ids:
                 rel_movies.append(movie_dict[int(item)])
-
-            for movie in movies:
-                if movie not in rel_movies:
-                    irrel_movies.append(movie)
+            for item in irrel_ids:
+                irrel_movies.append(movie_dict[int(item)])
 
         if task_no == 1 or task_no == 2:
             if not os.path.isfile(self.data_set_loc + "/task2-feedback.csv"):
