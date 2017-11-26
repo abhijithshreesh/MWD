@@ -186,7 +186,7 @@ if __name__ == "__main__":
     # user_id = input['user_id']
     # model = input['model']
     user_id = 25
-    model = "TD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     recommended_movies = obj.get_recommendation(model)
     obj.model_movies_dict[model] = recommended_movies
