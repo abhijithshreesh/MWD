@@ -163,6 +163,11 @@ class UserMovieRecommendation(object):
         :return: list of recommended movies
         """
         recommended_movies = []
+        model_list = ["SVD","LDA","PCA","PageRank","TD"]
+        models_present = self.model_movies_dict.keys()
+        models_absent = list(set(model_list) - set(models_present))
+        for model in models_absent:
+            self.model_movies_dict[model] = self.get_recommendation(model)
         model_movies_list = list(self.model_movies_dict.values())
         movie_dict = Counter()
         for movie_list in model_movies_list:
@@ -188,14 +193,20 @@ if __name__ == "__main__":
     user_id = 25
     model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
-    recommended_movies = obj.get_recommendation(model)
-    obj.model_movies_dict[model] = recommended_movies
+    if model not in obj.model_movies_dict.keys():
+        recommended_movies = obj.get_recommendation(model)
+        obj.model_movies_dict[model] = recommended_movies
+    else:
+        recommended_movies = obj.model_movies_dict[model]
     obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
     while True:
         confirmation = input("\n\nAre you done checking recommendation for all models? (y/Y/n/N): ")
         if confirmation == "y" or confirmation == "Y":
             break
         model = input("\n\nPlease enter the next model you want to use for recommendation: ")
-        recommended_movies = obj.get_recommendation(model)
-        obj.model_movies_dict[model] = recommended_movies
+        if model not in obj.model_movies_dict.keys():
+            recommended_movies = obj.get_recommendation(model)
+            obj.model_movies_dict[model] = recommended_movies
+        else:
+            recommended_movies = obj.model_movies_dict[model]
         obj.util.print_movie_recommendations_and_collect_feedback(recommended_movies, 1, user_id)
