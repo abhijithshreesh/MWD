@@ -15,6 +15,7 @@ class RelevancyFinder():
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.util = Util()
         self.fileName = "lsh_index_structure.csv"
+        self.movieLSH = MovieLSH()
         #self.movie_tag_df.to_csv(self.data_set_loc + '/movie_tag dataset.csv', index=True, encoding='utf-8')
         #self.relevancy_df = self.fetch_feedback_data()
         try:
@@ -62,8 +63,8 @@ class RelevancyFinder():
         return query_point.transpose()
 
     def relevancy(self, no_r,query_point):
-        #movieLSH = MovieLSH()  # Takes WAYYYYYY too much Time!
-        movie_names = MovieLSH.query_for_nearest_neighbours_using_csv(self, query_point, no_r)
+        #movieLSH = MovieLSH()  # Takes WAYYYYYY too much Time! - Hence commented out
+        movie_names = self.movieLSH.query_for_nearest_neighbours_using_csv(query_point, no_r)
         #movie_names = self.movie_tag_df['moviename'].sample(n=no_r)
         Util.print_movie_recommendations_and_collect_feedback(self, movie_names, 4, None)
 
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     obj = RelevancyFinder()
     i = True
     j = 2
-    qp = obj.query_point(0, 0)
+    qp = obj.query_point(0, 1)
     while i:
         r = int(input("\nEnter value of 'r' : "))
         obj.relevancy(r, qp)
