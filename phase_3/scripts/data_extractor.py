@@ -15,7 +15,7 @@ class DataExtractor(object):
 
     def data_extractor(self, file_name):  # return the data frame with respect to the csv file in 'resources' directory
         file_loc = os.path.join(self.file_path, file_name)
-        data_frame = pd.read_csv(file_loc)
+        data_frame = pd.read_csv(file_loc, low_memory=False)
         return data_frame
 
     def get_movie_actor_data(self):
@@ -46,7 +46,7 @@ class DataExtractor(object):
         return self.data_extractor("task4-feedback.csv")
 
     def get_movie_lanent_semantics_data(self):
-        return self.data_extractor("movie_tag dataset.csv")
+        return self.data_extractor("movie_latent_semantic.csv")
 
 
     def get_json(self):
