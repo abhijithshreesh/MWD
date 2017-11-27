@@ -122,7 +122,7 @@ class MovieLSH():
 
     def query_for_nearest_neighbours_using_csv(self, query_vector, no_of_nearest_neighbours):
         index_structure_df = pd.read_csv(os.path.join(self.data_set_loc, self.fileName)).fillna("")
-        index_structure_df = index_structure_df.drop(['Unnamed: 0'], axis=1)
+        # index_structure_df = index_structure_df.drop(['Unnamed: 0'], axis=1)
         self.index_structure = index_structure_df.to_dict("list")
         self.index_structure = {k: set(v) for k,v in list(self.index_structure.items())}
         for k,v in list(self.index_structure.items()):
@@ -133,6 +133,7 @@ class MovieLSH():
         query_bucket_list = self.LSH(query_vector)
         query_hash_key_list = self.fetch_hash_keys(query_bucket_list)
         selected_movie_set = set()
+        nearest_neighbours = set()
         for j in range(0, self.num_hashs):
             for i in range(0, len(query_hash_key_list)):
                 selected_movie_set.update(self.index_structure.get(query_hash_key_list[i].rsplit(".", j)[0], ''))
@@ -143,7 +144,7 @@ class MovieLSH():
                     row_list = selected_movie_vectors.iloc[i].tolist()
                     distance_from_query_list.append((row_list[-1], distance.euclidean(row_list[0:-1], query_vector)))
                 distance_from_query_list = sorted(distance_from_query_list, key=lambda x: x[1])
-                nearest_neighbours = [each[0] for each in distance_from_query_list[0:no_of_nearest_neighbours+1]]
+                nearest_neighbours.add([each[0] for each in distance_from_query_list[0:no_of_nearest_neighbours+1]])
                 if (len(nearest_neighbours) == no_of_nearest_neighbours):
                     break
         return nearest_neighbours
