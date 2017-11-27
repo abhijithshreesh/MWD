@@ -1,8 +1,10 @@
-import pandas as pd
 import data_extractor
 import config_parser
 from util import Util
-from phase_3_task_3 import MovieLSH
+import config_parser
+import data_extractor
+from util import Util
+
 
 class RelevancyFinder():
 
@@ -11,19 +13,27 @@ class RelevancyFinder():
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.util = Util()
-        self.movie_tag_df = self.util.get_movie_tag_matrix()
-        self.movie_tag_df = self.movie_tag_df.reset_index()
-        self.relevancy_df = self.data_extractor.get_task4_feedback_data()
+        self.movie_tag_df = self.util.get_movie_tag_matrix().reset_index()
+        self.relevancy_df = self.fetch_feedback_data()
 
+    def fetch_feedback_data(self):
+        data = None
+        try:
+            data = self.data_extractor.get_task4_feedback_data()
+        except:
+            print("Feedback file missing.\nAborting...")
+            exit(1)
+
+        return data
 
     def query_point(self, old_query_point):
-        self.relevancy_df = self.data_extractor.get_task4_feedback_data()
+        self.relevancy_df = self.fetch_feedback_data()
         self.relevancy_df = self.relevancy_df.set_index('moviename')
         merged_data_frame = self.relevancy_df.reset_index().merge(self.movie_tag_df, how="left", on="moviename")
         merged_data_frame = merged_data_frame.set_index('moviename')
         merged_data_frame = merged_data_frame.sort_values('relevancy')
         query_point = merged_data_frame.groupby('relevancy', axis=0).mean()
-        #query_point.to_csv(self.data_set_loc + '/temp1.csv', index=True, encoding='utf-8')
+        query_point.to_csv(self.data_set_loc + '/temp1.csv', index=True, encoding='utf-8')
         query_point = query_point.reset_index()
         del query_point['relevancy']
         if query_point.shape[0] < 2:
