@@ -1,3 +1,4 @@
+import random
 import operator
 from collections import Counter
 from scipy.spatial import distance as dist
@@ -5,16 +6,22 @@ import config_parser
 import data_extractor
 from util import Util
 
+util = Util()
+conf = config_parser.ParseConfig()
+data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
+data_extractor_obj = data_extractor.DataExtractor(data_set_loc)
+movie_tag_frame = util.get_movie_tag_matrix()
+movies = list(movie_tag_frame.index.values)
+tags = list(movie_tag_frame)
+label_movies_json_data = data_extractor_obj.get_json()
+
 class ClassifierTask(object):
     def __init__(self, r=0):
-        self.conf = config_parser.ParseConfig()
-        self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
-        self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
-        self.util = Util()
+        self.util = util
         self.r = r
-        self.movie_tag_frame = self.util.get_movie_tag_matrix()
-        self.movies = list(self.movie_tag_frame.index.values)
-        self.label_movies_json_data = self.data_extractor.get_json()
+        self.movie_tag_frame = movie_tag_frame
+        self.movies = movies
+        self.label_movies_json_data = label_movies_json_data
         self.movie_label_dict = self.get_labelled_movies()
 
     def get_labelled_movies(self):
@@ -51,9 +58,22 @@ class ClassifierTask(object):
 
         return label
 
+    def predict_using_DTC(self, tree, movie):
+        if tree.dominant_label != False:
+            return tree.dominant_label
+        movie_value_for_tag = movie_tag_frame.values[movies.index(movie)][tree.feature_index]
+        if movie_value_for_tag > 0:
+            return self.predict_using_DTC(tree.right, movie)
+        else:
+            return self.predict_using_DTC(tree.left, movie)
+
     def demo_output(self, model):
         movie_id_list = [self.util.get_movie_id(each) for each in self.movies]
         predicted_label = None
+        tree = None
+        if model == "DTC":
+            node = Node(self.movie_label_dict)
+            tree = node.construct_tree()
         while True:
             query_movie_id = input("Enter the movie ID you want to know the predicted label: ")
             query_movie_id = int(query_movie_id)
@@ -63,14 +83,56 @@ class ClassifierTask(object):
             query_movie_name = self.util.get_movie_name_for_id(query_movie_id)
             if model == "RNN":
                 predicted_label = self.find_label_RNN(query_movie_name)
+            elif model == "DTC":
+                predicted_label = self.predict_using_DTC(tree, query_movie_name)
             print("Entered movie: " + query_movie_name + "\nPredicted label: " + str(predicted_label))
             confirmation = input("Are you done querying? (y/Y/n/N): ")
             if confirmation == "y" or confirmation == "Y":
                 break
 
+class Node(object):
+    def __init__(self, movie_label_dict):
+        self.left = None
+        self.right = None
+        self.data = movie_label_dict
+        self.dominant_label = False
+        self.parent = None
+        self.feature_index = random.randint(0, len(tags) - 1)
+
+    def check_dominancy(self, movie_label_dict_values):
+        label_count_dict = Counter(movie_label_dict_values)
+        label_count_dict_sorted = sorted(label_count_dict.items(), key=operator.itemgetter(1), reverse=True)
+        (dominant_label, dominant_count) = label_count_dict_sorted[0]
+        dominancy = float(dominant_count) / len(movie_label_dict_values)
+        if dominancy > 0.75:
+            return dominant_label
+        else:
+            return False
+
+    def construct_tree(self):
+        movie_label_dict_values = self.data.values()
+        if len(movie_label_dict_values) == 0:
+            return None
+        dominant_label = self.check_dominancy(movie_label_dict_values)
+        if dominant_label:
+            self.dominant_label = dominant_label
+            return self
+        left_movie_label_dict = {}
+        right_movie_label_dict = {}
+        for (movie, label) in self.data.items():
+            movie_value_for_tag = movie_tag_frame.values[movies.index(movie)][self.feature_index]
+            if movie_value_for_tag > 0:
+                right_movie_label_dict[movie] = label
+            else:
+                left_movie_label_dict[movie] = label
+        self.left = Node(left_movie_label_dict).construct_tree()
+        self.right = Node(right_movie_label_dict).construct_tree()
+
+        return self
+
 
 if __name__ == "__main__":
-    r = 3
-    model = "RNN" #RNN,SVM,DTC
+    r = 4
+    model = "DTC" #RNN,SVM,DTC
     obj = ClassifierTask(r)
     obj.demo_output(model)
