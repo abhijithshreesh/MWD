@@ -13,9 +13,15 @@ class RelevancyFinder(object):
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
         self.data_extractor = data_extractor.DataExtractor(self.data_set_loc)
         self.util = Util()
-        self.movie_tag_df = self.util.get_movie_tag_matrix().reset_index()
         #self.movie_tag_df.to_csv(self.data_set_loc + '/movie_tag dataset.csv', index=True, encoding='utf-8')
         #self.relevancy_df = self.fetch_feedback_data()
+        try:
+            self.movie_tag_df = self.data_extractor.get_movie_lanent_semantics_data()
+            self.movie_tag_df = self.movie_tag_df.reset_index()
+        except:
+            print("Feedback file missing.\nAborting...")
+            exit(1)
+
 
     def fetch_feedback_data(self):
         data = None
@@ -66,8 +72,8 @@ if __name__ == "__main__":
         r = int(input("\nEnter value of 'r' : "))
         obj.relevancy(r, qp)
         j += 1
-        qp = obj.query_point(qp, 1 - 1/j)
-        temp = input('Press any key to continue the search & 0 to stop: ')
+        qp = obj.query_point(qp, 1/j)
+        temp = input('\nPress any key to continue the search or 0 to stop: ')
         if temp == '0':
             i = False
         else:
