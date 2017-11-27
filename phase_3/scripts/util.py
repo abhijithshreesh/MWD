@@ -309,8 +309,8 @@ class Util(object):
         idf_weight_dict = self.genre_tag.assign_idf_weight(idf_data, unique_tags)
         tag_df = self.genre_tag.get_model_weight(tf_weight_dict, idf_weight_dict, tag_df, 'tfidf')
         tag_df["total"] = tag_df.groupby(['movieid','tag_string'])['value'].transform('sum')
-        temp_df = tag_df[["movieid", "tag_string", "total"]].drop_duplicates().reset_index()
-        genre_tag_tfidf_df = temp_df.pivot_table('total', 'movieid', 'tag_string')
+        temp_df = tag_df[["moviename", "tag_string", "total"]].drop_duplicates().reset_index()
+        genre_tag_tfidf_df = temp_df.pivot_table('total', 'moviename', 'tag_string')
         genre_tag_tfidf_df = genre_tag_tfidf_df.fillna(0)
 
         return genre_tag_tfidf_df
