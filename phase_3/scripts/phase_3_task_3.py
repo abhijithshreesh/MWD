@@ -1,14 +1,16 @@
 import pandas as pd
+import os
 import random
 import math
 from scipy.spatial import distance
 import numpy
-
+from config_parser import ParseConfig
 from phase_3.scripts.util import Util
 
+conf = ParseConfig()
 
 class MovieLSH():
-    def __init__(self, num_layers, num_hashs):
+    def __init__(self, num_layers = 0, num_hashs = 0, fileName = "lsh_index_structure.csv"):
         self.util = Util()
         self.movie_tag_df = self.util.get_movie_tag_matrix()
         self.num_layers = num_layers
@@ -22,6 +24,9 @@ class MovieLSH():
         self.movie_latent_df = pd.DataFrame()
         self.w_length = 0.0
         (self.U, self.s, self.Vt) = self.util.SVD(self.movie_tag_df.values)
+        self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
+        self.fileName = fileName
+
 
     def assign_group(self, value):
         if value < 0:
@@ -62,6 +67,7 @@ class MovieLSH():
         movie_df = self.movie_tag_df.reset_index()
         movie_name_df = pd.DataFrame(movie_df["moviename"])
         self.movie_latent_df = U_dataframe.join(movie_name_df, how="left")
+        self.movie_latent_df.to_csv(os.path.join(self.data_set_loc, "movie_latent_semantic.csv"))
         return pd.DataFrame(bucket_matrix).join(movie_name_df, how="left")
 
     def index_data(self, df):
@@ -103,12 +109,24 @@ class MovieLSH():
         movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["moviename"].isin(movie_list)]
 
         self.index_structure = obj.index_data(self.movie_bucket_df)
+        temp_index_structure = dict([(k,pd.Series(list(v))) for k,v in list(self.index_structure.items())])
+        pd.DataFrame.from_dict(temp_index_structure).to_csv(os.path.join(self.data_set_loc, self.fileName))
 
     def query_for_nearest_neighbours_for_movie(self, query_movie_id, no_of_nearest_neighbours):
         query_movie_name = self.util.get_movie_name_for_id(query_movie_id)
         query_vector = self.movie_latent_df[self.movie_latent_df["moviename"] == query_movie_name]
         query_vector = query_vector.iloc[0].tolist()[0:-1]
         return self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
+
+    def query_for_nearest_neighbours_using_csv(self, query_vector, no_of_nearest_neighbours):
+        index_structure_df = pd.read_csv(os.path.join(self.data_set_loc, self.fileName)).fillna("")
+        index_structure_df = index_structure_df.drop(['Unnamed: 0'], axis=1)
+        self.index_structure = index_structure_df.to_dict("list")
+        self.index_structure = {k: set(v) for k,v in list(self.index_structure.items())}
+        for k,v in list(self.index_structure.items()):
+            v.discard('')
+        return self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
+
 
 
     def query_for_nearest_neighbours(self, query_vector, no_of_nearest_neighbours):
@@ -143,5 +161,5 @@ if __name__ == "__main__":
     no_of_nearest_neighbours = 5
     obj = MovieLSH(num_layers, num_hashs)
     obj.create_index_structure(movie_list)
-    nearest_neighbour = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
-    obj.util.print_movie_recommendations_and_collect_feedback(nearest_neighbour, 3, None)
+    nearest_neighbours = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    obj.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
