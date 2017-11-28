@@ -43,13 +43,13 @@ class NearestNeighbourBasedRelevanceFeedback(object):
         try:
             movie_tag_df = self.data_extractor.get_movie_lanent_semantics_data()
         except:
-            print("Unable to find movie tag matrix for movies in latent space.\nAborting")
+            print("Unable to find movie-tag matrix for movies in latent space.\nAborting...")
             exit(1)
 
         movie_index = 0
-        movies_list = list(movie_tag_df.index.values)
-        for movie in movies_list:
-            self.movies_dict[movie] = movie_index
+        movie_ids_list = movie_tag_df.movieid
+        for movie_id in movie_ids_list:
+            self.movies_dict[movie_id] = movie_index
             movie_index += 1
 
         return movie_tag_df.values
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     nn_rel_feed = NearestNeighbourBasedRelevanceFeedback()
     while True:
         n = int(input("\nEnter value of 'r' : "))
-        nn_rel_feed.print_movie_recommendations_and_collect_feedback(n)
-        confirmation = input("")
+        # nn_rel_feed.print_movie_recommendations_and_collect_feedback(n)
+        confirmation = input("\n\nDo you want to continue? (y/Y/n/N): ")
         if confirmation != "y" and confirmation != "Y":
             break
