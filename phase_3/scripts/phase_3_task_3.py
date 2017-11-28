@@ -56,7 +56,7 @@ class MovieLSH():
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
-        self.w_length = min(self.lsh_range_dict.values()) / 20
+        self.w_length = min(self.lsh_range_dict.values()) / 10
         self.column_groups = {vector: [] for vector in self.lsh_range_dict.keys()}
         bucket_matrix = numpy.zeros(shape=(len(self.U), len(self.lsh_points_dict)))
         self.U_matrix = U_dataframe.values
@@ -65,15 +65,15 @@ class MovieLSH():
             bucket_matrix[movie] = self.LSH(self.U_matrix[movie])
 
         movie_df = self.movie_tag_df.reset_index()
-        movie_name_df = pd.DataFrame(movie_df["moviename"])
-        self.movie_latent_df = U_dataframe.join(movie_name_df, how="left")
+        movie_id_df = pd.DataFrame(movie_df["movieid"])
+        self.movie_latent_df = U_dataframe.join(movie_id_df, how="left")
         self.movie_latent_df.to_csv(os.path.join(self.data_set_loc, "movie_latent_semantic.csv"), index=False)
-        return pd.DataFrame(bucket_matrix).join(movie_name_df, how="left")
+        return pd.DataFrame(bucket_matrix).join(movie_id_df, how="left")
 
     def index_data(self, df):
         index_structure_dict = {}
         for index, row in df.iterrows():
-            movie_name = row["moviename"]
+            movie_id = row["movieid"]
             column = 0
             for i in range(0, self.num_layers):
                 bucket = ""
@@ -82,10 +82,10 @@ class MovieLSH():
                     bucket = bucket + str(int(interval)) + "."
                     column += 1
                     if bucket.strip(".") in index_structure_dict:
-                        index_structure_dict[bucket.strip(".")].add(movie_name)
+                        index_structure_dict[bucket.strip(".")].add(movie_id)
                     else:
                         movie_set = set()
-                        movie_set.add(movie_name)
+                        movie_set.add(movie_id)
                         index_structure_dict[bucket.strip(".")] = movie_set
         return index_structure_dict
 
@@ -106,9 +106,12 @@ class MovieLSH():
 
     def create_index_structure(self, movie_list):
         self.movie_bucket_df = obj.group_data()
-        movie_name_list = [self.util.get_movie_name_for_id(movie_id) for movie_id in movie_list]
-        movie_list_latent_df = self.movie_latent_df[self.movie_latent_df["moviename"].isin(movie_name_list)]
-        movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["moviename"].isin(movie_name_list)]
+        # movie_name_list = [self.util.get_movie_name_for_id(movie_id) for movie_id in movie_list]
+        # movie_list_latent_df = self.movie_latent_df[self.movie_latent_df["moviename"].isin(movie_name_list)]
+        # movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["moviename"].isin(movie_name_list)]
+
+        # movie_list_latent_df = self.movie_latent_df[self.movie_latent_df["movieid"].isin(movie_list)]
+        movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["movieid"].isin(movie_list)]
 
         self.index_structure = obj.index_data(movie_list_bucket_df)
         temp_index_structure = dict([(k, pd.Series(list(v))) for k, v in list(self.index_structure.items())])
@@ -116,7 +119,9 @@ class MovieLSH():
 
     def query_for_nearest_neighbours_for_movie(self, query_movie_id, no_of_nearest_neighbours):
         query_movie_name = self.util.get_movie_name_for_id(query_movie_id)
-        query_vector = self.movie_latent_df[self.movie_latent_df["moviename"] == query_movie_name]
+        print("\nQuery Movie Name : " + query_movie_name + " - " + str(int(query_movie_id)) + "\n")
+        # query_vector = self.movie_latent_df[self.movie_latent_df["moviename"] == query_movie_name]
+        query_vector = self.movie_latent_df[self.movie_latent_df["movieid"] == query_movie_id]
         query_vector = query_vector.iloc[0].tolist()[0:-1]
         return self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
 
@@ -133,19 +138,21 @@ class MovieLSH():
         query_bucket_list = self.LSH(query_vector)
         query_hash_key_list = self.fetch_hash_keys(query_bucket_list)
         selected_movie_set = set()
-        nearest_neighbours = set()
+        nearest_neighbours = {}
         for j in range(0, self.num_hashs):
             for i in range(0, len(query_hash_key_list)):
                 selected_movie_set.update(self.index_structure.get(query_hash_key_list[i].rsplit(".", j)[0], ''))
                 selected_movie_set.discard('')
-                selected_movie_vectors = self.movie_latent_df[self.movie_latent_df["moviename"].isin(selected_movie_set)]
+                selected_movie_vectors = self.movie_latent_df[self.movie_latent_df["movieid"].isin(selected_movie_set)]
                 distance_from_query_list = []
                 for i in range(0, len(selected_movie_vectors.index)):
                     row_list = selected_movie_vectors.iloc[i].tolist()
-                    distance_from_query_list.append((row_list[-1], distance.euclidean(row_list[0:-1], query_vector)))
+                    euclidean_distance = distance.euclidean(row_list[0:-1], query_vector)
+                    if(euclidean_distance != 0):
+                        distance_from_query_list.append((row_list[-1], euclidean_distance))
                 distance_from_query_list = sorted(distance_from_query_list, key=lambda x: x[1])
-                nearest_neighbours.add([each[0] for each in distance_from_query_list[0:no_of_nearest_neighbours+1]])
-                if (len(nearest_neighbours) == no_of_nearest_neighbours):
+                nearest_neighbours = ([each[0] for each in distance_from_query_list[0:no_of_nearest_neighbours]])
+                if (len(nearest_neighbours) >= no_of_nearest_neighbours):
                     break
         return nearest_neighbours
 
@@ -164,5 +171,6 @@ if __name__ == "__main__":
     no_of_nearest_neighbours = 5
     obj = MovieLSH(num_layers, num_hashs)
     obj.create_index_structure(movie_list)
-    nearest_neighbours = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    nearest_neighbours_list = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    nearest_neighbours = [int(each) for each in nearest_neighbours_list]
     obj.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
