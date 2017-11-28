@@ -1,3 +1,4 @@
+import argparse
 import math
 import operator
 
@@ -126,12 +127,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(
-    #     description='phase_3_task_2.py user_id',
-    # )
-    # parser.add_argument('user_id', action="store", type=int)
-    # input = vars(parser.parse_args())
-    # user_id = input['user_id']
-    user_id = 20
+    parser = argparse.ArgumentParser(
+        description='phase_3_task_2.py user_id',
+    )
+    parser.add_argument('user_id', action="store", type=int)
+    input = vars(parser.parse_args())
+    user_id = input['user_id']
     prop_rel_feed_rec = ProbabilisticRelevanceFeedbackUserMovieRecommendation(user_id)
     prop_rel_feed_rec.print_movie_recommendations_and_collect_feedback()
