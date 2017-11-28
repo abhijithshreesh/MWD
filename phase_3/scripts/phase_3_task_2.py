@@ -24,6 +24,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         user_relevancy_info = self.feedback_data[self.feedback_data["user-id"] == self.user_id]
         movies = user_relevancy_info["movie-id"].unique()
 
+        if len(movies) == 0:
+            print("No relevance feedback data available for the user " + str(self.user_id))
+            print("Aborting...")
+            exit(1)
+
         relevant_tag_indices = set()
         relevant_tags = set()
         for movie in movies:
