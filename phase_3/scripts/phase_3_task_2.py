@@ -22,7 +22,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
 
     def get_relevant_tag_indices_and_movies(self):
         user_relevancy_info = self.feedback_data[self.feedback_data["user-id"] == self.user_id]
-        movies = user_relevancy_info["movie-name"].unique()
+        movies = user_relevancy_info["movie-id"].unique()
 
         relevant_tag_indices = set()
         relevant_tags = set()
@@ -71,8 +71,8 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
 
         return movie_tag_matrix.values
 
-    def get_movie_similarity(self, movie_name):
-        movie_index = self.movies_dict[movie_name]
+    def get_movie_similarity(self, movie_id):
+        movie_index = self.movies_dict[movie_id]
         movie_tag_values = self.movie_tag_matrix[movie_index]
 
         similarity = 0
@@ -92,9 +92,9 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
     def get_feedback_metadata(self, tag_index):
         user_feedback_data = self.feedback_data[self.feedback_data['user-id'] == self.user_id]
         user_relevant_data = user_feedback_data[user_feedback_data['relevancy'] == 'relevant']
-        user_relevant_movies = user_relevant_data['movie-name'].unique()
+        user_relevant_movies = user_relevant_data['movie-id'].unique()
         user_irrelevant_data = user_feedback_data[user_feedback_data['relevancy'] == 'irrelevant']
-        user_irrelevant_movies = user_irrelevant_data['movie-name'].unique()
+        user_irrelevant_movies = user_irrelevant_data['movie-id'].unique()
 
         R = len(user_relevant_movies)
         N = R + len(user_irrelevant_movies)
@@ -107,7 +107,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         r_i = count
 
         count = 0
-        for movie in user_feedback_data['movie-name'].unique():
+        for movie in user_feedback_data['movie-id'].unique():
             movie_index = self.movies_dict[movie]
             if self.movie_tag_matrix[movie_index][tag_index] == 1:
                 count += 1

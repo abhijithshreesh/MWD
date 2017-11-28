@@ -168,8 +168,8 @@ class Util(object):
 
         return sorted_rank[0:len(seed_nodes)+5]
 
-    def print_movie_recommendations_and_collect_feedback(self, movies, task_no, user_id):
-        if len(movies) == 0:
+    def print_movie_recommendations_and_collect_feedback(self, movie_ids, task_no, user_id):
+        if len(movie_ids) == 0:
             print("No movies found.")
             exit(1)
 
@@ -183,9 +183,10 @@ class Util(object):
             
         count = 1
         movie_dict = {}
-        for movie in movies:
-            print(str(count) + ". " + str(movie))
-            movie_dict[count] = movie
+        for movie_id in movie_ids:
+            movie_name = self.get_movie_name_for_id(movie_id)
+            print(str(count) + ". " + str(movie_name) + " - " + str(movie_id))
+            movie_dict[count] = (movie_name, movie_id)
             count += 1
 
         done = False
@@ -199,7 +200,7 @@ class Util(object):
 
             incorrect = False
             for item in rel_ids:
-                if int(item) not in [num for num in range(1, len(movies) + 1)]:
+                if int(item) not in [num for num in range(1, len(movie_ids) + 1)]:
                     print("Incorrect movie ID selected.")
                     incorrect = True
                     break
@@ -214,9 +215,10 @@ class Util(object):
             irrel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
             while '' in irrel_ids:
                 irrel_ids.remove('')
+
             incorrect = False
             for item in irrel_ids:
-                if int(item) not in list(set(list([num for num in range(1, len(movies) + 1)])) - set(
+                if int(item) not in list(set(list([num for num in range(1, len(movie_ids) + 1)])) - set(
                         int(num) for num in rel_ids)):
                     print("Incorrect movie ID selected.")
                     incorrect = True
@@ -237,26 +239,32 @@ class Util(object):
 
         if task_no == 1 or task_no == 2:
             if not os.path.isfile(self.data_set_loc + "/task2-feedback.csv"):
-                df = pd.DataFrame(columns=['movie-name', 'relevancy', 'user-id'])
+                df = pd.DataFrame(columns=['movie-name', 'movie-id', 'relevancy', 'user-id'])
             else:
                 df = self.data_extractor.get_task2_feedback_data()
 
             for movie in rel_movies:
-                df = df.append({'movie-name': movie, 'relevancy': 'relevant', 'user-id': user_id}, ignore_index=True)
+                df = df.append(
+                    {'movie-name': movie[0], 'movie-id': movie[1], 'relevancy': 'relevant', 'user-id': user_id},
+                    ignore_index=True)
             for movie in irrel_movies:
-                df = df.append({'movie-name': movie, 'relevancy': 'irrelevant', 'user-id': user_id}, ignore_index=True)
+                df = df.append(
+                    {'movie-name': movie[0], 'movie-id': movie[1], 'relevancy': 'irrelevant', 'user-id': user_id},
+                    ignore_index=True)
 
             df.to_csv(self.data_set_loc + "/task2-feedback.csv", index=False)
         elif task_no == 3 or task_no == 4:
             if not os.path.isfile(self.data_set_loc + "/task4-feedback.csv"):
-                df = pd.DataFrame(columns=['moviename', 'relevancy'])
+                df = pd.DataFrame(columns=['movie-name', 'movie-id', 'relevancy'])
             else:
                 df = self.data_extractor.get_task4_feedback_data()
 
             for movie in rel_movies:
-                df = df.append({'moviename': movie, 'relevancy': 1}, ignore_index=True)
+                df = df.append({'movie-name': movie[0], 'movie-id': movie[1], 'relevancy': 'relevant'},
+                               ignore_index=True)
             for movie in irrel_movies:
-                df = df.append({'moviename': movie, 'relevancy': 0}, ignore_index=True)
+                df = df.append({'movie-name': movie[0], 'movie-id': movie[1], 'relevancy': 'irrelevant'},
+                               ignore_index=True)
 
             df.to_csv(self.data_set_loc + "/task4-feedback.csv", index=False)
 
@@ -345,14 +353,14 @@ class Util(object):
         return movie_name[0]
 
     def get_tag_list_for_movie(self, movie):
-        movie_specific_data = self.genre_data[self.genre_data["moviename"] == movie]
+        movie_specific_data = self.genre_data[self.genre_data["movieid"] == movie]
         tags_list = movie_specific_data["tag_string"].unique()
 
         return tags_list
 
     def get_movies_for_tag(self, tag):
         tag_specific_data = self.genre_data[self.genre_data["tag_string"] == tag]
-        movies_list = tag_specific_data["moviename"].unique()
+        movies_list = tag_specific_data["movieid"].unique()
 
         return movies_list
 
@@ -364,7 +372,7 @@ class Util(object):
         """
         user_data = self.genre_data[self.genre_data['userid'] == user_id]
         user_data = user_data.sort_values('timestamp', ascending=False)
-        movies = user_data['moviename'].unique()
+        movies = user_data['movieid'].unique()
 
         return movies
 
