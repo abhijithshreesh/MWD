@@ -376,6 +376,13 @@ class Util(object):
 
         return movies
 
+    def get_movies_after_year(self, year):
+        all_movie_data = self.mlmovies
+        movie_data = all_movie_data[all_movie_data['year'] >= 2004]
+        movie_id_list = movie_data['movieid'].unique()
+
+        return movie_id_list
+
 
 if __name__ == "__main__":
     obj = Util()
