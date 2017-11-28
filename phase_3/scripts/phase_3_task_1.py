@@ -116,10 +116,7 @@ class UserMovieRecommendation(object):
         Create Movie Genre Tag tensor
         :return: tensor
         """
-        movie_id_list_after_year = self.util.get_movies_after_year(2004)
-
-        movie_list_containing_some_tag = self.genre_data["movieid"].unique()
-        movie_list = list(set(movie_id_list_after_year) & set(movie_list_containing_some_tag))
+        movie_list = self.genre_data["movieid"].unique()
         movie_list.sort()
         movie_count = 0
         movie_dict = {}
@@ -127,8 +124,7 @@ class UserMovieRecommendation(object):
             movie_dict[element] = movie_count
             movie_count += 1
 
-        subset_of_data = self.genre_data[self.genre_data['movieid'].isin(movie_list)]
-        genre_list = subset_of_data["genre"].unique()
+        genre_list = self.genre_data["genre"].unique()
         genre_list.sort()
         genre_count = 0
         genre_dict = {}
@@ -136,7 +132,8 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        tag_list = subset_of_data["tag_string"].unique()
+        user_df = self.genre_data[self.genre_data['movieid'].isin(self.watched_movies)]
+        tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
         tag_dict = {}
@@ -146,7 +143,7 @@ class UserMovieRecommendation(object):
 
         tensor = numpy.zeros((movie_count, genre_count, tag_count))
 
-        for index, row in subset_of_data.iterrows():
+        for index, row in self.genre_data.iterrows():
             movie = row["movieid"]
             genre = row["genre"]
             tag = row["tag_string"]
