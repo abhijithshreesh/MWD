@@ -364,7 +364,7 @@ class Util(object):
         """
         user_data = self.genre_data[self.genre_data['userid'] == user_id]
         user_data = user_data.sort_values('timestamp', ascending=False)
-        movies = user_data['moviename'].unique()
+        movies = user_data['movieid'].unique()
 
         return movies
 
