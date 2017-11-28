@@ -32,7 +32,7 @@ class MovieLSH():
         if value < 0:
             return math.floor(value/self.w_length)
         else:
-            return math.ceil(value/self.w_length)
+            return math.ceil(value / self.w_length)
 
     def init_lsh_vectors(self, U_dataframe):
         origin = list(numpy.zeros(shape=(1, 500)))
@@ -46,10 +46,20 @@ class MovieLSH():
             self.lsh_range_dict[i] = distance.euclidean(origin, cur_vector_list)
 
 
+    def project_on_hash_function(self, movie_vector, lsh_vector):
+        movie_lsh_dot_product = numpy.dot(movie_vector, lsh_vector)
+        if movie_lsh_dot_product == 0.0:
+            return 0
+        lsh_vector_dot_product = numpy.dot(lsh_vector, lsh_vector)
+        projection = movie_lsh_dot_product/lsh_vector_dot_product*lsh_vector
+        projection_magnitude = numpy.linalg.norm(projection)
+        return projection_magnitude
+
+
     def LSH(self, vector):
         bucket_list = []
         for lsh_vector in range(0, len(self.lsh_points_dict)):
-            bucket_list.append(self.assign_group(numpy.dot(numpy.array(vector), numpy.array(self.lsh_points_dict[lsh_vector]))))
+            bucket_list.append(self.assign_group(self.project_on_hash_function(numpy.array(vector), numpy.array(self.lsh_points_dict[lsh_vector]))))
         return bucket_list
 
     def group_data(self):
@@ -167,7 +177,7 @@ if __name__ == "__main__":
     num_layers = 4
     num_hashs = 3
     movie_list = [7755, 584, 4609, 9336, 9942, 2190, 9975, 6426]
-    query_movie = 9942
+    query_movie = 4609
     no_of_nearest_neighbours = 5
     obj = MovieLSH(num_layers, num_hashs)
     obj.create_index_structure(movie_list)
