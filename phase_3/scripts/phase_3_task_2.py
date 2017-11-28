@@ -18,35 +18,6 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         self.tag_dict = {}
         self.movie_tag_matrix = self.get_movie_tag_matrix()
         self.feedback_metadata_dict = {}
-        (self.relevant_tag_indices, self.relevant_movies) = self.get_relevant_tag_indices_and_movies()
-
-    def get_relevant_tag_indices_and_movies(self):
-        user_relevancy_info = self.feedback_data[self.feedback_data["user-id"] == self.user_id]
-        movies = user_relevancy_info["movie-id"].unique()
-
-        if len(movies) == 0:
-            print("No relevance feedback data available for the user " + str(self.user_id))
-            print("Aborting...")
-            exit(1)
-
-        relevant_tag_indices = set()
-        relevant_tags = set()
-        for movie in movies:
-            movie_tags = self.util.get_tag_list_for_movie(movie)
-            for tag in movie_tags:
-                relevant_tag_indices.add(self.tag_dict[tag])
-                relevant_tags.add(tag)
-
-        relevant_movies = set()
-        for tag in relevant_tags:
-            tag_movies = self.util.get_movies_for_tag(tag)
-            for movie in tag_movies:
-                relevant_movies.add(movie)
-
-        watched_movies = self.util.get_all_movies_for_user(self.user_id)
-        relevant_movies = set(relevant_movies) - set(watched_movies)
-
-        return list(relevant_tag_indices), list(relevant_movies)
 
     def get_feedback_data(self):
         data = None
@@ -54,6 +25,13 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
             data = self.data_extractor.get_task2_feedback_data()
         except:
             print("Relevance feedback information missing.\nAborting...")
+            exit(1)
+
+        user_relevancy_info = data[data["user-id"] == self.user_id]
+        movies = user_relevancy_info["movie-id"].unique()
+        if len(movies) == 0:
+            print("No relevance feedback data available for the user " + str(self.user_id))
+            print("Aborting...")
             exit(1)
 
         return data
@@ -81,15 +59,15 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         movie_tag_values = self.movie_tag_matrix[movie_index]
 
         similarity = 0
-        for tag in self.relevant_tag_indices:
+        for tag in self.tag_dict.keys():
             if tag in self.feedback_metadata_dict.keys():
                 (p_i, u_i) = self.feedback_metadata_dict[tag]
             else:
-                (p_i, u_i) = self.get_feedback_metadata(tag)
+                (p_i, u_i) = self.get_feedback_metadata(self.tag_dict[tag])
                 self.feedback_metadata_dict[tag] = (p_i, u_i)
             numerator = p_i * (1 - u_i)
             denominator = u_i * (1 - p_i)
-            temp = movie_tag_values[tag] * (math.log(numerator / denominator))
+            temp = movie_tag_values[self.tag_dict[tag]] * (math.log(numerator / denominator))
             similarity += temp
 
         return similarity
@@ -131,7 +109,7 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
     def get_movie_recommendations(self):
         movie_similarity = {}
 
-        for movie in self.relevant_movies:
+        for movie in self.movies_dict.keys():
             movie_similarity[movie] = self.get_movie_similarity(movie)
 
         movie_recommendations = []
