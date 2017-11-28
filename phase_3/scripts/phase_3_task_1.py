@@ -23,8 +23,8 @@ class UserMovieRecommendation(object):
         movies = None
         if model == "LDA":
             movie_tag_data_frame = self.genre_data
-            tag_df = movie_tag_data_frame.groupby(['moviename'])['tag_string'].apply(list).reset_index()
-            movies = tag_df.moviename.tolist()
+            tag_df = movie_tag_data_frame.groupby(['movieid'])['tag_string'].apply(list).reset_index()
+            movies = tag_df.movieid.tolist()
             movies_tags_list = list(tag_df.tag_string)
             (U, Vh) = self.util.LDA(movies_tags_list, num_topics=10, num_features=len(self.genre_data.tag_string.unique()))
             movie_latent_matrix = self.util.get_doc_topic_matrix(U, num_docs=len(movies), num_topics=10)
@@ -42,7 +42,7 @@ class UserMovieRecommendation(object):
         elif model == "TD":
             tensor = self.fetch_movie_genre_tag_tensor()
             factors = self.util.CPDecomposition(tensor, 10)
-            movies = self.genre_data["moviename"].unique()
+            movies = self.genre_data["movieid"].unique()
             movies.sort()
             movie_latent_matrix = factors[0]
         elif model == "PageRank":
@@ -116,7 +116,7 @@ class UserMovieRecommendation(object):
         Create Movie Genre Tag tensor
         :return: tensor
         """
-        movie_list = self.genre_data["moviename"].unique()
+        movie_list = self.genre_data["movieid"].unique()
         movie_list.sort()
         movie_count = 0
         movie_dict = {}
@@ -132,7 +132,7 @@ class UserMovieRecommendation(object):
             genre_dict[element] = genre_count
             genre_count += 1
 
-        user_df = self.genre_data[self.genre_data['moviename'].isin(self.watched_movies)]
+        user_df = self.genre_data[self.genre_data['movieid'].isin(self.watched_movies)]
         tag_list = user_df["tag_string"].unique()
         tag_list.sort()
         tag_count = 0
@@ -144,15 +144,15 @@ class UserMovieRecommendation(object):
         tensor = numpy.zeros((movie_count, genre_count, tag_count))
 
         for index, row in self.genre_data.iterrows():
-            movie = row["moviename"]
+            movie = row["movieid"]
             genre = row["genre"]
             tag = row["tag_string"]
             if genre not in genre_list or tag not in tag_list:
                 continue
-            movie_name = movie_dict[movie]
+            movie_id = movie_dict[movie]
             genre_name = genre_dict[genre]
             tag_name = tag_dict[tag]
-            tensor[movie_name][genre_name][tag_name] = 1
+            tensor[movie_id][genre_name][tag_name] = 1
 
         return tensor
 
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     # user_id = input['user_id']
     # model = input['model']
     user_id = 25
-    model = "SVD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    model = "Combination"  # SVD,PCA,LDA,TD,PageRank,Combination
     obj = UserMovieRecommendation(user_id=user_id)
     if model not in obj.model_movies_dict.keys():
         recommended_movies = obj.get_recommendation(model)
