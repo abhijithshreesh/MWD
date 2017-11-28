@@ -8,7 +8,6 @@ import pandas as pd
 import tensorly.tensorly.decomposition as decomp
 from config_parser import ParseConfig
 from data_extractor import DataExtractor
-from gensim import corpora
 from phase1_task_2 import GenreTag
 
 logging.getLogger("gensim").setLevel(logging.CRITICAL)
@@ -80,7 +79,7 @@ class Util(object):
         :param num_features:
         :return: topics and object topic distribution
         """
-        dictionary = corpora.Dictionary(input_compound_list)
+        dictionary = gensim.corpora.Dictionary(input_compound_list)
         corpus = [dictionary.doc2bow(text) for text in input_compound_list]
         lda = gensim.models.ldamodel.LdaModel(corpus, num_topics, id2word=dictionary, passes=20)
         latent_semantics = lda.print_topics(num_topics, num_features)
