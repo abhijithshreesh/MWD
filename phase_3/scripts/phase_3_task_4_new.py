@@ -23,27 +23,27 @@ class NearestNeighbourBasedRelevanceFeedback(object):
             df = self.data_extractor.get_relevance_feedback_query_vector()
         else:
             df = pd.DataFrame(columns=["latent-semantic-number-" + str(num) for num in range(1, 501)])
+            zero_query_vector = {}
+            for num in range(1, 501):
+                zero_query_vector["latent-semantic-number-" + str(num)] = 0
+            df = df.append(zero_query_vector, ignore_index=True)
 
-        return df, df.values
+        return df, df.values[-1]
 
     def save_query_vector_to_csv(self):
-        df = self.query_df
-        index = df.index.values
-        df.drop(index)
-
         new_query_point_dict = {}
         for num in range(1, 501):
-            new_query_point_dict["latent-semantic-number-" + str(num)] = self.query_vector[num]
+            new_query_point_dict["latent-semantic-number-" + str(num)] = self.query_vector[num - 1]
 
-        df.append(new_query_point_dict, ignore_index=True)
-        df.to_csv(self.data_set_loc + "/relevance-feedback-query-vector.csv", index=False)
+        self.query_df = self.query_df.append(new_query_point_dict, ignore_index=True)
+        self.query_df.to_csv(self.data_set_loc + "/relevance-feedback-query-vector.csv", index=False)
 
     def get_movie_tag_matrix(self):
         movie_tag_df = None
         try:
-            movie_tag_df = self.data_extractor.get_movie_lanent_semantics_data()
+            movie_tag_df = self.data_extractor.get_movie_latent_semantics_data()
         except:
-            print("Unable to find movie-tag matrix for movies in latent space.\nAborting...")
+            print("Unable to find movie matrix for movies in latent space.\nAborting...")
             exit(1)
 
         movie_index = 0
@@ -76,15 +76,15 @@ class NearestNeighbourBasedRelevanceFeedback(object):
             relevancy = row['relevancy']
             if relevancy == 'relevant':
                 for i in range(0, 500):
-                    rel_query_vector[i] += self.movie_tag_matrix[movie_id][i]
+                    rel_query_vector[i] += self.movie_tag_matrix[self.movies_dict[movie_id]][i]
             elif relevancy == 'irrelevant':
                 for i in range(0, 500):
-                    irrel_query_vector[i] += self.movie_tag_matrix[movie_id][i]
+                    irrel_query_vector[i] += self.movie_tag_matrix[self.movies_dict[movie_id]][i]
 
         relevant_data = feedback_data[feedback_data['relevancy'] == 'relevant']
-        num_of_rel_movie_records = len(relevant_data['relevant'])
+        num_of_rel_movie_records = len(relevant_data['relevancy'])
         irrelevant_data = feedback_data[feedback_data['relevancy'] == 'irrelevant']
-        num_of_irrel_movie_records = len(irrelevant_data['irrelevant'])
+        num_of_irrel_movie_records = len(irrelevant_data['relevancy'])
 
         new_query_vector = []
         for i in range(0, 500):
@@ -107,11 +107,10 @@ class NearestNeighbourBasedRelevanceFeedback(object):
 
 
 if __name__ == "__main__":
-    n = None
     nn_rel_feed = NearestNeighbourBasedRelevanceFeedback()
     while True:
-        n = int(input("\nEnter value of 'r' : "))
-        # nn_rel_feed.print_movie_recommendations_and_collect_feedback(n)
+        n = int(input("\n\nEnter value of 'r' : "))
+        nn_rel_feed.print_movie_recommendations_and_collect_feedback(n)
         confirmation = input("\n\nDo you want to continue? (y/Y/n/N): ")
         if confirmation != "y" and confirmation != "Y":
             break
