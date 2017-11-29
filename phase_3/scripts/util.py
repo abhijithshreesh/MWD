@@ -210,6 +210,7 @@ class Util(object):
             if confirmation != "y" and confirmation != "Y":
                 continue
 
+            irrel_ids = []
             if len(list(set(list([num for num in range(1, len(movie_ids) + 1)])) - set(
                     int(num) for num in rel_ids))) == 0:
                 movies_list = input("\nPlease enter comma separated ids of the irrelevant movies: ")
