@@ -19,7 +19,6 @@ class NearestNeighbourBasedRelevanceFeedback(object):
         task_3_input = json.load(open(os.path.join(self.data_set_loc, 'task_3_details.txt')))
         self.movieLSH = MovieLSH(task_3_input["num_layers"], task_3_input["num_hashs"])
         (self.query_df, self.query_vector) = self.fetch_query_vector_from_csv()
-
         self.movieLSH.create_index_structure(task_3_input["movie_list"])
 
     def fetch_query_vector_from_csv(self):
@@ -104,8 +103,7 @@ class NearestNeighbourBasedRelevanceFeedback(object):
 
     def get_nearest_neighbours(self, n):
         self.update_query_point()
-        movie_ids = self.movieLSH.query_for_nearest_neighbours_using_csv(self.query_vector, n)
-
+        movie_ids = self.movieLSH.query_for_nearest_neighbours(self.query_vector, n)
         return movie_ids
 
     def print_movie_recommendations_and_collect_feedback(self, n):
