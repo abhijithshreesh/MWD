@@ -210,28 +210,25 @@ class Util(object):
             if confirmation != "y" and confirmation != "Y":
                 continue
 
-            irrel_ids = []
-            if len(list(set(list([num for num in range(1, len(movie_ids) + 1)])) - set(
-                    int(num) for num in rel_ids))) == 0:
-                movies_list = input("\nPlease enter comma separated ids of the irrelevant movies: ")
-                irrel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
-                while '' in irrel_ids:
-                    irrel_ids.remove('')
+            movies_list = input("\nPlease enter comma separated ids of the irrelevant movies: ")
+            irrel_ids = set(movies_list.strip(" ").strip(",").replace(" ", "").split(","))
+            while '' in irrel_ids:
+                irrel_ids.remove('')
 
-                incorrect = False
-                for item in irrel_ids:
-                    if int(item) not in list(set(list([num for num in range(1, len(movie_ids) + 1)])) - set(
-                            int(num) for num in rel_ids)):
-                        print("Incorrect movie ID selected.")
-                        incorrect = True
-                        break
-                if incorrect:
-                    continue
+            incorrect = False
+            for item in irrel_ids:
+                if int(item) not in list(set(list([num for num in range(1, len(movie_ids) + 1)])) - set(
+                        int(num) for num in rel_ids)):
+                    print("Incorrect movie ID selected.")
+                    incorrect = True
+                    break
+            if incorrect:
+                continue
 
-                confirmation = input(
-                    "Are you sure these are the irrelevant movies? " + str(list(irrel_ids)) + " (y/Y/n/N): ")
-                if confirmation != "y" and confirmation != "Y":
-                    continue
+            confirmation = input(
+                "Are you sure these are the irrelevant movies? " + str(list(irrel_ids)) + " (y/Y/n/N): ")
+            if confirmation != "y" and confirmation != "Y":
+                continue
 
             done = True
             for item in rel_ids:
