@@ -1,4 +1,3 @@
-import json
 import os
 
 import config_parser
@@ -8,7 +7,7 @@ from phase_3_task_3 import MovieLSH
 from util import Util
 
 
-class NearestNeighbourBasedRelevanceFeedback(object):
+class NearestNeighborBasedRelevanceFeedback(object):
     def __init__(self):
         self.conf = config_parser.ParseConfig()
         self.data_set_loc = self.conf.config_section_mapper("filePath").get("data_set_loc")
@@ -16,7 +15,7 @@ class NearestNeighbourBasedRelevanceFeedback(object):
         self.util = Util()
         self.movies_dict = {}
         self.movie_tag_matrix = self.get_movie_tag_matrix()
-        self.task_3_input = json.load(open(os.path.join(self.data_set_loc, 'task_3_details.json')))
+        self.task_3_input = self.data_extractor.get_lsh_details()
         self.movieLSH = MovieLSH(self.task_3_input["num_layers"], self.task_3_input["num_hashs"])
         (self.query_df, self.query_vector) = self.fetch_query_vector_from_csv()
         self.movieLSH.create_index_structure(self.task_3_input["movie_list"])
@@ -74,15 +73,23 @@ class NearestNeighbourBasedRelevanceFeedback(object):
         irrel_query_vector = [0 for _ in range(1, 501)]
 
         feedback_data = self.get_feedback_data()
+        movies_vector_length = {}
         for index, row in feedback_data.iterrows():
             movie_id = row['movie-id']
             relevancy = row['relevancy']
+            if movie_id in movies_vector_length.keys():
+                vector_magnitude = movie_id[movie_id]
+            else:
+                vector_magnitude = self.util.get_vector_magnitude(self.movie_tag_matrix[self.movies_dict[movie_id]])
+                movies_vector_length[movie_id] = vector_magnitude
             if relevancy == 'relevant':
                 for i in range(0, 500):
-                    rel_query_vector[i] += self.movie_tag_matrix[self.movies_dict[movie_id]][i]
+                    result = self.movie_tag_matrix[self.movies_dict[movie_id]][i] / float(vector_magnitude)
+                    rel_query_vector[i] += result
             elif relevancy == 'irrelevant':
                 for i in range(0, 500):
-                    irrel_query_vector[i] += self.movie_tag_matrix[self.movies_dict[movie_id]][i]
+                    result = self.movie_tag_matrix[self.movies_dict[movie_id]][i] / float(vector_magnitude)
+                    irrel_query_vector[i] += result
 
         relevant_data = feedback_data[feedback_data['relevancy'] == 'relevant']
         num_of_rel_movie_records = len(relevant_data['relevancy'])
@@ -112,7 +119,7 @@ class NearestNeighbourBasedRelevanceFeedback(object):
 
 
 if __name__ == "__main__":
-    nn_rel_feed = NearestNeighbourBasedRelevanceFeedback()
+    nn_rel_feed = NearestNeighborBasedRelevanceFeedback()
     while True:
         n = int(input("\n\nEnter value of 'r' : "))
         nn_rel_feed.print_movie_recommendations_and_collect_feedback(n)

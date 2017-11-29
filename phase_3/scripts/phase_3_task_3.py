@@ -8,7 +8,6 @@ import pandas as pd
 from config_parser import ParseConfig
 from scipy.spatial import distance
 from util import Util
-import argparse
 
 conf = ParseConfig()
 
@@ -71,7 +70,7 @@ class MovieLSH():
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
-        self.w_length = min(self.lsh_range_dict.values()) / 10
+        self.w_length = min(self.lsh_range_dict.values()) / 100
         self.column_groups = {vector: [] for vector in self.lsh_range_dict.keys()}
         bucket_matrix = numpy.zeros(shape=(len(self.U), len(self.lsh_points_dict)))
         self.U_matrix = U_dataframe.values
@@ -174,23 +173,20 @@ if __name__ == "__main__":
     num_layers = 4
     num_hashs = 3
     movie_list = []
+    movie_lsh = MovieLSH(num_layers, num_hashs)
+    with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
+        outfile.write(json.dumps({"num_layers": num_layers,
+                                  'num_hashs': num_hashs,
+                                  "movie_list": movie_list},
+                                 sort_keys=True, indent=4, separators=(',', ': ')))
+    movie_lsh.create_index_structure(movie_list)
     while True:
         query_movie = int(input("\nEnter Query Movie ID : "))
         no_of_nearest_neighbours = int(input("\nEnter No. of Nearest Neighbours : "))
-
-        movie_lsh = MovieLSH(num_layers, num_hashs)
-        with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
-            outfile.write(json.dumps({"num_layers": num_layers,
-                        'num_hashs': num_hashs,
-                        "movie_list": movie_list,
-                        "query_movie":query_movie,
-                        "no_of_nearest_neighbours" : no_of_nearest_neighbours},
-                       sort_keys=True, indent=4, separators=(',', ': ')))
-        movie_lsh.create_index_structure(movie_list)
         nearest_neighbours = movie_lsh.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
-        movie_lsh.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
         print("\nTotal number of movie considered: %s" % len(movie_lsh.total_movies_considered))
-        print("\nTotal number of unique movies considered: %s" % len(set(movie_lsh.total_movies_considered)))
+        print("Total number of unique movies considered: %s" % len(set(movie_lsh.total_movies_considered)))
+        movie_lsh.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
         confirmation = input("\n\nDo you want to continue? (y/Y/n/N): ")
         if confirmation not in ("y", "Y"):
             break
