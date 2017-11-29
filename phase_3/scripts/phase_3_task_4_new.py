@@ -1,10 +1,11 @@
+import json
 import os
+
 import config_parser
 import data_extractor
 import pandas as pd
 from phase_3_task_3 import MovieLSH
 from util import Util
-import json
 
 
 class NearestNeighbourBasedRelevanceFeedback(object):
@@ -91,9 +92,12 @@ class NearestNeighbourBasedRelevanceFeedback(object):
 
         new_query_vector = []
         for i in range(0, 500):
-            new_query_vector.append(
-                previous_query_vector[i] + (rel_query_vector[i] / float(num_of_rel_movie_records)) - (
-                irrel_query_vector[i] / float(num_of_irrel_movie_records)))
+            result = previous_query_vector[i]
+            if num_of_rel_movie_records != 0:
+                result += (rel_query_vector[i] / float(num_of_rel_movie_records))
+            if num_of_irrel_movie_records != 0:
+                result -= (irrel_query_vector[i] / float(num_of_irrel_movie_records))
+            new_query_vector.append(result)
 
         self.query_vector = new_query_vector
         self.save_query_vector_to_csv()
