@@ -7,6 +7,7 @@ import numpy
 import json
 from config_parser import ParseConfig
 from phase_3.scripts.util import Util
+import argparse
 
 conf = ParseConfig()
 
@@ -21,6 +22,7 @@ class MovieLSH():
         self.lsh_range_dict = {}
         self.column_groups = []
         self.U_matrix = []
+        self.total_movies_considered = []
         self.movie_bucket_df = pd.DataFrame()
         self.movie_latent_df = pd.DataFrame()
         self.w_length = 0.0
@@ -140,8 +142,10 @@ class MovieLSH():
         nearest_neighbour_list = {}
         for j in range(0, self.num_hashs):
             for i in range(0, len(query_hash_key_list)):
-                selected_movie_set.update(self.index_structure.get(query_hash_key_list[i].rsplit(".", j)[0], ''))
-                selected_movie_set.discard('')
+                movies_in_current_bucket = self.index_structure.get(query_hash_key_list[i].rsplit(".", j)[0], '')
+                movies_in_current_bucket.discard('')
+                selected_movie_set.update(movies_in_current_bucket)
+                self.total_movies_considered.extend(list(movies_in_current_bucket))
                 selected_movie_vectors = self.movie_latent_df[self.movie_latent_df["movieid"].isin(selected_movie_set)]
                 distance_from_query_list = []
                 for i in range(0, len(selected_movie_vectors.index)):
@@ -159,11 +163,13 @@ class MovieLSH():
 
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(
-    #     description='phase_2_task_1a.py 146',
+    #     description='phase_3_task_3.py 4 3',
     # )
-    # parser.add_argument('user_id', action="store", type=int)
+    # parser.add_argument("num_layers", action="store", type=int)
+    # parser.add_argument("num_hashs_per_layer", action="store", type=int)
     # input = vars(parser.parse_args())
-    # user_id = input['user_id']
+    # num_layers = input["num_layers"]
+    # num_hashs = input["num_hashs_per_layer"]
     num_layers = 4
     num_hashs = 3
     movie_list = []
@@ -178,11 +184,12 @@ if __name__ == "__main__":
                         "movie_list": movie_list,
                         "query_movie":query_movie,
                         "no_of_nearest_neighbours" : no_of_nearest_neighbours},
-                       sort_keys=True, indent = 4, separators = (',', ': ')))
+                       sort_keys=True, indent=4, separators=(',', ': ')))
         movie_lsh.create_index_structure(movie_list)
         nearest_neighbours = movie_lsh.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
         movie_lsh.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
-
+        print("\nTotal number of movie considered: %s" % len(movie_lsh.total_movies_considered))
+        print("\nTotal number of unique movies considered: %s" % len(set(movie_lsh.total_movies_considered)))
         confirmation = input("\n\nDo you want to continue? (y/Y/n/N): ")
-        if confirmation != "y" and confirmation != "Y":
+        if confirmation not in ("y", "Y"):
             break
