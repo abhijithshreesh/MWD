@@ -1,4 +1,5 @@
 import logging
+import math
 import operator
 import os
 
@@ -381,6 +382,13 @@ class Util(object):
         movie_id_list = movie_data['movieid'].unique()
 
         return movie_id_list
+
+    def get_vector_magnitude(self, vector):
+        result = 0
+        for i in vector:
+            result += (i * i)
+
+        return math.sqrt(result)
 
 
 if __name__ == "__main__":

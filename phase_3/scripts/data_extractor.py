@@ -1,12 +1,8 @@
 import json
-import logging
 import os
 
 import pandas as pd
 from config_parser import ParseConfig
-
-logging.basicConfig(level=logging.INFO)
-log = logging.getLogger(__name__)
 
 
 class DataExtractor(object):
@@ -57,11 +53,14 @@ class DataExtractor(object):
     def get_relevance_feedback_query_vector(self):
         return self.data_extractor("relevance-feedback-query-vector.csv")
 
+    def get_lsh_details(self):
+        return json.load(open(os.path.join(self.file_path, 'task_3_details.json')))
+
 
 if __name__ == "__main__":
     conf = ParseConfig()
     data_set_location = conf.config_section_mapper("filePath").get("data_set_loc")
     extract_data = DataExtractor(data_set_location)
     data_frame = extract_data.data_extractor("mlmovies.csv")
-    log.info("File columns for mlmovies.csv")
-    log.info("Columns = %s" % (data_frame.columns.values))
+    print("File columns for mlmovies.csv")
+    print("Columns = %s" % (data_frame.columns.values))

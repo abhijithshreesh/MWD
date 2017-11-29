@@ -1,12 +1,13 @@
-import pandas as pd
+import json
+import math
 import os
 import random
-import math
-from scipy.spatial import distance
+
 import numpy
-import json
+import pandas as pd
 from config_parser import ParseConfig
-from phase_3.scripts.util import Util
+from scipy.spatial import distance
+from util import Util
 
 conf = ParseConfig()
 
@@ -167,19 +168,16 @@ if __name__ == "__main__":
     num_layers = 4
     num_hashs = 3
     movie_list = []
+    movie_lsh = MovieLSH(num_layers, num_hashs)
+    movie_lsh.create_index_structure(movie_list)
+    with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
+        outfile.write(json.dumps({"num_layers": num_layers,
+                                  'num_hashs': num_hashs,
+                                  "movie_list": movie_list},
+                                 sort_keys=True, indent=4, separators=(',', ': ')))
     while True:
         query_movie = int(input("\nEnter Query Movie ID : "))
-        no_of_nearest_neighbours = int(input("\nEnter No. of Nearest Neighbours : "))
-
-        movie_lsh = MovieLSH(num_layers, num_hashs)
-        with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
-            outfile.write(json.dumps({"num_layers": num_layers,
-                        'num_hashs': num_hashs,
-                        "movie_list": movie_list,
-                        "query_movie":query_movie,
-                        "no_of_nearest_neighbours" : no_of_nearest_neighbours},
-                       sort_keys=True, indent = 4, separators = (',', ': ')))
-        movie_lsh.create_index_structure(movie_list)
+        no_of_nearest_neighbours = int(input("\nEnter No. of Nearest Neighbors : "))
         nearest_neighbours = movie_lsh.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
         movie_lsh.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
 
