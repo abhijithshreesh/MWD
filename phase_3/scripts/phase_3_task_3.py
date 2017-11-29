@@ -29,15 +29,22 @@ class MovieLSH():
         (self.U, self.s, self.Vt) = self.util.SVD(self.movie_tag_df.values)
         self.data_set_loc = conf.config_section_mapper("filePath").get("data_set_loc")
 
-
     def assign_group(self, value):
+        """
+        Assigns bucket
+        :param value:
+        :return: bucket
+        """
         if value < 0:
             return math.floor(value/self.w_length)
         else:
             return math.ceil(value / self.w_length)
 
-
     def init_lsh_vectors(self, U_dataframe):
+        """
+        initialize lsh vectors
+        :param U_dataframe:
+        """
         origin = list(numpy.zeros(shape=(1, 500)))
         for column in U_dataframe:
             self.latent_range_dict[column] = (U_dataframe[column].min(), U_dataframe[column].max())
@@ -48,8 +55,13 @@ class MovieLSH():
             self.lsh_points_dict[i] = cur_vector_list
             self.lsh_range_dict[i] = distance.euclidean(origin, cur_vector_list)
 
-
     def project_on_hash_function(self, movie_vector, lsh_vector):
+        """
+        projection of movie vector on the hash fn
+        :param movie_vector:
+        :param lsh_vector:
+        :return: projection value
+        """
         movie_lsh_dot_product = numpy.dot(movie_vector, lsh_vector)
         if movie_lsh_dot_product == 0.0:
             return 0
@@ -60,13 +72,21 @@ class MovieLSH():
 
 
     def LSH(self, vector):
+        """
+        list of buckets for the vector
+        :param vector:
+        :return:
+        """
         bucket_list = []
         for lsh_vector in range(0, len(self.lsh_points_dict)):
             bucket_list.append(self.assign_group(self.project_on_hash_function(numpy.array(vector), numpy.array(self.lsh_points_dict[lsh_vector]))))
         return bucket_list
 
-
     def group_data(self):
+        """
+        groups all movies into buckets
+        :return:
+        """
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
@@ -86,8 +106,12 @@ class MovieLSH():
         self.movie_latent_df.to_csv(os.path.join(self.data_set_loc, "movie_latent_semantic.csv"), index=False)
         return pd.DataFrame(bucket_matrix).join(movie_id_df, how="left")
 
-
     def index_data(self, df):
+        """
+        Assigns buckets to movies in the dataframe
+        :param df:
+        :return:
+        """
         index_structure_dict = {}
         for index, row in df.iterrows():
             movie_id = row["movieid"]
@@ -106,8 +130,12 @@ class MovieLSH():
                         index_structure_dict[bucket.strip(".")] = movie_set
         return index_structure_dict
 
-
     def fetch_hash_keys(self, bucket_list):
+        """
+        Obtain the hash keys for the bucket list
+        :param bucket_list:
+        :return:
+        """
         column = 0
         hash_key_list = []
         for i in range(0, self.num_layers):
@@ -122,22 +150,35 @@ class MovieLSH():
             hash_key_list.append(bucket)
         return hash_key_list
 
-
     def create_index_structure(self, movie_list):
+        """
+        Creates index structure for search
+        :param movie_list:
+        """
         self.movie_bucket_df = self.group_data()
         movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["movieid"].isin(movie_list)] if movie_list  else self.movie_bucket_df
         self.index_structure = self.index_data(movie_list_bucket_df)
 
-
     def query_for_nearest_neighbours_for_movie(self, query_movie_id, no_of_nearest_neighbours):
+        """
+        Nearest neighbors for the the movie passed as input
+        :param query_movie_id:
+        :param no_of_nearest_neighbours:
+        :return: list of r nearest movies
+        """
         query_movie_name = self.util.get_movie_name_for_id(query_movie_id)
         print("\nQuery Movie Name : " + query_movie_name + " - " + str(int(query_movie_id)) + "\n")
         query_vector = self.movie_latent_df[self.movie_latent_df["movieid"] == query_movie_id]
         query_vector = query_vector.iloc[0].tolist()[0:-1]
         return self.query_for_nearest_neighbours(query_vector, no_of_nearest_neighbours)
 
-
     def query_for_nearest_neighbours(self, query_vector, no_of_nearest_neighbours):
+        """
+        Nearest neighbor for the query vector
+        :param query_vector:
+        :param no_of_nearest_neighbours:
+        :return: list of r nearest movies
+        """
         query_bucket_list = self.LSH(query_vector)
         query_hash_key_list = self.fetch_hash_keys(query_bucket_list)
         query_hash_key_set = set(query_hash_key_list)
