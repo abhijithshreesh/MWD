@@ -1,3 +1,4 @@
+import argparse
 import operator
 from collections import Counter
 
@@ -182,16 +183,14 @@ class UserMovieRecommendation(object):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(
-    #     description='phase_3_task_1.py user_id model',
-    # )
-    # parser.add_argument('user_id', action="store", type=int)
-    # parser.add_argument('model', action="store", choices=set(('SVD', 'PCA', 'LDA', 'TD', 'PageRank', 'Combination')))
-    # input = vars(parser.parse_args())
-    # user_id = input['user_id']
-    # model = input['model']
-    user_id = 25
-    model = "TD"  # SVD,PCA,LDA,TD,PageRank,Combination
+    parser = argparse.ArgumentParser(
+        description='phase_3_task_1.py user_id model',
+    )
+    parser.add_argument('user_id', action="store", type=int)
+    parser.add_argument('model', action="store", choices=['SVD', 'PCA', 'LDA', 'TD', 'PageRank', 'Combination'])
+    ip = vars(parser.parse_args())
+    user_id = ip['user_id']
+    model = ip['model']
     obj = UserMovieRecommendation(user_id=user_id)
     if model not in obj.model_movies_dict.keys():
         recommended_movies = obj.get_recommendation(model)

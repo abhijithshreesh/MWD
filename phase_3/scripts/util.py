@@ -169,6 +169,12 @@ class Util(object):
         return sorted_rank[0:len(seed_nodes)+5]
 
     def print_movie_recommendations_and_collect_feedback(self, movie_ids, task_no, user_id):
+        """
+        Interface to obtain relevance feedback
+        :param movie_ids: List of movies
+        :param task_no: Task from which the interface is called
+        :param user_id: user for which the movies are displayed
+        """
         if len(movie_ids) == 0:
             print("No movies found.")
             exit(1)
@@ -353,12 +359,22 @@ class Util(object):
         return movie_name[0]
 
     def get_tag_list_for_movie(self, movie):
+        """
+        Get a tag list for the movie
+        :param movie: movie id
+        :return: list of tags
+        """
         movie_specific_data = self.genre_data[self.genre_data["movieid"] == movie]
         tags_list = movie_specific_data["tag_string"].unique()
 
         return tags_list
 
     def get_movies_for_tag(self, tag):
+        """
+        Get the list of movies containing the tag
+        :param tag: tag string
+        :return: list of movies
+        """
         tag_specific_data = self.genre_data[self.genre_data["tag_string"] == tag]
         movies_list = tag_specific_data["movieid"].unique()
 
@@ -378,12 +394,17 @@ class Util(object):
 
     def get_movies_after_year(self, year):
         all_movie_data = self.mlmovies
-        movie_data = all_movie_data[all_movie_data['year'] >= 2004]
+        movie_data = all_movie_data[all_movie_data['year'] >= year]
         movie_id_list = movie_data['movieid'].unique()
 
         return movie_id_list
 
     def get_vector_magnitude(self, vector):
+        """
+        Calculate the magnitude of the vector
+        :param vector:
+        :return: length of the vector
+        """
         result = 0
         for i in vector:
             result += (i * i)
