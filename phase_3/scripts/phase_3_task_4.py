@@ -21,6 +21,10 @@ class NearestNeighborBasedRelevanceFeedback(object):
         self.movieLSH.create_index_structure(self.task_3_input["movie_list"])
 
     def fetch_query_vector_from_csv(self):
+        """
+        fetch the previous query vector
+        :return: query vector
+        """
         if os.path.isfile(self.data_set_loc + "/relevance-feedback-query-vector.csv"):
             df = self.data_extractor.get_relevance_feedback_query_vector()
         else:
@@ -33,6 +37,9 @@ class NearestNeighborBasedRelevanceFeedback(object):
         return df, df.values[-1]
 
     def save_query_vector_to_csv(self):
+        """
+        append query vector to csv
+        """
         new_query_point_dict = {}
         for num in range(1, 501):
             new_query_point_dict["latent-semantic-number-" + str(num)] = self.query_vector[num - 1]
@@ -41,6 +48,10 @@ class NearestNeighborBasedRelevanceFeedback(object):
         self.query_df.to_csv(self.data_set_loc + "/relevance-feedback-query-vector.csv", index=False)
 
     def get_movie_tag_matrix(self):
+        """
+        Movie tag matrix in latent space
+        :return: movie tag matrix in latent space
+        """
         movie_tag_df = None
         try:
             movie_tag_df = self.data_extractor.get_movie_latent_semantics_data()
@@ -57,6 +68,10 @@ class NearestNeighborBasedRelevanceFeedback(object):
         return movie_tag_df.values
 
     def get_feedback_data(self):
+        """
+        fetch relevance feedback data
+        :return: relevance feedback data
+        """
         data = None
         try:
             data = self.data_extractor.get_task4_feedback_data()
@@ -67,6 +82,10 @@ class NearestNeighborBasedRelevanceFeedback(object):
         return data
 
     def update_query_point(self):
+        """
+        update query point based on the relevance feedback
+        :return: new query point
+        """
         previous_query_vector = self.query_vector
 
         rel_query_vector = [0 for _ in range(1, 501)]
@@ -109,11 +128,21 @@ class NearestNeighborBasedRelevanceFeedback(object):
         self.save_query_vector_to_csv()
 
     def get_nearest_neighbours(self, n):
+        """
+        Obtain the nearest neighbors based on the relevance feedback
+        :param n:
+        :return: n nearest neighbors
+        """
         self.update_query_point()
         movie_ids = self.movieLSH.query_for_nearest_neighbours(self.query_vector, n)
         return movie_ids
 
     def print_movie_recommendations_and_collect_feedback(self, n):
+        """
+        Print nearest movies and collect relevance feedback
+        :param n:
+        :return:
+        """
         nearest_movie_ids = self.get_nearest_neighbours(n)
         self.util.print_movie_recommendations_and_collect_feedback(nearest_movie_ids, 4, None)
 
