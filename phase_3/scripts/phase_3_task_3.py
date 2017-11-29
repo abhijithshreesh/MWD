@@ -172,7 +172,7 @@ if __name__ == "__main__":
         no_of_nearest_neighbours = int(input("\nEnter No. of Nearest Neighbours : "))
 
         movie_lsh = MovieLSH(num_layers, num_hashs)
-        with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.txt'), 'w') as outfile:
+        with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
             outfile.write(json.dumps({"num_layers": num_layers,
                         'num_hashs': num_hashs,
                         "movie_list": movie_list,
