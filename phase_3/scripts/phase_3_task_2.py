@@ -21,6 +21,10 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         self.feedback_metadata_dict = {}
 
     def get_feedback_data(self):
+        """
+        Get the relevance feedback csv
+        :return: dataframe containing the relevance feedback
+        """
         data = None
         try:
             data = self.data_extractor.get_task2_feedback_data()
@@ -38,6 +42,10 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         return data
 
     def get_movie_tag_matrix(self):
+        """
+        Compute the movie tag matrix
+        :return: movie tag matix of 0s and 1s
+        """
         movie_tag_matrix = self.util.get_movie_tag_matrix()
         movie_tag_matrix[movie_tag_matrix > 0] = 1
 
@@ -56,6 +64,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         return movie_tag_matrix.values
 
     def get_movie_similarity(self, movie_id):
+        """
+        Calculate the similarity for the movie id passed as input
+        :param movie_id:
+        :return: similarity value
+        """
         movie_index = self.movies_dict[movie_id]
         movie_tag_values = self.movie_tag_matrix[movie_index]
 
@@ -74,6 +87,11 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         return similarity
 
     def get_feedback_metadata(self, tag_index):
+        """
+        get p_i and u_i values for the tag index passed as input
+        :param tag_index:
+        :return: (p_i, u_i)
+        """
         user_feedback_data = self.feedback_data[self.feedback_data['user-id'] == self.user_id]
         user_relevant_data = user_feedback_data[user_feedback_data['relevancy'] == 'relevant']
         user_relevant_movies = user_relevant_data['movie-id'].unique()
@@ -108,6 +126,10 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         return p_i, u_i
 
     def get_movie_recommendations(self):
+        """
+        Get top 5 movies movie recommendations based on probabilistic relevance feedback
+        :return: 5 movie recommendations
+        """
         movie_similarity = {}
 
         for movie in self.movies_dict.keys():
@@ -122,6 +144,10 @@ class ProbabilisticRelevanceFeedbackUserMovieRecommendation(object):
         return movie_recommendations
 
     def print_movie_recommendations_and_collect_feedback(self):
+        """
+        Display movie recommendations and take user relevance feedback
+        :return:
+        """
         movies = self.get_movie_recommendations()
         self.util.print_movie_recommendations_and_collect_feedback(movies, 2, self.user_id)
 
