@@ -4,6 +4,7 @@ import random
 import math
 from scipy.spatial import distance
 import numpy
+import json
 from config_parser import ParseConfig
 from phase_3.scripts.util import Util
 
@@ -115,15 +116,15 @@ class MovieLSH():
         return hash_key_list
 
     def create_index_structure(self, movie_list):
-        self.movie_bucket_df = obj.group_data()
+        self.movie_bucket_df = self.group_data()
         # movie_name_list = [self.util.get_movie_name_for_id(movie_id) for movie_id in movie_list]
         # movie_list_latent_df = self.movie_latent_df[self.movie_latent_df["moviename"].isin(movie_name_list)]
         # movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["moviename"].isin(movie_name_list)]
 
         # movie_list_latent_df = self.movie_latent_df[self.movie_latent_df["movieid"].isin(movie_list)]
-        movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["movieid"].isin(movie_list)]
+        movie_list_bucket_df = self.movie_bucket_df[self.movie_bucket_df["movieid"].isin(movie_list)] if movie_list  else self.movie_bucket_df
 
-        self.index_structure = obj.index_data(movie_list_bucket_df)
+        self.index_structure = self.index_data(movie_list_bucket_df)
         temp_index_structure = dict([(k, pd.Series(list(v))) for k, v in list(self.index_structure.items())])
         pd.DataFrame.from_dict(temp_index_structure).to_csv(os.path.join(self.data_set_loc, self.fileName), index=False)
 
@@ -176,11 +177,18 @@ if __name__ == "__main__":
     # user_id = input['user_id']
     num_layers = 4
     num_hashs = 3
-    movie_list = [7755, 584, 4609, 9336, 9942, 2190, 9975, 6426]
+    movie_list = [7755, 584, 4609, 9336, 9942, 2190, 9975, 6426, 3536, 6057]
     query_movie = 4609
     no_of_nearest_neighbours = 5
-    obj = MovieLSH(num_layers, num_hashs)
-    obj.create_index_structure(movie_list)
-    nearest_neighbours_list = obj.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
+    movie_lsh = MovieLSH(num_layers, num_hashs)
+    with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.txt'), 'w') as outfile:
+        outfile.write(json.dumps({"num_layers": num_layers,
+                    'num_hashs': num_hashs,
+                    "movie_list": movie_list,
+                    "query_movie":query_movie,
+                    "no_of_nearest_neighbours" : no_of_nearest_neighbours},
+                   sort_keys=True, indent = 4, separators = (',', ': ')))
+    movie_lsh.create_index_structure(movie_list)
+    nearest_neighbours_list = movie_lsh.query_for_nearest_neighbours_for_movie(query_movie, no_of_nearest_neighbours)
     nearest_neighbours = [int(each) for each in nearest_neighbours_list]
-    obj.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)
+    movie_lsh.util.print_movie_recommendations_and_collect_feedback(nearest_neighbours, 3, None)

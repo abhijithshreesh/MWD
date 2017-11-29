@@ -1,10 +1,10 @@
 import os
-
 import config_parser
 import data_extractor
 import pandas as pd
 from phase_3_task_3 import MovieLSH
 from util import Util
+import json
 
 
 class NearestNeighbourBasedRelevanceFeedback(object):
@@ -15,8 +15,11 @@ class NearestNeighbourBasedRelevanceFeedback(object):
         self.util = Util()
         self.movies_dict = {}
         self.movie_tag_matrix = self.get_movie_tag_matrix()
-        self.movieLSH = MovieLSH()
+        task_3_input = json.load(open(os.path.join(self.data_set_loc, 'task_3_details.txt')))
+        self.movieLSH = MovieLSH(task_3_input["num_layers"], task_3_input["num_hashs"])
         (self.query_df, self.query_vector) = self.fetch_query_vector_from_csv()
+
+        self.movieLSH.create_index_structure(task_3_input["movie_list"])
 
     def fetch_query_vector_from_csv(self):
         if os.path.isfile(self.data_set_loc + "/relevance-feedback-query-vector.csv"):
