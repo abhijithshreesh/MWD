@@ -78,7 +78,7 @@ class NearestNeighborBasedRelevanceFeedback(object):
             movie_id = row['movie-id']
             relevancy = row['relevancy']
             if movie_id in movies_vector_length.keys():
-                vector_magnitude = movie_id[movie_id]
+                vector_magnitude = movies_vector_length[movie_id]
             else:
                 vector_magnitude = self.util.get_vector_magnitude(self.movie_tag_matrix[self.movies_dict[movie_id]])
                 movies_vector_length[movie_id] = vector_magnitude
