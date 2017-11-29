@@ -6,6 +6,10 @@ from config_parser import ParseConfig
 
 
 class DataExtractor(object):
+    """
+    Class to return resources from the disk
+    """
+
     def __init__(self, file_path):
         self.file_path = file_path
 
