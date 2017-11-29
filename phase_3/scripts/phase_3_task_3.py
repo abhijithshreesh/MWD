@@ -70,7 +70,9 @@ class MovieLSH():
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
-        self.w_length = min(self.lsh_range_dict.values()) / 100
+        # self.w_length = min(self.lsh_range_dict.values()) / float(400)
+        self.w_length = 0.01
+        print("W : " + str(self.w_length))
         self.column_groups = {vector: [] for vector in self.lsh_range_dict.keys()}
         bucket_matrix = numpy.zeros(shape=(len(self.U), len(self.lsh_points_dict)))
         self.U_matrix = U_dataframe.values
@@ -138,25 +140,31 @@ class MovieLSH():
     def query_for_nearest_neighbours(self, query_vector, no_of_nearest_neighbours):
         query_bucket_list = self.LSH(query_vector)
         query_hash_key_list = self.fetch_hash_keys(query_bucket_list)
+        query_hash_key_set = set(query_hash_key_list)
         selected_movie_set = set()
         nearest_neighbour_list = {}
+        flag = False
         for j in range(0, self.num_hashs):
-            for i in range(0, len(query_hash_key_list)):
-                movies_in_current_bucket = self.index_structure.get(query_hash_key_list[i].rsplit(".", j)[0], '')
+            for bucket in query_hash_key_set:
+                print("Bucket : " + bucket.rsplit(".", j)[0])
+                movies_in_current_bucket = self.index_structure.get(bucket.rsplit(".", j)[0], '')
                 movies_in_current_bucket.discard('')
                 selected_movie_set.update(movies_in_current_bucket)
                 self.total_movies_considered.extend(list(movies_in_current_bucket))
                 selected_movie_vectors = self.movie_latent_df[self.movie_latent_df["movieid"].isin(selected_movie_set)]
                 distance_from_query_list = []
-                for i in range(0, len(selected_movie_vectors.index)):
-                    row_list = selected_movie_vectors.iloc[i].tolist()
+                for k in range(0, len(selected_movie_vectors.index)):
+                    row_list = selected_movie_vectors.iloc[k].tolist()
                     euclidean_distance = distance.euclidean(row_list[0:-1], query_vector)
                     if(euclidean_distance != 0):
                         distance_from_query_list.append((row_list[-1], euclidean_distance))
                 distance_from_query_list = sorted(distance_from_query_list, key=lambda x: x[1])
                 nearest_neighbour_list = ([each[0] for each in distance_from_query_list[0:no_of_nearest_neighbours]])
                 if (len(nearest_neighbour_list) >= no_of_nearest_neighbours):
+                    flag = True
                     break
+            if flag:
+                break
         nearest_neighbours = [int(each) for each in nearest_neighbour_list]
         return nearest_neighbours
 
@@ -179,6 +187,7 @@ if __name__ == "__main__":
                                   'num_hashs': num_hashs,
                                   "movie_list": movie_list},
                                  sort_keys=True, indent=4, separators=(',', ': ')))
+    print("Creating Index Structure for Movies...")
     movie_lsh.create_index_structure(movie_list)
     while True:
         query_movie = int(input("\nEnter Query Movie ID : "))
