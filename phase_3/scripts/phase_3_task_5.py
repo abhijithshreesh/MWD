@@ -7,6 +7,7 @@ import data_extractor
 import numpy
 from scipy.spatial import distance as dist
 from util import Util
+from svm_example import starting_function
 
 util = Util()
 conf = config_parser.ParseConfig()
@@ -127,7 +128,10 @@ class Node(object):
         variance_of_class1 = numpy.nanvar(matrix_of_class1_movies)
         variance_of_class2 = numpy.nanvar(matrix_of_class2_movies)
 
-        fsr = ((mean_of_class1 - mean_of_class2) ** 2) / float((variance_of_class1 ** 2) + (variance_of_class2 ** 2))
+        try:
+            fsr = ((mean_of_class1 - mean_of_class2)**2) / ((variance_of_class1**2) + (variance_of_class2**2))
+        except ZeroDivisionError:
+            fsr = float("-inf")
 
         return fsr
 
@@ -199,7 +203,12 @@ if __name__ == "__main__":
     ip = vars(parser.parse_args())
     model = ip['model']
     r = 0
-    if model == "RNN":
+    if model == "SVM":
+        starting_function()
+    elif model == "RNN":
+        obj = Classifier(r)
         r = int(input("Enter the value for r: "))
-    obj = Classifier(r)
-    obj.demo_output(model)
+        obj.demo_output(model)
+    else:
+        obj = Classifier(r)
+        obj.demo_output(model)
