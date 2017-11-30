@@ -411,6 +411,13 @@ class Util(object):
 
         return math.sqrt(result)
 
+def rbf_kernel(gamma, **kwargs):
+    def f(x1, x2):
+        distance = numpy.linalg.norm(x1 - x2) ** 2
+        return numpy.exp(-gamma * distance)
+
+    return f
+
 
 if __name__ == "__main__":
     obj = Util()
