@@ -2,13 +2,12 @@ import json
 import math
 import os
 import random
-
 import numpy
 import pandas as pd
 from config_parser import ParseConfig
 from scipy.spatial import distance
 from util import Util
-
+import argparse
 conf = ParseConfig()
 
 class MovieLSH():
@@ -90,9 +89,7 @@ class MovieLSH():
         U_dataframe = pd.DataFrame(self.U)
         U_dataframe = U_dataframe[U_dataframe.columns[0:500]]
         self.init_lsh_vectors(U_dataframe)
-        # self.w_length = min(self.lsh_range_dict.values()) / float(400)
-        self.w_length = 0.01
-        print("W : " + str(self.w_length))
+        self.w_length = min(self.lsh_range_dict.values()) / float(100)
         self.column_groups = {vector: [] for vector in self.lsh_range_dict.keys()}
         bucket_matrix = numpy.zeros(shape=(len(self.U), len(self.lsh_points_dict)))
         self.U_matrix = U_dataframe.values
@@ -187,7 +184,6 @@ class MovieLSH():
         flag = False
         for j in range(0, self.num_hashs):
             for bucket in query_hash_key_set:
-                print("Bucket : " + bucket.rsplit(".", j)[0])
                 movies_in_current_bucket = self.index_structure.get(bucket.rsplit(".", j)[0], '')
                 movies_in_current_bucket.discard('')
                 selected_movie_set.update(movies_in_current_bucket)
@@ -211,17 +207,19 @@ class MovieLSH():
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser(
-    #     description='phase_3_task_3.py 4 3',
-    # )
-    # parser.add_argument("num_layers", action="store", type=int)
-    # parser.add_argument("num_hashs_per_layer", action="store", type=int)
-    # input = vars(parser.parse_args())
-    # num_layers = input["num_layers"]
-    # num_hashs = input["num_hashs_per_layer"]
-    num_layers = 4
-    num_hashs = 3
-    movie_list = []
+    parser = argparse.ArgumentParser(
+        description='phase_3_task_3.py 4 3',
+    )
+    parser.add_argument("num_layers", action="store", type=int)
+    parser.add_argument("num_hashs_per_layer", action="store", type=int)
+    parser.add_argument("movie_str", action="store", type=str)
+    arg_input = vars(parser.parse_args())
+    num_layers = arg_input["num_layers"]
+    num_hashs = arg_input["num_hashs_per_layer"]
+    if arg_input["movie_str"] == "":
+        movie_list = []
+    else:
+        movie_list = arg_input["movie_str"].split(",")
     movie_lsh = MovieLSH(num_layers, num_hashs)
     with open(os.path.join(movie_lsh.data_set_loc, 'task_3_details.json'), 'w') as outfile:
         outfile.write(json.dumps({"num_layers": num_layers,
